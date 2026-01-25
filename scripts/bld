@@ -118,6 +118,10 @@ mkdir -p "$BUILD_DIR"
 
 [[ -d "$BUILD_DIR/$PNAME-$preset" ]] && rm -rf "$BUILD_DIR/$PNAME-$preset"
 
+if command -v install-export-templates >/dev/null; then
+    install-export-templates
+fi
+
 if [[ $preset = "Web" ]]; then
     mkdir -p "$BUILD_DIR/$PNAME-$preset"
     godot --headless --export-$export_type "$preset" "$BUILD_DIR/$PNAME-$preset/index.html"
