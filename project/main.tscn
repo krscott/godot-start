@@ -1,0 +1,34 @@
+[gd_scene load_steps=4 format=3 uid="uid://6uyp4hbab8gp"]
+
+[ext_resource type="Script" uid="uid://ygjvluupbdtm" path="res://main.gd" id="1_0xm2m"]
+[ext_resource type="Texture2D" uid="uid://co7fg4r4c84ai" path="res://icon.svg" id="2_h2yge"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_1bvp3"]
+font_size = 44
+
+[node name="Main" type="Node" node_paths=PackedStringArray("spin_sprite")]
+script = ExtResource("1_0xm2m")
+spin_sprite = NodePath("World/Sprite2D")
+
+[node name="World" type="CanvasLayer" parent="."]
+
+[node name="Sprite2D" type="Sprite2D" parent="World"]
+position = Vector2(337, 327)
+texture = ExtResource("2_h2yge")
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="Label" type="Label" parent="UI"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -138.0
+offset_top = -30.5
+offset_right = 138.0
+offset_bottom = 30.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "Hello, Godot!"
+label_settings = SubResource("LabelSettings_1bvp3")

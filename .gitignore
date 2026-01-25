@@ -1,0 +1,9 @@
+# Godot
+
+# Nix
+result
+
+# Dev Env
+.direnv/
+.env
+.envrc
