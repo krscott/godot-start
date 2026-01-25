@@ -33,6 +33,20 @@
           config.allowUnfree = true; # required for aseprite
         };
 
+        baseDevShell = devPkgs.mkShellNoCC {
+          buildInputs = with devPkgs; [
+            (callPackage ./scripts/install-export-templates.nix { })
+            godot_4
+            python3
+            steam-run-free
+            zip
+          ];
+
+          shellHook = ''
+            PATH="$PATH:$PWD/scripts"
+          '';
+        };
+
         mkArchive =
           preset:
           pkgs.godot-start.override {
@@ -55,20 +69,15 @@
         };
 
         devShells = {
-          default = devPkgs.mkShellNoCC {
-            buildInputs = with devPkgs; [
-              (callPackage ./scripts/install-export-templates.nix { })
-              godot_4
-              aseprite
-              python3
-              steam-run-free
-              zip
-            ];
+          default = baseDevShell;
 
-            shellHook = ''
-              PATH="$PATH:$PWD/scripts"
-            '';
-          };
+          full = baseDevShell.overrideAttrs (oldAttrs: {
+            buildInputs =
+              oldAttrs.buildInputs
+              ++ (with devPkgs; [
+                aseprite # Requires large local build
+              ]);
+          });
         };
 
         formatter = pkgs.nixfmt;
