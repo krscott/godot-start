@@ -26,7 +26,7 @@ stdenvNoCC.mkDerivation {
 
   nativeBuildInputs = [
     godot_4
-    (callPackage ./scripts/install-export-templates.nix { })
+    (callPackage ./nix/install-export-templates.nix { })
     util-linux # getopt
     makeWrapper
   ];

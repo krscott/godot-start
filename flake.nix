@@ -35,7 +35,7 @@
 
         baseDevShell = devPkgs.mkShellNoCC {
           buildInputs = with devPkgs; [
-            (callPackage ./scripts/install-export-templates.nix { })
+            (callPackage ./nix/install-export-templates.nix { })
             godot_4
             python3
             steam-run-free
@@ -64,7 +64,7 @@
 
           linux-archive = mkArchive "Linux";
           macos-archive = mkArchive "macOS";
-          windows-archive = mkArchive "Windows";
+          windows-archive = mkArchive "Windows Desktop";
           web-archive = mkArchive "Web";
         };
 
