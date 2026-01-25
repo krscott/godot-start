@@ -1,5 +1,6 @@
 {
   archive ? false,
+  debug ? false,
   preset ? "Linux",
 
   callPackage,
@@ -15,7 +16,6 @@
 }:
 let
   strIf = b: flag: if b then flag else "";
-  arrIf = b: arr: if b then arr else [ ];
 
   # NixOS and Web builds require wrapper
   wrapper = (preset == "Linux" || preset == "Web") && !archive;
@@ -31,8 +31,6 @@ stdenvNoCC.mkDerivation {
     makeWrapper
   ];
 
-  runtimeInputs = (arrIf wrapper [ steam-run-free ]) ++ (arrIf (preset == "Web") [ python3 ]);
-
   buildPhase = ''
     TMPDIR="''${TMPDIR:-/tmp}"
     export HOME="$TMPDIR/home"
@@ -41,7 +39,7 @@ stdenvNoCC.mkDerivation {
     export FONTCONFIG_PATH=${fontconfig.out}/etc/fonts/
     install-export-templates
     patchShebangs ./scripts/bld
-    ./scripts/bld ${preset} ${strIf archive "-z"} ${strIf wrapper "-w"}
+    ./scripts/bld ${preset} ${strIf archive "-z"} ${strIf wrapper "-w"} ${strIf debug "-d"}
   '';
 
   installPhase =
