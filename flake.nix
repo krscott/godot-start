@@ -46,6 +46,7 @@
           inherit (pkgs) godot-start;
           default = pkgs.godot-start;
           web = pkgs.godot-start.override { preset = "Web"; };
+          debug = pkgs.godot-start.override { debug = true; };
 
           linux-archive = mkArchive "Linux";
           macos-archive = mkArchive "macOS";
