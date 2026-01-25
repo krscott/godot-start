@@ -41,9 +41,12 @@
         devShells = {
           default = devPkgs.mkShellNoCC {
             buildInputs = with devPkgs; [
+              (callPackage ./scripts/install-export-templates.nix { })
               godot_4
               aseprite
               python3
+              steam-run-free
+              zip
             ];
 
             shellHook = ''
