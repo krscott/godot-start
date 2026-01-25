@@ -141,6 +141,10 @@ elif [[ $wrapped ]]; then
     godot --headless --export-$export_type "$preset" "$BUILD_DIR/$PNAME-$preset/$PNAME-bin"
     mkWrapperScript >"$BUILD_DIR/$PNAME-$preset/$PNAME"
     chmod +x "$BUILD_DIR/$PNAME-$preset/$PNAME"
+elif [[ $preset = "Windows" ]]; then
+    mkdir -p "$BUILD_DIR/$PNAME-$preset"
+    godot --headless --export-$export_type "$preset" "$BUILD_DIR/$PNAME-$preset/$PNAME.exe"
 else
-    godot --headless --export-$export_type "$preset" "$BUILD_DIR/$PNAME"
+    mkdir -p "$BUILD_DIR/$PNAME-$preset"
+    godot --headless --export-$export_type "$preset" "$BUILD_DIR/$PNAME-$preset/$PNAME"
 fi

@@ -39,7 +39,7 @@ stdenvNoCC.mkDerivation {
     export FONTCONFIG_PATH=${fontconfig.out}/etc/fonts/
     install-export-templates
     patchShebangs ./scripts/bld
-    ./scripts/bld ${preset} ${strIf archive "-z"} ${strIf wrapper "-w"} ${strIf debug "-d"}
+    ./scripts/bld "${preset}" ${strIf archive "-z"} ${strIf wrapper "-w"} ${strIf debug "-d"}
   '';
 
   installPhase =

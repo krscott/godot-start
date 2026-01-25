@@ -59,12 +59,14 @@
         packages = {
           inherit (pkgs) godot-start;
           default = pkgs.godot-start;
-          web = pkgs.godot-start.override { preset = "Web"; };
           debug = pkgs.godot-start.override { debug = true; };
+
+          web = pkgs.godot-start.override { preset = "Web"; };
+          windows = pkgs.godot-start.override { preset = "Windows"; };
 
           linux-archive = mkArchive "Linux";
           macos-archive = mkArchive "macOS";
-          windows-archive = mkArchive "Windows Desktop";
+          windows-archive = mkArchive "Windows";
           web-archive = mkArchive "Web";
         };
 
