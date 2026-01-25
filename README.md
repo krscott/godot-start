@@ -19,3 +19,7 @@ Start nix dev shell
 nix develop
 ```
 
+## Improvements
+
+- Fix home-manager setup / support nixGL
+  (see [1](https://github.com/NixOS/nixpkgs/issues/336400), [2](https://github.com/nix-community/home-manager/issues/3968))
