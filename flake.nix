@@ -33,10 +33,25 @@
           config.allowUnfree = true; # required for aseprite
         };
 
+        mkArchive =
+          preset:
+          pkgs.godot-start.override {
+            inherit preset;
+            archive = true;
+          };
+
       in
       {
-        # packages = {
-        # };
+        packages = {
+          inherit (pkgs) godot-start;
+          default = pkgs.godot-start;
+          web = pkgs.godot-start.override { preset = "Web"; };
+
+          linux-archive = mkArchive "Linux";
+          macos-archive = mkArchive "macOS";
+          windows-archive = mkArchive "Windows";
+          web-archive = mkArchive "Web";
+        };
 
         devShells = {
           default = devPkgs.mkShellNoCC {

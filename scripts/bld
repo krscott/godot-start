@@ -133,6 +133,7 @@ if [[ $preset = "Web" ]]; then
 elif [[ $zip ]]; then
     godot --headless --export-$export_type "$preset" "$BUILD_DIR/$PNAME-$preset.zip"
 elif [[ $wrapped ]]; then
+    mkdir -p "$BUILD_DIR/$PNAME-$preset"
     godot --headless --export-$export_type "$preset" "$BUILD_DIR/$PNAME-$preset/$PNAME-bin"
     mkWrapperScript >"$BUILD_DIR/$PNAME-$preset/$PNAME"
     chmod +x "$BUILD_DIR/$PNAME-$preset/$PNAME"

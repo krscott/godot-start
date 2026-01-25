@@ -1,6 +1,6 @@
 {
-  preset ? "Linux",
   archive ? false,
+  preset ? "Linux",
 
   callPackage,
   lib,
@@ -8,7 +8,10 @@
 
   fontconfig,
   godot_4,
+  makeWrapper,
+  python3,
   steam-run-free,
+  util-linux,
 }:
 let
   strIf = b: flag: if b then flag else "";
@@ -24,17 +27,21 @@ stdenvNoCC.mkDerivation {
   nativeBuildInputs = [
     godot_4
     (callPackage ./scripts/install-export-templates.nix { })
+    util-linux # getopt
+    makeWrapper
   ];
 
-  buildInputs = arrIf wrapper [ steam-run-free ];
+  runtimeInputs = (arrIf wrapper [ steam-run-free ]) ++ (arrIf (preset == "Web") [ python3 ]);
 
   buildPhase = ''
     TMPDIR="''${TMPDIR:-/tmp}"
     export HOME="$TMPDIR/home"
+    export XDG_DATA_HOME="$HOME/.local/share"
     export FONTCONFIG_FILE=${fontconfig.out}/etc/fonts/fonts.conf
     export FONTCONFIG_PATH=${fontconfig.out}/etc/fonts/
     install-export-templates
-    ./scripts/bld ${preset} ${strIf archive "-a"} ${strIf wrapper "-w"}
+    patchShebangs ./scripts/bld
+    ./scripts/bld ${preset} ${strIf archive "-z"} ${strIf wrapper "-w"}
   '';
 
   installPhase =
@@ -46,11 +53,19 @@ stdenvNoCC.mkDerivation {
     else
       ''
         mkdir -p $out/bin
-        mv build/* $out/bin
+        mv build/*/* $out/bin
+
+        if [[ "${strIf wrapper "1"}" ]]; then
+          if [[ ${preset} = Linux ]]; then
+            wrapProgram $out/bin/godot-start --prefix PATH : ${lib.makeBinPath [ steam-run-free ]}
+          elif [[ ${preset} = Web ]]; then
+            wrapProgram $out/bin/godot-start --prefix PATH : ${lib.makeBinPath [ python3 ]}
+          fi
+        fi
       '';
 
   meta = {
-    mainProgram = "godot-start";
+    mainProgram = if archive then null else "godot-start";
     # description = "A short description of my application";
     # homepage = "https://github.com";
     # license = lib.licenses.mit;
