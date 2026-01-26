@@ -1,5 +1,7 @@
 class_name GdSerde
 
+static var _property_list_cache := {}
+
 class GdSerdeResult:
 	var value: Variant
 	var err: bool
@@ -24,8 +26,6 @@ class GdSerdeProperty:
 
 	func _to_string() -> String:
 		return "GdSerdeProperty<%s: %s>" % [name, type_string(type)]
-
-static var _property_list_cache := {}
 
 static func _create_property_list(
 	obj: Object,
@@ -78,108 +78,35 @@ static func _get_obj_prop_list(obj: Object) -> Array[GdSerdeProperty]:
 	return prop_list
 
 
-static func _serialize_object(obj: Object) -> Dictionary:
-	if obj.has_method(&"gdserde_serialize"):
-		return obj.call(&"gdserde_serialize")
-	else:
+static func serialize(value: Variant) -> Variant:
+	if value is Object:
+		var obj: Object = value
+		if obj.has_method(&"gdserde_serialize"):
+			return obj.call(&"gdserde_serialize")
+
 		var out := {}
 		for prop in _get_obj_prop_list(obj):
 			out[prop.name] = serialize(obj.get(prop.name))
 		return out
 
-static func _deserialize_object(original: Object, value: Dictionary) -> GdSerdeResult:
-	if original.has_method(&"gdserde_deserialize"):
-		return original.call(&"gdserde_deserialize", value)
-	else:
-		for prop in _get_obj_prop_list(original):
-			var res := deserialize(original.get(prop.name), value[prop.name])
-			if res.err:
-				return res
-			#print("Setting ", prop.name)
-			original.set(prop.name, res.value)
-		return _ok(original)
-
-static func serialize(value: Variant) -> Variant:
-	match typeof(value):
-		TYPE_NIL, TYPE_BOOL, TYPE_INT, TYPE_FLOAT, TYPE_STRING:
-			# JSON primitive types
-			return value
-		TYPE_ARRAY, TYPE_DICTIONARY:
-			# Assuming contains only primitives
-			return value
-		TYPE_OBJECT:
-			var obj: Object = value
-			return _serialize_object(obj)
-		TYPE_VECTOR2:
-			return [value.x, value.y]
-		TYPE_VECTOR3:
-			return [value.x, value.y, value.z]
-		TYPE_TRANSFORM3D:
-			var t: Transform3D = value
-			return [
-				t.basis.x.x, t.basis.x.y, t.basis.x.z,
-				t.basis.y.x, t.basis.y.y, t.basis.y.z,
-				t.basis.z.x, t.basis.z.y, t.basis.z.z,
-				t.origin.x,  t.origin.y,  t.origin.z,
-			]
-		TYPE_QUATERNION:
-			var q: Quaternion = value
-			return [q.x, q.y, q.z, q.w]
-		var t:
-			assert(false, str("Unhandled type: ", type_string(t), " - ", str(value)))
-			return str(value)
+	return value
 
 
 static func deserialize(original: Variant, value: Variant) -> GdSerdeResult:
-	match typeof(original):
-		TYPE_NIL, TYPE_BOOL, TYPE_INT, TYPE_FLOAT, TYPE_STRING:
-			# JSON primitive types
-			return _ok(value)
-		TYPE_ARRAY, TYPE_DICTIONARY:
-			# Assuming contains only primitives
-			return _ok(value)
-		TYPE_OBJECT:
-			var value_dict: Dictionary = value
-			var original_obj: Object = original
-			return _deserialize_object(original_obj, value_dict)
-		TYPE_VECTOR2:
-			var a := _to_float_array(value, 2)
-			if not a: return _err()
-			return _ok(Vector2(a[0] as float, a[1] as float))
-		TYPE_VECTOR3:
-			var a := _to_float_array(value, 3)
-			if not a: return _err()
-			return _ok(Vector3(a[0], a[1], a[2]))
-		TYPE_TRANSFORM3D:
-			var a := _to_float_array(value, 12)
-			if not a: return _err()
-			return _ok(Transform3D(
-				Vector3(a[ 0], a[ 1], a[ 2]),
-				Vector3(a[ 3], a[ 4], a[ 5]),
-				Vector3(a[ 6], a[ 7], a[ 8]),
-				Vector3(a[ 9], a[10], a[11]),
-			))
-		TYPE_QUATERNION:
-			var a := _to_float_array(value, 4)
-			if not a: return _err()
-			return _ok(Quaternion(a[0], a[1], a[2], a[3]))
-		var t:
-			assert(false, str("Unhandled type: ", type_string(t), " - ", str(value)))
+	if original is Object:
+		var obj: Object = original
+		if value is not Dictionary:
 			return _err()
+		var dict: Dictionary = value
 
-static func _to_float_array(value: Variant, expected_size: int) -> Array[float]:
-	if typeof(value) != TYPE_ARRAY:
-		return []
-	var arr: Array[float] = []
-	for x: Variant in value:
-		if x is int:
-			var i: int = x
-			arr.push_back(float(i))
-		elif x is float:
-			var f: float = x
-			arr.push_back(f)
-		else:
-			return []
-	if arr.size() != expected_size:
-		return []
-	return arr
+		if obj.has_method(&"gdserde_deserialize"):
+			return obj.call(&"gdserde_deserialize", dict)
+
+		for prop in _get_obj_prop_list(obj):
+			var res := deserialize(obj.get(prop.name), dict[prop.name])
+			if res.err:
+				return res
+			obj.set(prop.name, res.value)
+		return _ok(obj)
+
+	return _ok(value)
