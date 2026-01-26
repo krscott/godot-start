@@ -6,15 +6,12 @@ const sensitivity := 0.2
 const min_angle := -90.0
 const max_angle := 90
 
-var quit := false
-var skip_next_mouse_move := true
-var mouse_captured := true
+
 var look := Vector2.ZERO
 var move := Vector2.ZERO
 var sprint := false
 var crouch := false
 var jump := false
-
 
 func update_physics_from_input() -> void:
 	move = Input.get_vector(
@@ -28,17 +25,9 @@ func update_physics_from_input() -> void:
 func update_view_from_event(event: InputEvent) -> void:
 	match event.get_class():
 		"InputEventMouseMotion":
-			if skip_next_mouse_move:
-				skip_next_mouse_move = false
-			elif mouse_captured:
-				var ev: InputEventMouseMotion = event
-				look.y -= (ev.relative.x * sensitivity)
-				look.x -= (ev.relative.y * sensitivity)
-				look.x = clamp(look.x, min_angle, max_angle)
+			var ev: InputEventMouseMotion = event
+			look.y -= (ev.relative.x * sensitivity)
+			look.x -= (ev.relative.y * sensitivity)
+			look.x = clamp(look.x, min_angle, max_angle)
 		"InputEventKey", "InputEventMouseButton":
-			if Input.is_action_just_pressed("quit"):
-				quit = true
-			elif Input.is_action_just_pressed("toggle_mouse"):
-				mouse_captured = not mouse_captured
-				if mouse_captured:
-					skip_next_mouse_move = true
+			pass

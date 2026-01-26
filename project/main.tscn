@@ -1,7 +1,9 @@
-[gd_scene load_steps=7 format=3 uid="uid://6uyp4hbab8gp"]
+[gd_scene load_steps=9 format=3 uid="uid://6uyp4hbab8gp"]
 
 [ext_resource type="Script" uid="uid://ygjvluupbdtm" path="res://main.gd" id="1_0xm2m"]
 [ext_resource type="Script" uid="uid://dfati240tvaw1" path="res://scripts/free_cam.gd" id="2_0xm2m"]
+[ext_resource type="Script" uid="uid://cj83dvikoriai" path="res://world.gd" id="2_1bvp3"]
+[ext_resource type="Script" uid="uid://c1yjf0s7vvoqn" path="res://rotate.gd" id="3_h2yge"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_0xm2m"]
 
@@ -15,11 +17,14 @@ sky = SubResource("Sky_0xm2m")
 [sub_resource type="LabelSettings" id="LabelSettings_1bvp3"]
 font_size = 44
 
-[node name="Main" type="Node" node_paths=PackedStringArray("freecam")]
+[node name="Main" type="Node" node_paths=PackedStringArray("world")]
 script = ExtResource("1_0xm2m")
-freecam = NodePath("World/FreeCam")
+world = NodePath("World")
 
-[node name="World" type="CanvasLayer" parent="."]
+[node name="World" type="CanvasLayer" parent="." node_paths=PackedStringArray("freecam", "box")]
+script = ExtResource("2_1bvp3")
+freecam = NodePath("FreeCam")
+box = NodePath("Box")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="World"]
 environment = SubResource("Environment_h2yge")
@@ -28,10 +33,11 @@ environment = SubResource("Environment_h2yge")
 transform = Transform3D(0.9182944, 0.30154994, -0.25652105, -3.72529e-08, 0.6479471, 0.7616854, 0.39589825, -0.6994514, 0.59500617, 0, 8.608476, 0)
 
 [node name="FreeCam" type="Camera3D" parent="World"]
-transform = Transform3D(0.95611066, 0, -0.2930059, 0, 1, 0, 0.2930059, 0, 0.95611066, -1.2843667, 1.2835217, 4.559859)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 3)
 script = ExtResource("2_0xm2m")
 
-[node name="CSGBox3D" type="CSGBox3D" parent="World"]
+[node name="Box" type="CSGBox3D" parent="World"]
+script = ExtResource("3_h2yge")
 
 [node name="UI" type="CanvasLayer" parent="."]
 

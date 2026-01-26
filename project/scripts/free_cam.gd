@@ -20,14 +20,14 @@ func apply_physics_input(input: PlayerInput) -> void:
 		updown += 1.0
 	if input.crouch:
 		updown -= 1.0
-	
+
 	var speed := base_speed
 	if input.sprint:
 		speed = sprint_speed
-	
+
 	var direction := (
 		transform.basis * Vector3(input.move.x, 0, input.move.y)
 		+ Vector3(0, updown, 0)
 	).normalized()
-	
+
 	position += direction * speed;
