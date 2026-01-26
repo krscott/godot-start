@@ -32,13 +32,14 @@ func save_replay_and_quit() -> void:
 
 
 func _physics_process(_delta: float) -> void:
-	match replay.next():
-		[var frame, OK]:
-			var err := GdSerde.deserialize_object(player_input, frame)
-			assert(not err)
-		_:
-			player_input.update_physics_from_input()
-			replay.add_frame(GdSerde.serialize(player_input))
+	if replay.is_active:
+		var err := GdSerde.deserialize_object(player_input, replay.next())
+		assert(not err)
+		if not replay.is_active:
+			print("REPLAY DONE")
+	else:
+		player_input.update_physics_from_input()
+		replay.add_frame(GdSerde.serialize_object(player_input))
 
 	world.apply_physics_input(player_input)
 

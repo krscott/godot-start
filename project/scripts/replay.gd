@@ -55,31 +55,22 @@ func start() -> void:
 func stop() -> void:
 	is_active = false
 
-## returns [Variant, Error]
-func next() -> Array:
+func next() -> Dictionary:
+	assert(is_active)
 	if current_frame >= frames.size():
-		stop()
-		return _err()
+		assert(false)
+		return {}
 	
-	var out: Variant = frames[current_frame]
+	var out: Dictionary = frames[current_frame]
 	current_frame += 1
 	if current_frame >= frames.size():
 		stop()
-	return _ok(out)
+	return out
 
-func add_frame(frame: Variant) -> void:
+func add_frame(frame: Dictionary) -> void:
 	assert(not is_active)
 	if current_frame > frames.size():
 		var err := frames.resize(current_frame)
 		assert(err == OK)
 	
 	frames.push_back(frame)
-
-## returns [null, Error]
-static func _err(err: Error = FAILED) -> Array:
-	assert(err != OK)
-	return [null, err]
-
-## returns [Variant, OK]
-static func _ok(value: Variant) -> Variant:
-	return [value, OK]

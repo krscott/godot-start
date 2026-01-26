@@ -77,6 +77,10 @@ static func serialize(value: Variant) -> Variant:
 
 	return value
 
+static func serialize_object(obj: Object) -> Dictionary:
+	var dict: Dictionary = serialize(obj)
+	return dict
+
 ## returns [Variant, Error]
 static func deserialize(original: Variant, value: Variant) -> Array:
 	if original is Object:
@@ -98,7 +102,7 @@ static func deserialize(original: Variant, value: Variant) -> Array:
 
 	return _ok(value)
 
-static func deserialize_object(obj: Object, value: Variant) -> Error:
+static func deserialize_object(obj: Object, value: Dictionary) -> Error:
 	match deserialize(obj, value):
 		[_, var err]:
 			return err
