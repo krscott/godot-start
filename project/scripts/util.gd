@@ -8,3 +8,6 @@ static func mouse_capture() -> void:
 
 static func mouse_show() -> void:
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+
+static func has_member(obj: Object, name: StringName) -> bool:
+	return obj.get(name) != null
