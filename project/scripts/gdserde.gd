@@ -2,20 +2,6 @@ class_name GdSerde
 
 static var _property_list_cache := {}
 
-class GdSerdeResult:
-	var value: Variant
-	var err: bool
-
-	func _init(value_: Variant, err_: bool) -> void:
-		value = value_
-		err = err_
-
-static func _ok(value: Variant) -> GdSerdeResult:
-	return GdSerdeResult.new(value, false)
-
-static func _err() -> GdSerdeResult:
-	return GdSerdeResult.new(null, true)
-
 class GdSerdeProperty:
 	var name: StringName
 	var type: Variant.Type
@@ -91,8 +77,8 @@ static func serialize(value: Variant) -> Variant:
 
 	return value
 
-
-static func deserialize(original: Variant, value: Variant) -> GdSerdeResult:
+## returns [Variant, Error]
+static func deserialize(original: Variant, value: Variant) -> Array:
 	if original is Object:
 		var obj: Object = original
 		if value is not Dictionary:
@@ -103,10 +89,27 @@ static func deserialize(original: Variant, value: Variant) -> GdSerdeResult:
 			return obj.call(&"gdserde_deserialize", dict)
 
 		for prop in _get_obj_prop_list(obj):
-			var res := deserialize(obj.get(prop.name), dict[prop.name])
-			if res.err:
-				return res
-			obj.set(prop.name, res.value)
+			match deserialize(obj.get(prop.name), dict[prop.name]):
+				[var x, OK]:
+					obj.set(prop.name, x)
+				var res:
+					return res
 		return _ok(obj)
 
 	return _ok(value)
+
+static func deserialize_object(obj: Object, value: Variant) -> Error:
+	match deserialize(obj, value):
+		[_, var err]:
+			return err
+	assert(false)
+	return ERR_BUG
+
+## returns [null, Error]
+static func _err(err: Error = FAILED) -> Array:
+	assert(err != OK)
+	return [null, err]
+
+## returns [Variant, OK]
+static func _ok(value: Variant) -> Variant:
+	return [value, OK]

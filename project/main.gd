@@ -7,12 +7,9 @@ const gdserde_props := [&"world", &"player_input"]
 var skip_next_mouse_move := true
 var mouse_captured := true
 var player_input := PlayerInput.new()
-
+var replay := Replay.new()
 var quick_save := {}
 
-var replay_active := false
-var replay_frame := 0
-var replay := []
 
 func _ready() -> void:
 	assert(world)
@@ -23,29 +20,25 @@ func _ready() -> void:
 	var args := OS.get_cmdline_user_args()
 	print(args)
 	if args:
-		print("Loading replay: ", args[0])
-		var replay_data := FileAccess.get_file_as_bytes(args[0])
-		replay = bytes_to_var(replay_data)
-		replay_active = true
+		if OK == replay.load_from_file(args[0]):
+			print("REPLAY")
+			replay.start()
 
 
 func save_replay_and_quit() -> void:
-	var f := FileAccess.open("replay.dat", FileAccess.ModeFlags.WRITE)
-	var ok := f.store_buffer(var_to_bytes(replay))
-	assert(ok)
+	var err := replay.save_to_file("replay.dat")
+	assert(not err)
 	get_tree().quit()
 
 
 func _physics_process(_delta: float) -> void:
-	if replay_frame >= replay.size():
-		replay_active = false
-	if replay_active:
-		var res := GdSerde.deserialize(player_input, replay[replay_frame])
-		assert(not res.err)
-		replay_frame += 1
-	else:
-		player_input.update_physics_from_input()
-		replay.push_back(GdSerde.serialize(player_input))
+	match replay.next():
+		[var frame, OK]:
+			var err := GdSerde.deserialize_object(player_input, frame)
+			assert(not err)
+		_:
+			player_input.update_physics_from_input()
+			replay.add_frame(GdSerde.serialize(player_input))
 
 	world.apply_physics_input(player_input)
 
@@ -71,8 +64,8 @@ func _input(event: InputEvent) -> void:
 				quick_save = GdSerde.serialize(self)
 				print(JSON.stringify(quick_save))
 			elif Input.is_action_just_pressed("quick_load"):
-				var res := GdSerde.deserialize(self, quick_save)
-				assert(not res.err)
+				var err := GdSerde.deserialize_object(self, quick_save)
+				assert(not err)
 			elif Input.is_action_just_pressed("quit"):
 				save_replay_and_quit()
 			elif Input.is_action_just_pressed("toggle_mouse"):

@@ -28,6 +28,10 @@ gdscript/warnings/return_value_discarded=1
 
 window/stretch/mode="canvas_items"
 
+[editor]
+
+run/main_run_args="-- replay.dat"
+
 [input]
 
 move_forward={

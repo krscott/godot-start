@@ -29,13 +29,23 @@ func load_from_file(filename: String) -> Error:
 	return err
 
 func save_to_file(filename: String) -> Error:
-	print("Saving replay to: ", filename)
-	var f := FileAccess.open("replay.dat", FileAccess.ModeFlags.WRITE)
-	if not f:
-		return FileAccess.get_open_error()
-	if not f.store_buffer(var_to_bytes(frames)):
-		return ERR_INVALID_DATA
-	return OK
+	var err := OK
+	
+	if not frames:
+		err = ERR_INVALID_DATA
+		printerr("No frame data to save")
+	
+	if not err:
+		print("Saving replay to: ", filename)
+		var f := FileAccess.open("replay.dat", FileAccess.ModeFlags.WRITE)
+		if not f:
+			err = FileAccess.get_open_error()
+			printerr(error_string(err))
+		elif not f.store_buffer(var_to_bytes(frames)):
+			printerr("Failed to store buffer")
+			err = FAILED
+	
+	return err
 
 func start() -> void:
 	assert(frames, "No replay loaded")
@@ -45,14 +55,17 @@ func start() -> void:
 func stop() -> void:
 	is_active = false
 
-func next() -> Result:
+## returns [Variant, Error]
+func next() -> Array:
 	if current_frame >= frames.size():
 		stop()
-		return Result.fail()
+		return _err()
 	
 	var out: Variant = frames[current_frame]
 	current_frame += 1
-	return Result.ok(out)
+	if current_frame >= frames.size():
+		stop()
+	return _ok(out)
 
 func add_frame(frame: Variant) -> void:
 	assert(not is_active)
@@ -61,3 +74,12 @@ func add_frame(frame: Variant) -> void:
 		assert(err == OK)
 	
 	frames.push_back(frame)
+
+## returns [null, Error]
+static func _err(err: Error = FAILED) -> Array:
+	assert(err != OK)
+	return [null, err]
+
+## returns [Variant, OK]
+static func _ok(value: Variant) -> Variant:
+	return [value, OK]
