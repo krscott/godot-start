@@ -67,6 +67,11 @@ func _input(event: InputEvent) -> void:
 			elif Input.is_action_just_pressed("quick_load"):
 				var err := GdSerde.deserialize_object(self, quick_save)
 				assert(not err)
+			elif Input.is_action_just_pressed("load_replay"):
+				mouse_captured = false
+				var filename := await Popupper.open_file_dialog(self, "*.dat", "Replay File")
+				mouse_captured = true
+				print(filename)
 			elif Input.is_action_just_pressed("quit"):
 				save_replay_and_quit()
 			elif Input.is_action_just_pressed("toggle_mouse"):
