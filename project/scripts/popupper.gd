@@ -38,5 +38,9 @@ static func file_dialog(
 	pop.queue_free()
 	return filename
 
-static func open_file_dialog(parent: Node, filter: String = "", description: String = "") -> String:
+static func file_open_dialog(
+	parent: Node,
+	filter: String = "",
+	description: String = ""
+) -> String:
 	return await file_dialog(parent, FileDialog.FileMode.FILE_MODE_OPEN_FILE, filter, description)

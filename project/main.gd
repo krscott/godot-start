@@ -9,13 +9,15 @@ var mouse_captured := true
 var player_input := PlayerInput.new()
 var replay := Replay.new()
 var quick_save := {}
+var quick_save_zero := {}
 
 
 func _ready() -> void:
 	assert(world)
 	if OS.is_debug_build():
 		print("DEBUG MODE")
-	quick_save = GdSerde.serialize(self)
+	quick_save_zero = GdSerde.serialize(self)
+	quick_save = quick_save_zero
 
 	var args := OS.get_cmdline_user_args()
 	print(args)
@@ -25,16 +27,10 @@ func _ready() -> void:
 			replay.start()
 
 
-func save_replay_and_quit() -> void:
-	var err := replay.save_to_file("replay.dat")
-	assert(not err)
-	get_tree().quit()
-
-
 func _physics_process(_delta: float) -> void:
 	if replay.is_active:
 		var err := GdSerde.deserialize_object(player_input, replay.next())
-		assert(not err)
+		assert(not err, error_string(err))
 		if not replay.is_active:
 			print("REPLAY DONE")
 	else:
@@ -54,6 +50,7 @@ func _process(_delta: float) -> void:
 
 
 func _input(event: InputEvent) -> void:
+	var err := OK
 	match event.get_class():
 		"InputEventMouseMotion":
 			if skip_next_mouse_move:
@@ -65,13 +62,14 @@ func _input(event: InputEvent) -> void:
 				quick_save = GdSerde.serialize(self)
 				print(JSON.stringify(quick_save))
 			elif Input.is_action_just_pressed("quick_load"):
-				var err := GdSerde.deserialize_object(self, quick_save)
-				assert(not err)
+				err = GdSerde.deserialize_object(self, quick_save)
+				assert(not err, error_string(err))
 			elif Input.is_action_just_pressed("load_replay"):
-				mouse_captured = false
-				var filename := await Popupper.open_file_dialog(self, "*.dat", "Replay File")
-				mouse_captured = true
-				print(filename)
+				var filename := await file_open_dialog("*.dat", "Replay File")
+				if filename:
+					err = replay.load_from_file(filename)
+					assert(not err, error_string(err))
+					restart_replay()
 			elif Input.is_action_just_pressed("quit"):
 				save_replay_and_quit()
 			elif Input.is_action_just_pressed("toggle_mouse"):
@@ -80,3 +78,33 @@ func _input(event: InputEvent) -> void:
 					skip_next_mouse_move = true
 			else:
 				player_input.update_view_from_event(event)
+
+
+func save_replay_and_quit() -> void:
+	var err := replay.save_to_file("replay.dat")
+	assert(not err, error_string(err))
+	get_tree().quit()
+
+
+func restart_replay() -> void:
+	load_savedata(quick_save_zero)
+	replay.restart()
+
+
+func load_savedata(data: Dictionary) -> void:
+	var err := GdSerde.deserialize_object(self, data)
+	assert(not err, error_string(err))
+
+
+func file_open_dialog(
+	filter: String = "",
+	description: String = ""
+) -> String:
+	mouse_captured = false
+	
+	var filename := await Popupper.file_open_dialog(
+		self, filter, description
+	)
+	
+	mouse_captured = true
+	return filename

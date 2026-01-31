@@ -37,7 +37,7 @@ func save_to_file(filename: String) -> Error:
 	
 	if not err:
 		print("Saving replay to: ", filename)
-		var f := FileAccess.open("replay.dat", FileAccess.ModeFlags.WRITE)
+		var f := FileAccess.open(filename, FileAccess.ModeFlags.WRITE)
 		if not f:
 			err = FileAccess.get_open_error()
 			printerr(error_string(err))
@@ -54,6 +54,10 @@ func start() -> void:
 
 func stop() -> void:
 	is_active = false
+
+func restart() -> void:
+	current_frame = 0
+	start()
 
 func next() -> Dictionary:
 	assert(is_active)

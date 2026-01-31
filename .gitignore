@@ -1,6 +1,6 @@
 # Godot
 build/
-replay.dat
+replay*.dat
 
 # Nix
 result
