@@ -40,7 +40,7 @@ func _physics_process(_delta: float) -> void:
 		assert(not err, error_string(err))
 		if not replay.is_active:
 			print("REPLAY DONE")
-			unpause()
+			pause()
 	else:
 		player_input.update_physics_from_input()
 		replay.add_frame(GdSerde.serialize_object(player_input))
