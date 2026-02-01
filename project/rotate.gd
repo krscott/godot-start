@@ -6,5 +6,5 @@ const gdserde_props := [&"transform"]
 var speed := 1.0
 
 
-func _physics_process(delta: float) -> void:
+func _process(delta: float) -> void:
 	rotate(Vector3.UP, speed * delta)

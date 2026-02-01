@@ -13,6 +13,8 @@ sky_material = SubResource("ProceduralSkyMaterial_0xm2m")
 [sub_resource type="Environment" id="Environment_h2yge"]
 background_mode = 2
 sky = SubResource("Sky_0xm2m")
+ambient_light_source = 2
+ambient_light_color = Color(0.796243, 0.796243, 0.796243, 1)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lwsif"]
 albedo_texture = ExtResource("3_p6tgm")
@@ -26,7 +28,8 @@ freecam = NodePath("FreeCam")
 environment = SubResource("Environment_h2yge")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(0.9182944, 0.30154994, -0.25652105, -3.72529e-08, 0.6479471, 0.7616854, 0.39589825, -0.6994514, 0.59500617, 0, 8.608476, 0)
+transform = Transform3D(0.9182944, 0.3015499, -0.25652108, -3.72529e-08, 0.6479471, 0.7616854, 0.39589825, -0.6994514, 0.59500617, 0, 8.608476, 0)
+visible = false
 
 [node name="FreeCam" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 3)

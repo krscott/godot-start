@@ -3,36 +3,14 @@ shader_type canvas_item;
 uniform sampler2D screen_texture : hint_screen_texture, repeat_disable, filter_nearest;
 
 #define PALETTE_X(X) \
-	X(0x491d3a) \
-	X(0x732444) \
-	X(0xb72d3d) \
-	X(0xcc672d) \
-	X(0xf2901f) \
-	X(0xf1c833) \
-	X(0x3a172f) \
-	X(0x461b2d) \
-	X(0x5e2525) \
-	X(0x792917) \
-	X(0x99330e) \
-	X(0xd5560c) \
-	X(0x35154e) \
-	X(0x151b75) \
-	X(0x0045a5) \
-	X(0x0074dc) \
-	X(0x00c8ff) \
-	X(0x4ee3e6) \
-	X(0x1b0a29) \
-	X(0x2b1739) \
-	X(0x380b5a) \
-	X(0x401186) \
-	X(0x4c24b2) \
-	X(0x6441e3) \
-	X(0x063025) \
-	X(0x064015) \
-	X(0x00611a) \
-	X(0x068425) \
-	X(0x06aa25) \
-	X(0x6bcd4d)
+	X(0xff8274) \
+	X(0xd53c6a) \
+	X(0x7c183c) \
+	X(0x460e2b) \
+	X(0x31051e) \
+	X(0x1f0510) \
+	X(0x130208) \
+
 
 #define X_COUNT(x) + 1
 
