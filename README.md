@@ -1,4 +1,4 @@
-# py-start
+# godot-start
 
 My rather opinionated Godot project template.
 
