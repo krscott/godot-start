@@ -36,11 +36,8 @@ func _physics_process(_delta: float) -> void:
 
 func _input(event: InputEvent) -> void:
 	if not skip_frame:
-		match event.get_class():
-			"InputEventMouseMotion":
-				var ev: InputEventMouseMotion = event
-				look.y -= (ev.relative.x * sensitivity)
-				look.x -= (ev.relative.y * sensitivity)
-				look.x = clamp(look.x, min_angle, max_angle)
-			"InputEventKey", "InputEventMouseButton":
-				pass
+		if event is InputEventMouseMotion:
+			var ev: InputEventMouseMotion = event
+			look.y -= (ev.relative.x * sensitivity)
+			look.x -= (ev.relative.y * sensitivity)
+			look.x = clamp(look.x, min_angle, max_angle)

@@ -29,7 +29,6 @@ script = ExtResource("2_5vw27")
 [node name="Replay" type="Node" parent="."]
 unique_name_in_owner = true
 script = ExtResource("2_272bh")
-enabled = false
 
 [node name="PlayerInput" type="Node" parent="."]
 unique_name_in_owner = true

@@ -69,6 +69,8 @@ func _replay_save_frame() -> void:
 func _save_replay_and_quit() -> void:
 	if replay.enabled:
 		util.expect_ok(replay.save_to_file("replay.dat"))
+
+	await get_tree().process_frame
 	get_tree().quit()
 
 

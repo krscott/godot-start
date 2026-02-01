@@ -50,7 +50,7 @@ func save_to_file(filename: String) -> Error:
 		printerr("No frame data to save")
 
 	if not err:
-		print("Saving replay to: ", filename)
+		print("Saving replay to: ", filename, " (", frames.size(), " frames)")
 		var f := FileAccess.open(filename, FileAccess.ModeFlags.WRITE)
 		if not f:
 			err = FileAccess.get_open_error()
