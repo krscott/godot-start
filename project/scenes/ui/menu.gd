@@ -20,6 +20,7 @@ static func btn(text: String, callback: Callable, action: StringName = &"") -> S
 	spec.action = action
 	return spec
 
+@onready var title_label: Label = %Title
 
 @onready var _items_container: Node = %ItemsContainer
 @onready var _templates := {
@@ -29,7 +30,9 @@ static func btn(text: String, callback: Callable, action: StringName = &"") -> S
 var _spec: Array[Spec] = []
 
 func _ready() -> void:
+	assert(title_label)
 	assert(_items_container)
+	title_label.text = ProjectSettings.get_setting("application/config/name")
 	hide()
 	for k: SpecKind in _templates:
 		_get_template(k).hide()
