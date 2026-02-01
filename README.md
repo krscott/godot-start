@@ -7,7 +7,18 @@ To start a project with this template, run:
 ./init-template.sh new_project_name
 ```
 
+## Features
+
+Batteries included. Delete what you don't want.
+
+- Cross-platform nix build
+- Quicksave/Quickload
+- Player input replay
+- Pause menu
+
 ## Development
+
+A nix env is provided, but purely optional.
 
 Update dependencies
 ```
