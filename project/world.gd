@@ -4,6 +4,7 @@ const gdserde_class := &"World"
 const gdserde_props := [
 	&"box",
 	&"freecam",
+	&"player_input",
 ]
 
 @export var box: Node3D

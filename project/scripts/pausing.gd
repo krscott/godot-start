@@ -1,8 +1,6 @@
 class_name Pausing
 extends Node
 
-signal pre_pause
-
 
 var paused := false
 
@@ -23,7 +21,6 @@ func _physics_process(_delta: float) -> void:
 	if paused != get_tree().paused:
 		if paused:
 			print("PAUSED")
-			pre_pause.emit()
 		else:
 			print("UNPAUSED")
 
