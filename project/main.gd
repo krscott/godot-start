@@ -1,154 +1,116 @@
 extends Node
-const gdserde_class := &"Main"
-const gdserde_props := [&"world", &"player_input"]
 
-@export var world: World
-@export var menu: Menu
 
-var skip_next_mouse_move := true
-var mouse_captured := true
-var player_input := PlayerInput.new()
-var replay := Replay.new()
+@onready var pausing: Pausing = %Pausing
+@onready var replay: Replay = %Replay
+@onready var player_input: PlayerInput = %PlayerInput
+@onready var world: World = %World
+@onready var menu: Menu = %Menu
+@onready var system_dialog: SystemDialog = %SystemDialog
+
+
 var quick_save := {}
 var quick_save_zero := {}
 
+
 func _ready() -> void:
+	assert(pausing)
+	assert(replay)
+	assert(player_input)
 	assert(world)
 	assert(menu)
+	assert(system_dialog)
+
 	if OS.is_debug_build():
 		print("DEBUG MODE")
-	
+
+	util.expect_ok(replay.load_frame.connect(_replay_load_frame))
+	util.expect_ok(replay.request_frame.connect(_replay_save_frame))
+
 	build_menu()
-	
-	quick_save_zero = GdSerde.serialize(self)
+
+	quick_save_zero = _save_savedata()
 	quick_save = quick_save_zero
 
 	var args := OS.get_cmdline_user_args()
 	print(args)
 	if args:
 		if OK == replay.load_from_file(args[0]):
-			print("REPLAY")
 			replay.start()
 
-
-func _physics_process(_delta: float) -> void:
-	if get_tree().paused:
-		return
-		
-	if replay.is_active:
-		var err := GdSerde.deserialize_object(player_input, replay.next())
-		assert(not err, error_string(err))
-		if not replay.is_active:
-			print("REPLAY DONE")
-			pause()
-	else:
-		player_input.update_physics_from_input()
-		replay.add_frame(GdSerde.serialize_object(player_input))
-
-	world.apply_physics_input(player_input)
+	unpause()
 
 
 func _process(_delta: float) -> void:
-	if mouse_captured:
-		util.mouse_capture()
+	if not menu.visible:
+		if Input.is_action_just_pressed("quick_save"):
+			quick_save = _save_savedata()
+		elif Input.is_action_just_pressed("quick_load"):
+			_load_savedata(quick_save)
+		elif Input.is_action_just_pressed("quit"):
+			_save_replay_and_quit()
+		elif Input.is_action_just_pressed("ui_cancel"):
+			pause()
+
+
+func _replay_load_frame(frame: Dictionary) -> void:
+	util.expect_ok(GdSerde.deserialize_object(player_input, frame))
+	if replay.is_active:
+		player_input.skip_frame = true
 	else:
-		util.mouse_show()
-
-	if not get_tree().paused:
-		world.apply_view_input(player_input)
+		print("REPLAY DONE")
+		pause()
 
 
-func _input(event: InputEvent) -> void:
-	if get_tree().paused:
-		return
-	
-	var err := OK
-	match event.get_class():
-		"InputEventMouseMotion":
-			if skip_next_mouse_move:
-				skip_next_mouse_move = false
-			elif mouse_captured:
-				player_input.update_view_from_event(event)
-		"InputEventKey", "InputEventMouseButton":
-			if Input.is_action_just_pressed("quick_save"):
-				quick_save = GdSerde.serialize(self)
-				print(JSON.stringify(quick_save))
-			elif Input.is_action_just_pressed("quick_load"):
-				err = GdSerde.deserialize_object(self, quick_save)
-				assert(not err, error_string(err))
-			elif Input.is_action_just_pressed("load_replay"):
-				replay_open_dialog()
-			elif Input.is_action_just_pressed("quit"):
-				save_replay_and_quit()
-			elif Input.is_action_just_pressed("toggle_mouse"):
-				mouse_captured = not mouse_captured
-				if mouse_captured:
-					skip_next_mouse_move = true
-			elif Input.is_action_just_pressed("ui_cancel"):
-				pause()
-			else:
-				player_input.update_view_from_event(event)
+func _replay_save_frame() -> void:
+	replay.add_frame(GdSerde.serialize_object(player_input))
 
 
-func save_replay_and_quit() -> void:
-	var err := replay.save_to_file("replay.dat")
-	assert(not err, error_string(err))
+func _save_replay_and_quit() -> void:
+	if replay.enabled:
+		util.expect_ok(replay.save_to_file("replay.dat"))
 	get_tree().quit()
 
 
-func restart_replay() -> void:
-	load_savedata(quick_save_zero)
+func _restart_replay() -> void:
+	_load_savedata(quick_save_zero)
 	replay.restart()
 
 
-func load_savedata(data: Dictionary) -> void:
-	var err := GdSerde.deserialize_object(self, data)
-	assert(not err, error_string(err))
+func _load_savedata(data: Dictionary) -> void:
+	util.expect_ok(GdSerde.deserialize_object(world, data))
 
 
-func file_open_dialog(
-	filter: String = "",
-	description: String = ""
-) -> String:
-	var original_mouse_captured := mouse_captured
-	mouse_captured = false
-	
-	var filename := await Popupper.file_open_dialog(
-		self, filter, description
-	)
-	
-	mouse_captured = original_mouse_captured
-	return filename
+func _save_savedata() -> Dictionary:
+	var savedata := GdSerde.serialize_object(world)
+	print(JSON.stringify(savedata))
+	return savedata
+
 
 func replay_open_dialog() -> void:
-	var filename := await file_open_dialog("*.dat", "Replay File")
+	var filename := await system_dialog.file_open_dialog("*.dat", "Replay File")
 	if filename:
 		var err := replay.load_from_file(filename)
 		assert(not err, error_string(err))
-		restart_replay()
+		_restart_replay()
 		unpause()
 
-func set_paused(paused: bool) -> void:
-	# Align pause state to frame
-	await get_tree().process_frame
-	
-	menu.visible = paused
-	mouse_captured = not paused
-	get_tree().paused = paused
-	if paused:
-		print("PAUSED")
-	else:
-		print("UNPAUSED")
 
 func unpause() -> void:
-	set_paused(false)
+	pausing.unpause()
+	menu.hide()
+	util.set_mouse_captured(true)
+
 
 func pause() -> void:
-	set_paused(true)
+	pausing.pause()
+	menu.show()
+	util.set_mouse_captured(false)
+
 
 func build_menu() -> void:
 	menu.build([
 		Menu.btn("Continue", unpause, "ui_cancel"),
 		Menu.btn("Load Replay", replay_open_dialog),
-		Menu.btn("Quit", save_replay_and_quit),
+		Menu.btn("Quit", _save_replay_and_quit),
 	])

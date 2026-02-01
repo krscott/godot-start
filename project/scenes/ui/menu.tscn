@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://bn5av54g3r5s4" path="res://scenes/ui/menu.gd" id="1_6tw0m"]
 
 [node name="Menu" type="CanvasLayer"]
+process_mode = 3
 script = ExtResource("1_6tw0m")
 
 [node name="Background" type="ColorRect" parent="."]

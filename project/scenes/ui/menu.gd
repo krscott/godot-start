@@ -28,6 +28,7 @@ static func btn(text: String, callback: Callable, action: StringName = &"") -> S
 }
 
 var _spec: Array[Spec] = []
+var _was_visible_last_frame := false
 
 func _ready() -> void:
 	assert(title_label)
@@ -37,9 +38,20 @@ func _ready() -> void:
 	for k: SpecKind in _templates:
 		_get_template(k).hide()
 
+
+func _process(_delta: float) -> void:
+	if _was_visible_last_frame and visible:
+		for x in _spec:
+			if x.action and Input.is_action_just_pressed(x.action):
+				print("Menu: ", x.action, " -> ", x.text)
+				x.callback.call()
+	_was_visible_last_frame = visible
+
+
 func _get_template(kind: SpecKind) -> Control:
 	assert(_templates.has(kind), str("Missing template for kind: ", kind))
 	return _templates[kind]
+
 
 func _dupe_template(kind: SpecKind) -> Node:
 	var new_node: Control = _get_template(kind).duplicate()
@@ -47,16 +59,10 @@ func _dupe_template(kind: SpecKind) -> Node:
 	new_node.show()
 	return new_node
 
-func _input(_event: InputEvent) -> void:
-	if visible:
-		for x in _spec:
-			if x.action and Input.is_action_just_pressed(x.action):
-				print("Menu: ", x.action, " -> ", x.text)
-				x.callback.call()
 
 func build(spec: Array[Spec]) -> void:
 	assert(_spec.size() == 0, "TODO: clear old spec")
-	
+
 	for x in spec:
 		var k := x.kind
 		match k:
@@ -66,5 +72,5 @@ func build(spec: Array[Spec]) -> void:
 				util.expect_ok(button.pressed.connect(x.callback))
 			_:
 				assert(false, str("KIND NOT IMPLEMENTED: ", k))
-	
+
 	_spec = spec

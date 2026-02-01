@@ -3,31 +3,33 @@ class_name FreeCam
 const gdserde_class := &"FreeCam"
 const gdserde_props := [&"transform"]
 
-@export
-var base_speed := 0.05
-@export
-var sprint_speed := 0.2
+@export var maybe_input: PlayerInput
+
+@export var base_speed := 5.0
+@export var sprint_speed := 20.0
 
 
-func apply_view_input(input: PlayerInput) -> void:
-	rotation_degrees.x = input.look.x
-	rotation_degrees.y = input.look.y
+func _physics_process(delta: float) -> void:
+	if maybe_input:
+		var updown := 0.0
+		if maybe_input.jump:
+			updown += 1.0
+		if maybe_input.crouch:
+			updown -= 1.0
+
+		var speed := base_speed * delta
+		if maybe_input.sprint:
+			speed = sprint_speed * delta
+
+		var direction := (
+			transform.basis * Vector3(maybe_input.move.x, 0, maybe_input.move.y)
+			+ Vector3(0, updown, 0)
+		).normalized()
+
+		position += direction * speed;
 
 
-func apply_physics_input(input: PlayerInput) -> void:
-	var updown := 0.0
-	if input.jump:
-		updown += 1.0
-	if input.crouch:
-		updown -= 1.0
-
-	var speed := base_speed
-	if input.sprint:
-		speed = sprint_speed
-
-	var direction := (
-		transform.basis * Vector3(input.move.x, 0, input.move.y)
-		+ Vector3(0, updown, 0)
-	).normalized()
-
-	position += direction * speed;
+func _process(_delta: float) -> void:
+	if maybe_input:
+		rotation_degrees.x = maybe_input.look.x
+		rotation_degrees.y = maybe_input.look.y

@@ -1,10 +1,14 @@
-[gd_scene load_steps=10 format=3 uid="uid://6uyp4hbab8gp"]
+[gd_scene load_steps=13 format=3 uid="uid://6uyp4hbab8gp"]
 
 [ext_resource type="Script" uid="uid://ygjvluupbdtm" path="res://main.gd" id="1_0xm2m"]
 [ext_resource type="Script" uid="uid://dfati240tvaw1" path="res://scripts/free_cam.gd" id="2_0xm2m"]
 [ext_resource type="Script" uid="uid://cj83dvikoriai" path="res://world.gd" id="2_1bvp3"]
+[ext_resource type="Script" uid="uid://n2spkoxc2iv5" path="res://scripts/pausing.gd" id="2_5vw27"]
+[ext_resource type="Script" uid="uid://skj8dxeivfvs" path="res://scripts/player_input.gd" id="2_7mycd"]
+[ext_resource type="Script" uid="uid://mahcrqfjlyyq" path="res://scripts/replay.gd" id="2_272bh"]
 [ext_resource type="Script" uid="uid://c1yjf0s7vvoqn" path="res://rotate.gd" id="3_h2yge"]
 [ext_resource type="PackedScene" uid="uid://dkhqxc2w4rda4" path="res://scenes/ui/menu.tscn" id="5_lquwl"]
+[ext_resource type="Script" uid="uid://btc74n06ykolu" path="res://scripts/system_dialog.gd" id="9_kek77"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_0xm2m"]
 
@@ -15,20 +19,27 @@ sky_material = SubResource("ProceduralSkyMaterial_0xm2m")
 background_mode = 2
 sky = SubResource("Sky_0xm2m")
 
-[sub_resource type="LabelSettings" id="LabelSettings_1bvp3"]
-font_size = 44
-
-[node name="Main" type="Node" node_paths=PackedStringArray("world", "menu")]
-process_mode = 3
+[node name="Main" type="Node"]
 script = ExtResource("1_0xm2m")
-world = NodePath("World")
-menu = NodePath("Menu")
 
-[node name="World" type="CanvasLayer" parent="." node_paths=PackedStringArray("freecam", "box")]
-process_mode = 1
+[node name="Pausing" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("2_5vw27")
+
+[node name="Replay" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("2_272bh")
+enabled = false
+
+[node name="PlayerInput" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("2_7mycd")
+
+[node name="World" type="CanvasLayer" parent="." node_paths=PackedStringArray("box", "freecam")]
+unique_name_in_owner = true
 script = ExtResource("2_1bvp3")
-freecam = NodePath("FreeCam")
 box = NodePath("Box")
+freecam = NodePath("FreeCam")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="World"]
 environment = SubResource("Environment_h2yge")
@@ -43,22 +54,9 @@ script = ExtResource("2_0xm2m")
 [node name="Box" type="CSGBox3D" parent="World"]
 script = ExtResource("3_h2yge")
 
-[node name="UI" type="CanvasLayer" parent="."]
-
-[node name="Label" type="Label" parent="UI"]
-visible = false
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -138.0
-offset_top = -30.5
-offset_right = 138.0
-offset_bottom = 30.5
-grow_horizontal = 2
-grow_vertical = 2
-text = "Hello, Godot!"
-label_settings = SubResource("LabelSettings_1bvp3")
-
 [node name="Menu" parent="." instance=ExtResource("5_lquwl")]
+unique_name_in_owner = true
+
+[node name="SystemDialog" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("9_kek77")

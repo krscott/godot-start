@@ -1,9 +1,23 @@
 class_name Replay
-extends RefCounted
+extends Node
+
+signal load_frame(data: Dictionary)
+signal request_frame
+
+@export var enabled := true
 
 var is_active := false
 var frames := []
 var current_frame := 0
+
+func _physics_process(_delta: float) -> void:
+	if not enabled:
+		return
+
+	if is_active:
+		load_frame.emit(next())
+	else:
+		request_frame.emit()
 
 func load_from_file(filename: String) -> Error:
 	var err := OK
@@ -14,7 +28,7 @@ func load_from_file(filename: String) -> Error:
 		if err == OK:
 			printerr("Empty replay")
 			err = ERR_INVALID_DATA
-	
+
 	if not err:
 		var maybe_frames: Variant = bytes_to_var(replay_data)
 		if maybe_frames is not Array:
@@ -22,19 +36,19 @@ func load_from_file(filename: String) -> Error:
 			err = ERR_INVALID_DATA
 		else:
 			frames = maybe_frames
-	
+
 	if err:
 		printerr("Error loading replay file '", filename, "': ", error_string(err))
-		
+
 	return err
 
 func save_to_file(filename: String) -> Error:
 	var err := OK
-	
+
 	if not frames:
 		err = ERR_INVALID_DATA
 		printerr("No frame data to save")
-	
+
 	if not err:
 		print("Saving replay to: ", filename)
 		var f := FileAccess.open(filename, FileAccess.ModeFlags.WRITE)
@@ -44,7 +58,7 @@ func save_to_file(filename: String) -> Error:
 		elif not f.store_buffer(var_to_bytes(frames)):
 			printerr("Failed to store buffer")
 			err = FAILED
-	
+
 	return err
 
 func start() -> void:
@@ -64,7 +78,7 @@ func next() -> Dictionary:
 	if current_frame >= frames.size():
 		assert(false)
 		return {}
-	
+
 	var out: Dictionary = frames[current_frame]
 	current_frame += 1
 	if current_frame >= frames.size():
@@ -76,5 +90,5 @@ func add_frame(frame: Dictionary) -> void:
 	if current_frame > frames.size():
 		var err := frames.resize(current_frame)
 		assert(err == OK)
-	
+
 	frames.push_back(frame)
