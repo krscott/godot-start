@@ -69,7 +69,7 @@ func build(spec: Array[Spec]) -> void:
 			SpecKind.BUTTON:
 				var button := _dupe_template(k) as Button
 				button.text = x.text
-				util.expect_ok(button.pressed.connect(x.callback))
+				util.aok(button.pressed.connect(x.callback))
 			_:
 				assert(false, str("KIND NOT IMPLEMENTED: ", k))
 

@@ -13,7 +13,7 @@ static func set_mouse_captured(is_caputred: bool) -> void:
 static func has_member(obj: Object, name: StringName) -> bool:
 	return obj.get(name) != null
 
-static func expect_ok(err: Error) -> void:
+static func aok(err: Error) -> void:
 	if err:
 		assert(false, error_string(err))
 		printerr(error_string(err))

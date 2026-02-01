@@ -24,8 +24,8 @@ func _ready() -> void:
 	if OS.is_debug_build():
 		print("DEBUG MODE")
 
-	util.expect_ok(replay.load_frame.connect(_replay_load_frame))
-	util.expect_ok(replay.request_frame.connect(_replay_save_frame))
+	util.aok(replay.load_frame.connect(_replay_load_frame))
+	util.aok(replay.request_frame.connect(_replay_save_frame))
 
 	build_menu()
 
@@ -54,7 +54,7 @@ func _process(_delta: float) -> void:
 
 
 func _replay_load_frame(frame: Dictionary) -> void:
-	util.expect_ok(GdSerde.deserialize_object(player_input, frame))
+	util.aok(GdSerde.deserialize_object(player_input, frame))
 	if replay.is_active:
 		player_input.skip_frame = true
 	else:
@@ -68,7 +68,7 @@ func _replay_save_frame() -> void:
 
 func _save_replay_and_quit() -> void:
 	if replay.enabled:
-		util.expect_ok(replay.save_to_file("replay.dat"))
+		util.aok(replay.save_to_file("replay.dat"))
 
 	await get_tree().process_frame
 	get_tree().quit()
@@ -80,7 +80,7 @@ func _restart_replay() -> void:
 
 
 func _load_savedata(data: Dictionary) -> void:
-	util.expect_ok(GdSerde.deserialize_object(world, data))
+	util.aok(GdSerde.deserialize_object(world, data))
 
 
 func _save_savedata() -> Dictionary:
