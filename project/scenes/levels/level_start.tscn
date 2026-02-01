@@ -17,7 +17,7 @@ sky = SubResource("Sky_0xm2m")
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lwsif"]
 albedo_texture = ExtResource("3_p6tgm")
 
-[node name="Level" type="CanvasLayer" node_paths=PackedStringArray("box", "freecam")]
+[node name="LevelStart" type="CanvasLayer" node_paths=PackedStringArray("box", "freecam")]
 script = ExtResource("1_q4qc6")
 box = NodePath("Box")
 freecam = NodePath("FreeCam")

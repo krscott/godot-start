@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://6uyp4hbab8gp"]
+[gd_scene load_steps=9 format=3 uid="uid://6uyp4hbab8gp"]
 
 [ext_resource type="Script" uid="uid://ygjvluupbdtm" path="res://scenes/game_state.gd" id="1_aj67o"]
 [ext_resource type="Script" uid="uid://n2spkoxc2iv5" path="res://scripts/pausing.gd" id="2_dq14d"]
@@ -6,6 +6,10 @@
 [ext_resource type="Script" uid="uid://skj8dxeivfvs" path="res://scripts/player_input.gd" id="4_qn400"]
 [ext_resource type="PackedScene" uid="uid://dkhqxc2w4rda4" path="res://scenes/ui/menu.tscn" id="5_vsnwl"]
 [ext_resource type="Script" uid="uid://btc74n06ykolu" path="res://scripts/system_dialog.gd" id="6_rxqo8"]
+[ext_resource type="Shader" uid="uid://cucunjhgkuj2r" path="res://shaders/palette-post.gdshader" id="7_q5byu"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_q5byu"]
+shader = ExtResource("7_q5byu")
 
 [node name="GameState" type="Node"]
 script = ExtResource("1_aj67o")
@@ -22,9 +26,21 @@ script = ExtResource("3_rerck")
 unique_name_in_owner = true
 script = ExtResource("4_qn400")
 
-[node name="Menu" parent="." instance=ExtResource("5_vsnwl")]
-unique_name_in_owner = true
-
 [node name="SystemDialog" type="Node" parent="."]
 unique_name_in_owner = true
 script = ExtResource("6_rxqo8")
+
+[node name="Menu" parent="." instance=ExtResource("5_vsnwl")]
+unique_name_in_owner = true
+visible = false
+
+[node name="PostProcessing" type="CanvasLayer" parent="."]
+
+[node name="ColorRect" type="ColorRect" parent="PostProcessing"]
+material = SubResource("ShaderMaterial_q5byu")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2

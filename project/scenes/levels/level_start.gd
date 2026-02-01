@@ -1,4 +1,4 @@
-extends Node
+extends CanvasLayer
 
 const gdserde_class := &"World"
 const gdserde_props := [
