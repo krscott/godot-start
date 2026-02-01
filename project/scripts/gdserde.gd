@@ -13,6 +13,7 @@ class GdSerdeProperty:
 	func _to_string() -> String:
 		return "GdSerdeProperty<%s: %s>" % [name, type_string(type)]
 
+
 static func _create_property_list(
 	obj: Object,
 	prop_filter: Array
@@ -33,6 +34,7 @@ static func _create_property_list(
 			out.push_back(GdSerdeProperty.new(name, type))
 	return out
 
+
 static func _get_obj_prop_list(obj: Object) -> Array[GdSerdeProperty]:
 	var prop_list: Array[GdSerdeProperty]
 
@@ -51,7 +53,7 @@ static func _get_obj_prop_list(obj: Object) -> Array[GdSerdeProperty]:
 				prop_filter = []
 			prop_list = _create_property_list(obj, prop_filter)
 			_property_list_cache[type] = prop_list
-			print_debug("GdSerde: cached ", type, " props ", prop_list)
+			#print_debug("GdSerde: cached ", type, " props ", prop_list)
 	else:
 		assert(
 			false,
@@ -77,9 +79,11 @@ static func serialize(value: Variant) -> Variant:
 
 	return value
 
+
 static func serialize_object(obj: Object) -> Dictionary:
 	var dict: Dictionary = serialize(obj)
 	return dict
+
 
 ## returns [Variant, Error]
 static func deserialize(original: Variant, value: Variant) -> Array:
@@ -102,6 +106,7 @@ static func deserialize(original: Variant, value: Variant) -> Array:
 
 	return _ok(value)
 
+
 static func deserialize_object(obj: Object, value: Dictionary) -> Error:
 	match deserialize(obj, value):
 		[_, var err]:
@@ -109,10 +114,17 @@ static func deserialize_object(obj: Object, value: Dictionary) -> Error:
 	assert(false)
 	return ERR_BUG
 
+
+static func clone_object(to: Object, from: Object) -> Error:
+	var dict := serialize_object(from)
+	return deserialize_object(to, dict)
+
+
 ## returns [null, Error]
 static func _err(err: Error = FAILED) -> Array:
 	assert(err != OK)
 	return [null, err]
+
 
 ## returns [Variant, OK]
 static func _ok(value: Variant) -> Variant:

@@ -1,44 +1,82 @@
 extends Node
 
 
+signal savedata_saving
+signal savedata_loaded
+
+
 @onready var pausing: Pausing = %Pausing
 @onready var replay: Replay = %Replay
 @onready var player_input: PlayerInput = %PlayerInput
-@onready var world: World = %World
 @onready var menu: Menu = %Menu
 @onready var system_dialog: SystemDialog = %SystemDialog
 
+
+## Dictionary[StringName, Dictionary]
+var _savedata_state := {}
+## Dictionary[StringName, Object]
+var _savedata_refs := {}
 
 var quick_save := {}
 var quick_save_zero := {}
 
 
+func update_state(key: StringName, obj: Object) -> void:
+	_savedata_state[key] = GdSerde.serialize_object(obj)
+
+
+func load_state(key: StringName, obj: Object) -> void:
+	if _savedata_state.has(key):
+		var dict: Dictionary = _savedata_state[key]
+		util.aok(GdSerde.deserialize_object(obj, dict))
+
+
+func sync_state(key: StringName, obj: Object) -> void:
+	print("Sync state: ", key)
+	
+	load_state(key, obj)
+	if OS.is_debug_build():
+		# Debug-only check for serde errors
+		var dict := GdSerde.serialize_object(obj)
+		util.aok(GdSerde.deserialize_object(obj, dict))
+
+	_savedata_refs[key] = obj
+
+
 func _ready() -> void:
+	# NOTE: GameState node is the first child of the current level's node.
+	#       i.e., this node is visited FIRST.
+	#       We need to call-deferred if we want to run something after root.
+	call_deferred(&"_root_ready")
+	
 	assert(pausing)
 	assert(replay)
 	assert(player_input)
-	assert(world)
 	assert(menu)
 	assert(system_dialog)
 
 	if OS.is_debug_build():
 		print("DEBUG MODE")
+	
+	sync_state(&"player_input", player_input)
 
 	util.aok(replay.load_frame.connect(_replay_load_frame))
 	util.aok(replay.request_frame.connect(_replay_save_frame))
 
 	build_menu()
 
-	quick_save_zero = _save_savedata()
-	quick_save = quick_save_zero
-
 	var args := OS.get_cmdline_user_args()
-	print(args)
 	if args:
+		print("CLI args: ", args)
 		if OK == replay.load_from_file(args[0]):
 			replay.start()
 
 	unpause()
+
+
+func _root_ready() -> void:
+	quick_save_zero = _serialize_savedata()
+	quick_save = quick_save_zero
 
 
 func _physics_process(_delta: float) -> void:
@@ -48,9 +86,9 @@ func _physics_process(_delta: float) -> void:
 func _process(_delta: float) -> void:
 	if not menu.visible:
 		if Input.is_action_just_pressed("quick_save"):
-			quick_save = _save_savedata()
+			quick_save = _serialize_savedata()
 		elif Input.is_action_just_pressed("quick_load"):
-			_load_savedata(quick_save)
+			_deserialize_savedata(quick_save)
 		elif Input.is_action_just_pressed("quit"):
 			_save_replay_and_quit()
 		elif Input.is_action_just_pressed("ui_cancel"):
@@ -79,18 +117,37 @@ func _save_replay_and_quit() -> void:
 
 
 func _restart_replay() -> void:
-	_load_savedata(quick_save_zero)
+	_deserialize_savedata(quick_save_zero)
 	replay.restart()
 
 
-func _load_savedata(data: Dictionary) -> void:
-	util.aok(GdSerde.deserialize_object(world, data))
+func _deserialize_savedata(data: Dictionary) -> void:
+	_savedata_state = data
+	for k: StringName in _savedata_refs:
+		if is_instance_valid(_savedata_refs[k]):
+			var obj: Object = _savedata_refs[k]
+			load_state(k, obj)
+		else:
+			util.expect_true(_savedata_refs.erase(k))
+
+	print("Loaded savedata")
+	print(JSON.stringify(_savedata_state))
+	savedata_loaded.emit()
 
 
-func _save_savedata() -> Dictionary:
-	var savedata := GdSerde.serialize_object(world)
-	print(JSON.stringify(savedata))
-	return savedata
+func _serialize_savedata() -> Dictionary:
+	savedata_saving.emit()
+
+	for k: StringName in _savedata_refs:
+		if is_instance_valid(_savedata_refs[k]):
+			var obj: Object = _savedata_refs[k]
+			update_state(k, obj)
+		else:
+			util.expect_true(_savedata_refs.erase(k))
+
+	print("Saved savedata")
+	print(JSON.stringify(_savedata_state))
+	return _savedata_state
 
 
 func replay_open_dialog() -> void:

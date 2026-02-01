@@ -1,20 +1,18 @@
 extends Node
-class_name World
+
 const gdserde_class := &"World"
 const gdserde_props := [
 	&"box",
 	&"freecam",
-	&"player_input",
 ]
 
 @export var box: Node3D
 @export var freecam: FreeCam
 
-@onready var player_input: PlayerInput = %PlayerInput
-
 func _ready() -> void:
 	assert(freecam)
 	assert(box)
-	assert(player_input)
+	
+	gamestate.sync_state(&"level_start", self)
 
-	freecam.maybe_input = player_input
+	freecam.maybe_input = gamestate.player_input

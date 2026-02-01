@@ -1,0 +1,32 @@
+[gd_scene load_steps=7 format=3 uid="uid://c8lpblcihq5ff"]
+
+[ext_resource type="Script" uid="uid://cj83dvikoriai" path="res://scenes/levels/level_start.gd" id="1_q4qc6"]
+[ext_resource type="Script" uid="uid://dfati240tvaw1" path="res://scripts/free_cam.gd" id="2_p6tgm"]
+[ext_resource type="Script" uid="uid://c1yjf0s7vvoqn" path="res://rotate.gd" id="3_lwsif"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_0xm2m"]
+
+[sub_resource type="Sky" id="Sky_0xm2m"]
+sky_material = SubResource("ProceduralSkyMaterial_0xm2m")
+
+[sub_resource type="Environment" id="Environment_h2yge"]
+background_mode = 2
+sky = SubResource("Sky_0xm2m")
+
+[node name="Level" type="CanvasLayer" node_paths=PackedStringArray("box", "freecam")]
+script = ExtResource("1_q4qc6")
+box = NodePath("Box")
+freecam = NodePath("FreeCam")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_h2yge")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.9182944, 0.30154994, -0.25652105, -3.72529e-08, 0.6479471, 0.7616854, 0.39589825, -0.6994514, 0.59500617, 0, 8.608476, 0)
+
+[node name="FreeCam" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 3)
+script = ExtResource("2_p6tgm")
+
+[node name="Box" type="CSGBox3D" parent="."]
+script = ExtResource("3_lwsif")

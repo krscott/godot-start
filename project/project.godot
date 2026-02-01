@@ -11,9 +11,13 @@ config_version=5
 [application]
 
 config/name="godot-start"
-run/main_scene="uid://6uyp4hbab8gp"
+run/main_scene="uid://c8lpblcihq5ff"
 config/features=PackedStringArray("4.5", "GL Compatibility")
 config/icon="res://icon.svg"
+
+[autoload]
+
+gamestate="*res://scenes/game_state.tscn"
 
 [debug]
 

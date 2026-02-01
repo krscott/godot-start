@@ -23,8 +23,12 @@ var crouch := false
 var jump := false
 
 
+func _is_listening() -> bool:
+	return listening and util.is_mouse_captured()
+
+
 func _physics_process(_delta: float) -> void:
-	if listening:
+	if _is_listening():
 		move = Input.get_vector(
 			"move_left", "move_right", "move_forward", "move_backward"
 		)
@@ -34,7 +38,7 @@ func _physics_process(_delta: float) -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if listening:
+	if _is_listening():
 		if event is InputEventMouseMotion:
 			var ev: InputEventMouseMotion = event
 			look.y -= (ev.relative.x * sensitivity)
