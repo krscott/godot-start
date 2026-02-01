@@ -15,4 +15,4 @@ func _ready() -> void:
 	
 	gamestate.sync_state(&"level_start", self)
 
-	freecam.maybe_input = gamestate.player_input
+	freecam.give_control(gamestate.player_input)

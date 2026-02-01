@@ -9,6 +9,14 @@ const gdserde_props := [&"transform"]
 @export var sprint_speed := 20.0
 
 
+var look_origin := Vector2.ZERO
+
+
+func give_control(player_input: PlayerInput) -> void:
+	look_origin = Vector2(rotation_degrees.x, rotation_degrees.y) - player_input.look
+	maybe_input = player_input
+
+
 func _physics_process(delta: float) -> void:
 	if maybe_input:
 		var updown := 0.0
@@ -31,5 +39,5 @@ func _physics_process(delta: float) -> void:
 
 func _process(_delta: float) -> void:
 	if maybe_input:
-		rotation_degrees.x = maybe_input.look.x
-		rotation_degrees.y = maybe_input.look.y
+		rotation_degrees.x = maybe_input.look.x + look_origin.x
+		rotation_degrees.y = maybe_input.look.y + look_origin.y
