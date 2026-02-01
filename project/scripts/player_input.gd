@@ -14,7 +14,7 @@ const sensitivity := 0.2
 const min_angle := -90.0
 const max_angle := 90
 
-var skip_frame := false
+var listening := false
 
 var look := Vector2.ZERO
 var move := Vector2.ZERO
@@ -22,8 +22,9 @@ var sprint := false
 var crouch := false
 var jump := false
 
+
 func _physics_process(_delta: float) -> void:
-	if not skip_frame:
+	if listening:
 		move = Input.get_vector(
 			"move_left", "move_right", "move_forward", "move_backward"
 		)
@@ -31,11 +32,9 @@ func _physics_process(_delta: float) -> void:
 		crouch = Input.is_action_pressed("crouch")
 		jump = Input.is_action_pressed("jump")
 
-	skip_frame = false
-
 
 func _input(event: InputEvent) -> void:
-	if not skip_frame:
+	if listening:
 		if event is InputEventMouseMotion:
 			var ev: InputEventMouseMotion = event
 			look.y -= (ev.relative.x * sensitivity)

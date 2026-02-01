@@ -41,6 +41,10 @@ func _ready() -> void:
 	unpause()
 
 
+func _physics_process(_delta: float) -> void:
+	player_input.listening = not replay.is_active
+
+
 func _process(_delta: float) -> void:
 	if not menu.visible:
 		if Input.is_action_just_pressed("quick_save"):
@@ -56,7 +60,7 @@ func _process(_delta: float) -> void:
 func _replay_load_frame(frame: Dictionary) -> void:
 	util.aok(GdSerde.deserialize_object(player_input, frame))
 	if replay.is_active:
-		player_input.skip_frame = true
+		player_input.listening = false
 	else:
 		print("REPLAY DONE")
 		pause()
