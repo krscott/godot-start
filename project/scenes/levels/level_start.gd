@@ -12,7 +12,7 @@ const gdserde_props := [
 func _ready() -> void:
 	assert(freecam)
 	assert(box)
-	
+
 	gamestate.sync_state(&"level_start", self)
 
 	freecam.give_control(gamestate.player_input)
