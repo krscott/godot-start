@@ -2,12 +2,14 @@ class_name Menu
 extends CanvasLayer
 
 enum SpecKind {
+	NONE,
 	BUTTON,
 	CHECKBOX,
+	LABEL,
 }
 
 class Spec:
-	var _kind: SpecKind
+	var _kind: SpecKind = SpecKind.NONE
 	var _text: String
 	var _callback: Callable
 	var _action: StringName = &""
@@ -32,12 +34,14 @@ class Spec:
 			_hidden = true
 		return self
 
+
 static func button(text: String, callback: Callable) -> Spec:
 	var spec := Spec.new()
 	spec._kind = SpecKind.BUTTON
 	spec._text = text
 	spec._callback = callback
 	return spec
+
 
 static func checkbox(text: String, callback: Callable) -> Spec:
 	var spec := Spec.new()
@@ -46,12 +50,21 @@ static func checkbox(text: String, callback: Callable) -> Spec:
 	spec._callback = callback
 	return spec
 
+
+static func label(text: String) -> Spec:
+	var spec := Spec.new()
+	spec._kind = SpecKind.LABEL
+	spec._text = text
+	return spec
+
+
 @onready var title_label: Label = %Title
 
 @onready var _items_container: Node = %ItemsContainer
 @onready var _templates := {
 	SpecKind.BUTTON: %ButtonTemplate,
 	SpecKind.CHECKBOX: %CheckBoxTemplate,
+	SpecKind.LABEL: %LabelTemplate
 }
 
 var _spec: Array[Spec] = []
@@ -94,7 +107,7 @@ func _create_item(x: Spec) -> Node:
 	var new_node: Control = _get_template(x._kind).duplicate()
 	_items_container.add_child(new_node)
 	new_node.show()
-	if x._focus or _initial_focus == null:
+	if x._focus or (_initial_focus == null and new_node is Button):
 		_initial_focus = new_node
 	return new_node
 
@@ -112,11 +125,15 @@ func build(spec: Array[Spec]) -> void:
 				button_.text = x._text
 				util.aok(button_.pressed.connect(x._callback))
 			SpecKind.CHECKBOX:
-				var checkbox_ := _create_item(x) as CheckBox
+				var checkbox_ := _create_item(x) as Button
 				checkbox_.text = x._text
+				checkbox_.toggle_mode = true
 				checkbox_.button_pressed = x._button_pressed
 				print("Initial button_pressed: ", checkbox_.button_pressed)
 				util.aok(checkbox_.toggled.connect(x._callback))
+			SpecKind.LABEL:
+				var label_ := _create_item(x) as Label
+				label_.text = x._text
 			_:
 				assert(false, str("KIND NOT IMPLEMENTED: ", x._kind))
 

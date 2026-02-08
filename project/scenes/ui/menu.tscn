@@ -38,6 +38,13 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 100
 text = "Title"
 
+[node name="LabelTemplate" type="Label" parent="MarginContainer/ItemsContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5132329, 0.5132329, 0.5132329, 1)
+theme_override_font_sizes/font_size = 22
+text = "Label"
+
 [node name="ButtonTemplate" type="Button" parent="MarginContainer/ItemsContainer"]
 unique_name_in_owner = true
 layout_mode = 2

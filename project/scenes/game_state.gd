@@ -186,14 +186,8 @@ func _toggle_palette_filter(on: bool) -> void:
 	palette_filter.visible = on
 
 
-func _quack() -> void:
-	print("QUACK!")
-
-
 func _build_menu() -> void:
 	menu.build([
-		Menu.button("DEBUG MODE", _quack)
-			.debug_only(),
 		Menu.button("Continue", _unpause)
 			.action("ui_cancel")
 			.focus(),
@@ -201,4 +195,6 @@ func _build_menu() -> void:
 		Menu.checkbox("Palette Filter", _toggle_palette_filter)
 			.toggled(palette_filter.visible),
 		Menu.button("Quit", _save_replay_and_quit),
+		Menu.label("DEBUG MODE")
+			.debug_only(),
 	])
