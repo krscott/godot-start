@@ -12,6 +12,7 @@ signal savedata_loaded
 @onready var menu: Menu = %Menu
 @onready var system_dialog: SystemDialog = %SystemDialog
 @onready var palette_filter: ColorRect = %PaletteFilter
+@onready var dither_filter: ColorRect = %DitherFilter
 
 
 ## Dictionary[StringName, Dictionary]
@@ -58,6 +59,7 @@ func _ready() -> void:
 	assert(menu)
 	assert(system_dialog)
 	assert(palette_filter)
+	assert(dither_filter)
 
 	# NOTE: GameState node is the first child of the tree root.
 	#       i.e., this node is visited FIRST, before any level-specific logic.
@@ -185,6 +187,10 @@ func _toggle_palette_filter(on: bool) -> void:
 	palette_filter.visible = on
 
 
+func _toggle_dither_filter(on: bool) -> void:
+	dither_filter.visible = on
+
+
 func _build_menu() -> void:
 	menu.build([
 		Menu.button("Continue", _unpause)
@@ -193,5 +199,7 @@ func _build_menu() -> void:
 		Menu.button("Load Replay", _replay_open_dialog),
 		Menu.checkbox("Palette Filter", _toggle_palette_filter)
 			.toggled(palette_filter.visible),
+		Menu.checkbox("Dither Filter", _toggle_dither_filter)
+			.toggled(dither_filter.visible),
 		Menu.button("Quit", _save_replay_and_quit),
 	])

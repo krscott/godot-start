@@ -31,7 +31,7 @@ gdscript/warnings/return_value_discarded=1
 
 [display]
 
-window/stretch/mode="canvas_items"
+window/stretch/mode="viewport"
 window/vsync/vsync_mode=0
 
 [input]
