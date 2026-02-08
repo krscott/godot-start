@@ -40,3 +40,4 @@ material = SubResource("StandardMaterial3D_lwsif")
 
 [node name="Rotate" type="Node" parent="Box"]
 script = ExtResource("3_lwsif")
+metadata/_custom_type_script = "uid://c1yjf0s7vvoqn"

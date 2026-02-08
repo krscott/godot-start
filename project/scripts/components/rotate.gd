@@ -1,3 +1,4 @@
+class_name Rotate
 extends Node
 
 @export var speed := 1.0

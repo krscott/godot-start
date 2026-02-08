@@ -1,5 +1,5 @@
-extends Camera3D
 class_name FreeCam
+extends Camera3D
 const gdserde_class := &"FreeCam"
 const gdserde_props := [&"transform"]
 
