@@ -195,6 +195,4 @@ func _build_menu() -> void:
 		Menu.checkbox("Palette Filter", _toggle_palette_filter)
 			.toggled(palette_filter.visible),
 		Menu.button("Quit", _save_replay_and_quit),
-		Menu.label("DEBUG MODE")
-			.debug_only(),
 	])
