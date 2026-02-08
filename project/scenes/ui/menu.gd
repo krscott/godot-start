@@ -8,6 +8,7 @@ enum SpecKind {
 	LABEL,
 }
 
+## Menu item builder
 class Spec:
 	var _kind: SpecKind = SpecKind.NONE
 	var _text: String
@@ -35,6 +36,8 @@ class Spec:
 		return self
 
 
+# Menu item factory functions
+
 static func button(text: String, callback: Callable) -> Spec:
 	var spec := Spec.new()
 	spec._kind = SpecKind.BUTTON
@@ -57,6 +60,8 @@ static func label(text: String) -> Spec:
 	spec._text = text
 	return spec
 
+
+# Menu instance
 
 @onready var title_label: Label = %Title
 

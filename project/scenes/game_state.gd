@@ -59,9 +59,9 @@ func _ready() -> void:
 	assert(system_dialog)
 	assert(palette_filter)
 
-	# NOTE: GameState node is the first child of the current level's node.
-	#       i.e., this node is visited FIRST.
-	#       We need to call-deferred if we want to run something after root.
+	# NOTE: GameState node is the first child of the tree root.
+	#       i.e., this node is visited FIRST, before any level-specific logic.
+	#       We need to call-deferred if we want to run something after.
 	call_deferred(&"_root_ready")
 
 	util.printdbg("DEBUG BUILD")
