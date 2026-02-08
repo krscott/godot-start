@@ -18,7 +18,9 @@ var _savedata_state := {}
 ## Dictionary[StringName, Object]
 var _savedata_refs := {}
 
+## Player quick save
 var _quick_save := {}
+## Save of initial game state
 var _quick_save_zero := {}
 
 

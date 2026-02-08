@@ -36,24 +36,33 @@ static func _create_property_list(
 
 
 static func _get_obj_prop_list(obj: Object) -> Array[GdSerdeProperty]:
+	var gdserde_class := &""
+	var prop_filter: Array
 	var prop_list: Array[GdSerdeProperty]
 
-	if util.has_member(obj, &"gdserde_class"):
-		var type: StringName = obj.get(&"gdserde_class")
+	if obj.get_script():
+		if util.has_member(obj, &"gdserde_class"):
+			gdserde_class = obj.get(&"gdserde_class")
 
-		if _property_list_cache.has(type):
-			prop_list = _property_list_cache[type]
-		else:
-			var prop_filter: Array
 			if util.has_member(obj, &"gdserde_props"):
 				prop_filter = obj.get(&"gdserde_props")
 			elif obj.get_class() != "RefCounted":
 				assert(false, str("Object must define gdserde_props: ", obj))
 			else:
 				prop_filter = []
+
+	elif obj is Node3D:
+		gdserde_class = &"Node3D"
+		prop_filter = [&"transform"]
+
+
+	if gdserde_class:
+		if _property_list_cache.has(gdserde_class):
+			prop_list = _property_list_cache[gdserde_class]
+		else:
 			prop_list = _create_property_list(obj, prop_filter)
-			_property_list_cache[type] = prop_list
-			#print_debug("GdSerde: cached ", type, " props ", prop_list)
+			_property_list_cache[gdserde_class] = prop_list
+			#print_debug("GdSerde: cached ", gdserde_class, " props ", prop_list)
 	else:
 		assert(
 			false,
