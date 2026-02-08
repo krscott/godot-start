@@ -36,7 +36,8 @@ visible = false
 
 [node name="PostProcessing" type="CanvasLayer" parent="."]
 
-[node name="PaletteShader" type="ColorRect" parent="PostProcessing"]
+[node name="PaletteFilter" type="ColorRect" parent="PostProcessing"]
+unique_name_in_owner = true
 material = SubResource("ShaderMaterial_q5byu")
 anchors_preset = 15
 anchor_right = 1.0

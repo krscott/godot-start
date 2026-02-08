@@ -3,21 +3,36 @@ extends CanvasLayer
 
 enum SpecKind {
 	BUTTON,
+	CHECKBOX,
 }
 
 class Spec:
-	var kind: SpecKind
-	var text: String
-	var callback: Callable
-	var action: StringName = &""
-	func _init(kind_: SpecKind) -> void:
-		kind = kind_
+	var _kind: SpecKind
+	var _text: String
+	var _callback: Callable
+	var _action: StringName = &""
+	var _button_pressed: bool = false
 
-static func btn(text: String, callback: Callable, action: StringName = &"") -> Spec:
-	var spec := Spec.new(SpecKind.BUTTON)
-	spec.text = text
-	spec.callback = callback
-	spec.action = action
+	func action(action_: StringName) -> Spec:
+		_action = action_
+		return self
+
+	func toggled(value: bool = true) -> Spec:
+		_button_pressed = value
+		return self
+
+static func button(text: String, callback: Callable) -> Spec:
+	var spec := Spec.new()
+	spec._kind = SpecKind.BUTTON
+	spec._text = text
+	spec._callback = callback
+	return spec
+
+static func checkbox(text: String, callback: Callable) -> Spec:
+	var spec := Spec.new()
+	spec._kind = SpecKind.CHECKBOX
+	spec._text = text
+	spec._callback = callback
 	return spec
 
 @onready var title_label: Label = %Title
@@ -25,6 +40,7 @@ static func btn(text: String, callback: Callable, action: StringName = &"") -> S
 @onready var _items_container: Node = %ItemsContainer
 @onready var _templates := {
 	SpecKind.BUTTON: %ButtonTemplate,
+	SpecKind.CHECKBOX: %CheckBoxTemplate,
 }
 
 var _spec: Array[Spec] = []
@@ -42,9 +58,9 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	if _was_visible_last_frame and visible:
 		for x in _spec:
-			if x.action and Input.is_action_just_pressed(x.action):
-				print("Menu: ", x.action, " -> ", x.text)
-				x.callback.call()
+			if x._action and Input.is_action_just_pressed(x._action):
+				print("Menu: ", x._action, " -> ", x._text)
+				x._callback.call()
 	_was_visible_last_frame = visible
 
 
@@ -64,12 +80,18 @@ func build(spec: Array[Spec]) -> void:
 	assert(_spec.size() == 0, "TODO: clear old spec")
 
 	for x in spec:
-		var k := x.kind
+		var k := x._kind
 		match k:
 			SpecKind.BUTTON:
-				var button := _dupe_template(k) as Button
-				button.text = x.text
-				util.aok(button.pressed.connect(x.callback))
+				var button_ := _dupe_template(k) as Button
+				button_.text = x._text
+				util.aok(button_.pressed.connect(x._callback))
+			SpecKind.CHECKBOX:
+				var checkbox_ := _dupe_template(k) as CheckBox
+				checkbox_.text = x._text
+				checkbox_.button_pressed = x._button_pressed
+				print("Initial button_pressed: ", checkbox_.button_pressed)
+				util.aok(checkbox_.toggled.connect(x._callback))
 			_:
 				assert(false, str("KIND NOT IMPLEMENTED: ", k))
 

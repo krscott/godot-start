@@ -11,6 +11,7 @@ signal savedata_loaded
 @onready var player_input: PlayerInput = %PlayerInput
 @onready var menu: Menu = %Menu
 @onready var system_dialog: SystemDialog = %SystemDialog
+@onready var palette_filter: ColorRect = %PaletteFilter
 
 
 ## Dictionary[StringName, Dictionary]
@@ -51,16 +52,17 @@ func sync_state(key: StringName, obj: Object) -> void:
 # Interface Methods
 
 func _ready() -> void:
-	# NOTE: GameState node is the first child of the current level's node.
-	#       i.e., this node is visited FIRST.
-	#       We need to call-deferred if we want to run something after root.
-	call_deferred(&"_root_ready")
-
 	assert(pausing)
 	assert(replay)
 	assert(player_input)
 	assert(menu)
 	assert(system_dialog)
+	assert(palette_filter)
+
+	# NOTE: GameState node is the first child of the current level's node.
+	#       i.e., this node is visited FIRST.
+	#       We need to call-deferred if we want to run something after root.
+	call_deferred(&"_root_ready")
 
 	if OS.is_debug_build():
 		print("DEBUG MODE")
@@ -69,8 +71,6 @@ func _ready() -> void:
 
 	util.aok(replay.load_frame.connect(_replay_load_frame))
 	util.aok(replay.request_frame.connect(_replay_save_frame))
-
-	_build_menu()
 
 	var args := OS.get_cmdline_user_args()
 	if args:
@@ -90,6 +90,8 @@ func _physics_process(_delta: float) -> void:
 func _root_ready() -> void:
 	_quick_save_zero = _serialize_savedata()
 	_quick_save = _quick_save_zero
+
+	_build_menu()
 
 
 func _process(_delta: float) -> void:
@@ -180,9 +182,16 @@ func _pause() -> void:
 	util.set_mouse_captured(false)
 
 
+func _toggle_palette_filter(on: bool) -> void:
+	palette_filter.visible = on
+
+
 func _build_menu() -> void:
 	menu.build([
-		Menu.btn("Continue", _unpause, "ui_cancel"),
-		Menu.btn("Load Replay", _replay_open_dialog),
-		Menu.btn("Quit", _save_replay_and_quit),
+		Menu.button("Continue", _unpause)
+			.action("ui_cancel"),
+		Menu.button("Load Replay", _replay_open_dialog),
+		Menu.checkbox("Palette Filter", _toggle_palette_filter)
+			.toggled(palette_filter.visible),
+		Menu.button("Quit", _save_replay_and_quit),
 	])
