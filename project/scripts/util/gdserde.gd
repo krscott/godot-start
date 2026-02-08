@@ -30,7 +30,6 @@ static func _create_property_list(
 		var name: String = item.name
 		var type: Variant.Type = item.type
 		if not name.ends_with(".gd"):
-			#print(str(item))
 			out.push_back(GdSerdeProperty.new(name, type))
 	return out
 

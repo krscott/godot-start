@@ -4,6 +4,12 @@ class_name util
 const MAX_INT: int = 9223372036854775807
 const MIN_INT: int = -9223372036854775807 - 1
 
+
+static func printdbg(...args: Array) -> void:
+	if OS.is_debug_build():
+		print.callv(args)
+
+
 static func set_mouse_captured(is_caputred: bool) -> void:
 	if is_caputred:
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)

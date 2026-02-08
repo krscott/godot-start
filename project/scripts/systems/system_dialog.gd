@@ -28,11 +28,6 @@ func file_dialog(
 
 	var filename: String = await completed
 
-	if filename:
-		print("filename: ", filename)
-	else:
-		print("canceled")
-
 	fd.queue_free()
 	return filename
 

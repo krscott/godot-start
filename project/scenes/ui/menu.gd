@@ -87,7 +87,6 @@ func _process(_delta: float) -> void:
 	if _was_visible_last_frame and visible:
 		for x in _spec:
 			if x._action and Input.is_action_just_pressed(x._action):
-				print("Menu: ", x._action, " -> ", x._text)
 				x._callback.call()
 	_was_visible_last_frame = visible
 
@@ -129,7 +128,6 @@ func build(spec: Array[Spec]) -> void:
 				checkbox_.text = x._text
 				checkbox_.toggle_mode = true
 				checkbox_.button_pressed = x._button_pressed
-				print("Initial button_pressed: ", checkbox_.button_pressed)
 				util.aok(checkbox_.toggled.connect(x._callback))
 			SpecKind.LABEL:
 				var label_ := _create_item(x) as Label

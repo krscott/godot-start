@@ -38,7 +38,7 @@ func load_state(key: StringName, obj: Object) -> void:
 
 
 func sync_state(key: StringName, obj: Object) -> void:
-	print("Sync state: ", key)
+	util.printdbg("Sync state: ", key)
 
 	load_state(key, obj)
 	if OS.is_debug_build():
@@ -64,8 +64,7 @@ func _ready() -> void:
 	#       We need to call-deferred if we want to run something after root.
 	call_deferred(&"_root_ready")
 
-	if OS.is_debug_build():
-		print("DEBUG MODE")
+	util.printdbg("DEBUG BUILD")
 
 	sync_state(&"player_input", player_input)
 
@@ -74,7 +73,7 @@ func _ready() -> void:
 
 	var args := OS.get_cmdline_user_args()
 	if args:
-		print("CLI args: ", args)
+		util.printdbg("CLI args: ", args)
 		if OK == replay.load_from_file(args[0]):
 			replay.start()
 
@@ -141,8 +140,8 @@ func _deserialize_savedata(data: Dictionary) -> void:
 		else:
 			util.expect_true(_savedata_refs.erase(k))
 
-	print("Loaded savedata")
-	print(JSON.stringify(_savedata_state))
+	if OS.is_debug_build():
+		util.printdbg("Loaded savedata: ", JSON.stringify(_savedata_state))
 	savedata_loaded.emit()
 
 
@@ -156,8 +155,8 @@ func _serialize_savedata() -> Dictionary:
 		else:
 			util.expect_true(_savedata_refs.erase(k))
 
-	print("Saved savedata")
-	print(JSON.stringify(_savedata_state))
+	if OS.is_debug_build():
+		util.printdbg("Saved savedata: ", JSON.stringify(_savedata_state))
 	return _savedata_state
 
 

@@ -19,9 +19,4 @@ func _ready() -> void:
 
 func _physics_process(_delta: float) -> void:
 	if paused != get_tree().paused:
-		if paused:
-			print("PAUSED")
-		else:
-			print("UNPAUSED")
-
 		get_tree().paused = paused
