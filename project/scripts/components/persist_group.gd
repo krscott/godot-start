@@ -12,7 +12,7 @@ const gdserde_class := &"PersistGroup"
 ## Unique node keys (relative path)
 var _keys: Array[String] = []
 ## References to nodes
-var _nodes: Array[WeakRef] = []
+var _nodes: Array[Node] = []
 var _output := {}
 
 
@@ -20,7 +20,12 @@ func gdserde_serialize() -> Variant:
 	assert(_keys.size() == _nodes.size())
 	_output.clear()
 	for i in range(_keys.size()):
-		_output[_keys[i]] = GdSerde.serialize(_nodes[i].get_ref())
+		var key := _keys[i]
+		var node := _nodes[i]
+		if is_instance_valid(node):
+			_output[key] = GdSerde.serialize(_nodes[i])
+		else:
+			assert(false, str("Attempted to serialize invalid instance: ", key))
 	return _output
 
 
@@ -31,11 +36,15 @@ func gdserde_deserialize(dict: Dictionary) -> Error:
 		var key := _keys[i]
 		if key in dict:
 			var value: Dictionary = dict[key]
-			var obj: Object = _nodes[i].get_ref()
-			var err2 := GdSerde.deserialize_object(obj, value)
-			if err2 != OK:
-				printerr("Error deserializing ", key, ": ", error_string(err2))
-				err = err2
+			var node := _nodes[i]
+			if is_instance_valid(node):
+				var err2 := GdSerde.deserialize_object(node, value)
+				if err2 != OK:
+					printerr("Error deserializing ", key, ": ", error_string(err2))
+					err = err2
+			else:
+				assert(false, str("Attempted to deserialize invalid instance: ", key))
+				err = FAILED
 	return err
 
 
@@ -58,7 +67,7 @@ func _ready() -> void:
 				key = str(parent.get_path_to(node, true))
 			print(key)
 			_keys.push_back(key)
-			_nodes.push_back(weakref(node))
+			_nodes.push_back(node)
 			assert(_keys.size() == _nodes.size())
 
 	gamestate.sync_state(unique_state_key, self)
