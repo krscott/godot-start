@@ -117,23 +117,15 @@ func _pause() -> void:
 	util.set_mouse_captured(false)
 
 
-func _toggle_palette_filter(on: bool) -> void:
-	palette_filter.visible = on
-
-
-func _toggle_dither_filter(on: bool) -> void:
-	dither_filter.visible = on
-
-
 func _build_menu() -> void:
 	menu.build([
 		Menu.button("Continue", _unpause)
 			.action("ui_cancel")
 			.focus(),
 		Menu.button("Load Replay", _replay_open_dialog),
-		Menu.checkbox("Palette Filter", _toggle_palette_filter)
+		Menu.checkbox("Palette Filter", palette_filter.set_visible)
 			.toggled(palette_filter.visible),
-		Menu.checkbox("Dither Filter", _toggle_dither_filter)
+		Menu.checkbox("Dither Filter", dither_filter.set_visible)
 			.toggled(dither_filter.visible),
 		Menu.button("Quit", _save_replay_and_quit),
 	])
