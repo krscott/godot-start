@@ -7,6 +7,16 @@ To start a project with this template, run:
 ./init-template.sh new_project_name
 ```
 
+## AI Use
+
+This template does not contain the output of Generative AI.
+
+This project is tagged `no-ai`, following the
+[itch.io AI disclosure guidelines](https://itch.io/docs/creators/quality-guidelines#ai-disclosure)
+
+This is to allow derivative projects to publish under a no-AI policy.
+If AI is used in derivative projects, this section must be removed.
+
 ## Features
 
 Batteries included. Delete what you don't want.
