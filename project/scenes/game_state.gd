@@ -2,10 +2,7 @@ class_name GameState
 extends Node
 
 
-signal savedata_saving
-signal savedata_loaded
-
-
+@onready var save_state: SaveState = %SaveState
 @onready var pausing: Pausing = %Pausing
 @onready var replay: Replay = %Replay
 @onready var player_input: PlayerInput = %PlayerInput
@@ -15,44 +12,16 @@ signal savedata_loaded
 @onready var dither_filter: ColorRect = %DitherFilter
 
 
-## Dictionary[StringName, Dictionary]
-var _savedata_state := {}
-## Dictionary[StringName, Object]
-var _savedata_refs := {}
-
-## Player quick save
-var _quick_save: PackedByteArray
-## Save of initial game state
-var _quick_save_zero: PackedByteArray
-
-
 # Public Methods
 
-func update_state(key: StringName, obj: Object) -> void:
-	_savedata_state[key] = GdSerde.serialize_object(obj)
-
-
-func load_state(key: StringName, obj: Object) -> void:
-	if _savedata_state.has(key):
-		var dict: Dictionary = _savedata_state[key]
-		util.aok(GdSerde.deserialize_object(obj, dict))
-
-
 func sync_state(key: StringName, obj: Object) -> void:
-	util.printdbg("Sync state: ", key)
-
-	load_state(key, obj)
-	if OS.is_debug_build():
-		# Debug-only check for serde errors
-		var dict := GdSerde.serialize_object(obj)
-		util.aok(GdSerde.deserialize_object(obj, dict))
-
-	_savedata_refs[key] = obj
+	save_state.sync_state(key, obj)
 
 
 # Interface Methods
 
 func _ready() -> void:
+	assert(save_state)
 	assert(pausing)
 	assert(replay)
 	assert(player_input)
@@ -60,11 +29,6 @@ func _ready() -> void:
 	assert(system_dialog)
 	assert(palette_filter)
 	assert(dither_filter)
-
-	# NOTE: GameState node is the first child of the tree root.
-	#       i.e., this node is visited FIRST, before any level-specific logic.
-	#       We need to call-deferred if we want to run something after.
-	call_deferred(&"_root_ready")
 
 	util.printdbg("DEBUG BUILD")
 
@@ -80,31 +44,30 @@ func _ready() -> void:
 			replay.start()
 
 	_unpause()
+	
+	# NOTE: GameState node is the first child of the tree root.
+	#       i.e., this node is visited FIRST, before any level-specific logic.
+	#       We need to call-deferred if we want to run something after.
+	call_deferred(&"_build_menu")
 
 
 func _physics_process(_delta: float) -> void:
 	player_input.listening = not replay.is_active
 
 
-# Private Methods
-
-func _root_ready() -> void:
-	_quick_save_zero = _serialize_savedata()
-	_quick_save = _quick_save_zero
-
-	_build_menu()
-
-
 func _process(_delta: float) -> void:
 	if not menu.visible:
 		if Input.is_action_just_pressed("quick_save"):
-			_quick_save = _serialize_savedata()
+			save_state.quicksave()
 		elif Input.is_action_just_pressed("quick_load"):
-			_deserialize_savedata(_quick_save)
+			save_state.quickload()
 		elif Input.is_action_just_pressed("quit"):
 			_save_replay_and_quit()
 		elif Input.is_action_just_pressed("ui_cancel"):
 			_pause()
+
+
+# Private Methods
 
 
 func _replay_load_frame(frame: Dictionary) -> void:
@@ -129,43 +92,8 @@ func _save_replay_and_quit() -> void:
 
 
 func _restart_replay() -> void:
-	_deserialize_savedata(_quick_save_zero)
+	save_state.reset()
 	replay.restart()
-
-
-func _deserialize_savedata(packed_data: PackedByteArray) -> void:
-	var unpacked_state: Variant = bytes_to_var(packed_data)
-	if unpacked_state is not Dictionary:
-		printerr("Save data is not a Dictionary")
-		return
-		
-	_savedata_state = unpacked_state
-	
-	for k: StringName in _savedata_refs:
-		if is_instance_valid(_savedata_refs[k]):
-			var obj: Object = _savedata_refs[k]
-			load_state(k, obj)
-		else:
-			util.expect_true(_savedata_refs.erase(k))
-
-	if OS.is_debug_build():
-		util.printdbg("Loaded savedata: ", JSON.stringify(_savedata_state))
-	savedata_loaded.emit()
-
-
-func _serialize_savedata() -> PackedByteArray:
-	savedata_saving.emit()
-
-	for k: StringName in _savedata_refs:
-		if is_instance_valid(_savedata_refs[k]):
-			var obj: Object = _savedata_refs[k]
-			update_state(k, obj)
-		else:
-			util.expect_true(_savedata_refs.erase(k))
-	
-	if OS.is_debug_build():
-		util.printdbg("Saved savedata: ", JSON.stringify(_savedata_state))
-	return var_to_bytes(_savedata_state)
 
 
 func _replay_open_dialog() -> void:

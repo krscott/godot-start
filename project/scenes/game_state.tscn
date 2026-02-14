@@ -1,6 +1,7 @@
-[gd_scene load_steps=11 format=3 uid="uid://6uyp4hbab8gp"]
+[gd_scene load_steps=12 format=3 uid="uid://6uyp4hbab8gp"]
 
 [ext_resource type="Script" uid="uid://ygjvluupbdtm" path="res://scenes/game_state.gd" id="1_aj67o"]
+[ext_resource type="Script" uid="uid://cu714ln7qv2gu" path="res://scripts/systems/save_state.gd" id="2_3oy0g"]
 [ext_resource type="Script" uid="uid://n2spkoxc2iv5" path="res://scripts/systems/pausing.gd" id="2_dq14d"]
 [ext_resource type="Script" uid="uid://mahcrqfjlyyq" path="res://scripts/systems/replay.gd" id="3_rerck"]
 [ext_resource type="Script" uid="uid://skj8dxeivfvs" path="res://scripts/systems/player_input.gd" id="4_qn400"]
@@ -19,6 +20,11 @@ shader_parameter/pixel_size = 2
 [node name="GameState" type="Node"]
 script = ExtResource("1_aj67o")
 metadata/_custom_type_script = "uid://ygjvluupbdtm"
+
+[node name="SaveState" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("2_3oy0g")
+metadata/_custom_type_script = "uid://cu714ln7qv2gu"
 
 [node name="Pausing" type="Node" parent="."]
 unique_name_in_owner = true
