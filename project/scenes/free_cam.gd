@@ -3,6 +3,8 @@ extends Camera3D
 const gdserde_class := &"FreeCam"
 const gdserde_props := [&"transform"]
 
+@export var take_control_on_ready := false
+
 @export var maybe_input: PlayerInput
 
 @export var base_speed := 5.0
@@ -15,6 +17,11 @@ var look_origin := Vector2.ZERO
 func give_control(player_input: PlayerInput) -> void:
 	look_origin = Vector2(rotation_degrees.x, rotation_degrees.y) - player_input.look
 	maybe_input = player_input
+
+
+func _ready() -> void:
+	if take_control_on_ready:
+		give_control(gamestate.player_input)
 
 
 func _physics_process(delta: float) -> void:

@@ -1,3 +1,7 @@
+## Utilities for serializing/deserializng Godot Objects
+## NOTE: Technically, this is not full serializing/deserializing--it is just
+##       handling conversion to/from Variant, which can then be converted to
+##       JSON, etc.
 class_name GdSerde
 
 static var _property_list_cache := {}
@@ -102,7 +106,8 @@ static func deserialize(original: Variant, value: Variant) -> Array:
 		var dict: Dictionary = value
 
 		if obj.has_method(&"gdserde_deserialize"):
-			return obj.call(&"gdserde_deserialize", dict)
+			var err: Error = obj.call(&"gdserde_deserialize", dict)
+			return [obj, err]
 
 		for prop in _get_obj_prop_list(obj):
 			match deserialize(obj.get(prop.name), dict[prop.name]):

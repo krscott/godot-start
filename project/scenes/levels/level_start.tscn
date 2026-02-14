@@ -1,6 +1,6 @@
 [gd_scene load_steps=11 format=3 uid="uid://c8lpblcihq5ff"]
 
-[ext_resource type="Script" uid="uid://cj83dvikoriai" path="res://scenes/levels/level_start.gd" id="1_q4qc6"]
+[ext_resource type="Script" uid="uid://chi5smarodjo2" path="res://scripts/components/persist_group.gd" id="2_lwsif"]
 [ext_resource type="Script" uid="uid://dfati240tvaw1" path="res://scenes/free_cam.gd" id="2_p6tgm"]
 [ext_resource type="Script" uid="uid://c1yjf0s7vvoqn" path="res://scripts/components/rotate.gd" id="3_lwsif"]
 [ext_resource type="Texture2D" uid="uid://co7fg4r4c84ai" path="res://icon.svg" id="3_p6tgm"]
@@ -24,10 +24,12 @@ albedo_texture = ExtResource("3_p6tgm")
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4icbv"]
 albedo_color = Color(0, 0, 0, 1)
 
-[node name="LevelStart" type="CanvasLayer" node_paths=PackedStringArray("box", "freecam")]
-script = ExtResource("1_q4qc6")
-box = NodePath("Box")
-freecam = NodePath("FreeCam")
+[node name="LevelStart" type="CanvasLayer"]
+
+[node name="PersistGroup" type="Node" parent="."]
+script = ExtResource("2_lwsif")
+unique_state_key = "level_start"
+metadata/_custom_type_script = "uid://chi5smarodjo2"
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_h2yge")
@@ -35,29 +37,33 @@ environment = SubResource("Environment_h2yge")
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.9182944, 0.3015499, -0.25652108, -3.72529e-08, 0.6479471, 0.7616854, 0.39589825, -0.6994514, 0.59500617, 0, 8.608476, 0)
 
-[node name="FreeCam" type="Camera3D" parent="."]
+[node name="FreeCam" type="Camera3D" parent="." groups=["persist"]]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 3, 1, 0)
 script = ExtResource("2_p6tgm")
+take_control_on_ready = true
+metadata/_custom_type_script = "uid://dfati240tvaw1"
 
-[node name="Box" type="CSGBox3D" parent="."]
+[node name="Debug" type="Node3D" parent="."]
+
+[node name="TextureBox" type="CSGBox3D" parent="Debug" groups=["persist"]]
 material = SubResource("StandardMaterial3D_lwsif")
 
-[node name="Rotate" type="Node" parent="Box"]
+[node name="Rotate" type="Node" parent="Debug/TextureBox"]
 script = ExtResource("3_lwsif")
 metadata/_custom_type_script = "uid://c1yjf0s7vvoqn"
 
-[node name="WhiteBox" type="CSGBox3D" parent="."]
+[node name="WhiteBox" type="CSGBox3D" parent="Debug" groups=["persist"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2)
 material = SubResource("StandardMaterial3D_p6tgm")
 
-[node name="Rotate" type="Node" parent="WhiteBox"]
+[node name="Rotate" type="Node" parent="Debug/WhiteBox"]
 script = ExtResource("3_lwsif")
 metadata/_custom_type_script = "uid://c1yjf0s7vvoqn"
 
-[node name="BlackBox" type="CSGBox3D" parent="."]
+[node name="BlackBox" type="CSGBox3D" parent="Debug" groups=["persist"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2)
 material = SubResource("StandardMaterial3D_4icbv")
 
-[node name="Rotate" type="Node" parent="BlackBox"]
+[node name="Rotate" type="Node" parent="Debug/BlackBox"]
 script = ExtResource("3_lwsif")
 metadata/_custom_type_script = "uid://c1yjf0s7vvoqn"

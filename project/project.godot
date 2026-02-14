@@ -34,6 +34,10 @@ gdscript/warnings/return_value_discarded=1
 window/stretch/mode="viewport"
 window/vsync/vsync_mode=0
 
+[global_group]
+
+persist="Serialize state"
+
 [input]
 
 move_forward={
