@@ -21,9 +21,9 @@ var _savedata_state := {}
 var _savedata_refs := {}
 
 ## Player quick save
-var _quick_save := {}
+var _quick_save: PackedByteArray
 ## Save of initial game state
-var _quick_save_zero := {}
+var _quick_save_zero: PackedByteArray
 
 
 # Public Methods
@@ -133,8 +133,14 @@ func _restart_replay() -> void:
 	replay.restart()
 
 
-func _deserialize_savedata(data: Dictionary) -> void:
-	_savedata_state = data
+func _deserialize_savedata(packed_data: PackedByteArray) -> void:
+	var unpacked_state: Variant = bytes_to_var(packed_data)
+	if unpacked_state is not Dictionary:
+		printerr("Save data is not a Dictionary")
+		return
+		
+	_savedata_state = unpacked_state
+	
 	for k: StringName in _savedata_refs:
 		if is_instance_valid(_savedata_refs[k]):
 			var obj: Object = _savedata_refs[k]
@@ -147,7 +153,7 @@ func _deserialize_savedata(data: Dictionary) -> void:
 	savedata_loaded.emit()
 
 
-func _serialize_savedata() -> Dictionary:
+func _serialize_savedata() -> PackedByteArray:
 	savedata_saving.emit()
 
 	for k: StringName in _savedata_refs:
@@ -156,10 +162,10 @@ func _serialize_savedata() -> Dictionary:
 			update_state(k, obj)
 		else:
 			util.expect_true(_savedata_refs.erase(k))
-
+	
 	if OS.is_debug_build():
 		util.printdbg("Saved savedata: ", JSON.stringify(_savedata_state))
-	return _savedata_state
+	return var_to_bytes(_savedata_state)
 
 
 func _replay_open_dialog() -> void:
