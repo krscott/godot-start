@@ -11,10 +11,12 @@ To start a project with this template, run:
 
 Batteries included. Delete what you don't want.
 
-- Cross-platform nix build
-- Quicksave/Quickload
-- Player input replay
+- Safe serialization/deserialization framework
+- Quicksave (hotkey `[`) and Quickload (hotkey `]`)
+- Player input replay system
 - Pause menu
+- Palette and dither screen shaders
+- Cross-platform nix build
 
 ## Development
 
