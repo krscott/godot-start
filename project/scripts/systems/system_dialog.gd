@@ -33,3 +33,6 @@ func file_dialog(
 
 func file_open_dialog(filter: String = "", description: String = "") -> String:
 	return await file_dialog(FileDialog.FileMode.FILE_MODE_OPEN_FILE, filter, description)
+
+func file_save_dialog(filter: String = "", description: String = "") -> String:
+	return await file_dialog(FileDialog.FileMode.FILE_MODE_SAVE_FILE, filter, description)

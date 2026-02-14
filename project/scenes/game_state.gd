@@ -14,8 +14,8 @@ extends Node
 
 # Public Methods
 
-func sync_state(key: StringName, obj: Object) -> void:
-	save_state.sync_state(key, obj)
+func sync_object_state(key: StringName, obj: Object) -> void:
+	save_state.sync_object_state(key, obj)
 
 
 # Interface Methods
@@ -32,7 +32,7 @@ func _ready() -> void:
 
 	util.printdbg("DEBUG BUILD")
 
-	sync_state(&"player_input", player_input)
+	sync_object_state(&"player_input", player_input)
 
 	util.aok(replay.load_frame.connect(_replay_load_frame))
 	util.aok(replay.request_frame.connect(_replay_save_frame))
@@ -99,8 +99,7 @@ func _restart_replay() -> void:
 func _replay_open_dialog() -> void:
 	var filename := await system_dialog.file_open_dialog("*.dat", "Replay File")
 	if filename:
-		var err := replay.load_from_file(filename)
-		assert(not err, error_string(err))
+		var _err := replay.load_from_file(filename)
 		_restart_replay()
 		_unpause()
 
@@ -117,11 +116,25 @@ func _pause() -> void:
 	util.set_mouse_captured(false)
 
 
+func _save_game_dialog() -> void:
+	var filename := await system_dialog.file_save_dialog("*.sav", "Save File")
+	if filename:
+		util.aok(save_state.save_to_file(filename))
+
+
+func _load_game_dialog() -> void:
+	var filename := await system_dialog.file_open_dialog("*.sav", "Save File")
+	if filename:
+		var _err := save_state.load_from_file(filename)
+
+
 func _build_menu() -> void:
 	menu.build([
 		Menu.button("Continue", _unpause)
 			.action("ui_cancel")
 			.focus(),
+		Menu.button("Save Game", _save_game_dialog),
+		Menu.button("Load Game", _load_game_dialog),
 		Menu.button("Load Replay", _replay_open_dialog),
 		Menu.checkbox("Palette Filter", palette_filter.set_visible)
 			.toggled(palette_filter.visible),

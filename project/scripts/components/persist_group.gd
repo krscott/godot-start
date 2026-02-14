@@ -70,4 +70,4 @@ func _ready() -> void:
 			_nodes.push_back(node)
 			assert(_keys.size() == _nodes.size())
 
-	gamestate.sync_state(unique_state_key, self)
+	gamestate.sync_object_state(unique_state_key, self)
