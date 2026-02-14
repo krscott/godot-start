@@ -18,22 +18,27 @@ shader_parameter/pixel_size = 2
 
 [node name="GameState" type="Node"]
 script = ExtResource("1_aj67o")
+metadata/_custom_type_script = "uid://ygjvluupbdtm"
 
 [node name="Pausing" type="Node" parent="."]
 unique_name_in_owner = true
 script = ExtResource("2_dq14d")
+metadata/_custom_type_script = "uid://n2spkoxc2iv5"
 
 [node name="Replay" type="Node" parent="."]
 unique_name_in_owner = true
 script = ExtResource("3_rerck")
+metadata/_custom_type_script = "uid://mahcrqfjlyyq"
 
 [node name="PlayerInput" type="Node" parent="."]
 unique_name_in_owner = true
 script = ExtResource("4_qn400")
+metadata/_custom_type_script = "uid://skj8dxeivfvs"
 
 [node name="SystemDialog" type="Node" parent="."]
 unique_name_in_owner = true
 script = ExtResource("6_rxqo8")
+metadata/_custom_type_script = "uid://btc74n06ykolu"
 
 [node name="Menu" parent="." instance=ExtResource("5_vsnwl")]
 unique_name_in_owner = true
