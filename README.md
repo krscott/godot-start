@@ -50,7 +50,9 @@ To enable butler uploads in CI:
   - secret: BUTLER_API_KEY=...
   - env var: BUTLER_TARGET=<itch-account>/godot-start
 
-## Improvements
+## TODO
 
+- Detect mouse un-capture in browser so Escape key pauses game (requires html/js)
+- Capture ctrl+key input in browser (to prevent ctrl+w from closing tab, requires html/js)
 - Fix home-manager setup / support nixGL
   (see [1](https://github.com/NixOS/nixpkgs/issues/336400), [2](https://github.com/nix-community/home-manager/issues/3968))
