@@ -25,6 +25,7 @@ Batteries included. Delete what you don't want.
 - Pause menu
 - Palette and dither screen shaders
 - Cross-platform nix build
+- CI checks and release upload to itch.io
 
 ## Development
 

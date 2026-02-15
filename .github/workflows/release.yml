@@ -20,6 +20,6 @@ jobs:
       env:
         BUTLER_TARGET: ${{ vars.BUTLER_TARGET }}
         BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
-      run: nix run .#publish
+      run: nix run '.?submodules=1#publish'
 
 

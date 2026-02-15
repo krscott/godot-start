@@ -72,6 +72,10 @@
           pub linux "${self.packages.${system}.linux-archive}"
           pub macos "${self.packages.${system}.macos-archive}"
         '';
+
+        format = pkgs.writeShellScriptBin "format" ''
+          ./scripts/format "$@"
+        '';
       in
       {
         packages = {
@@ -87,7 +91,7 @@
           windows-archive = mkArchive "Windows";
           web-archive = mkArchive "Web";
 
-          inherit publish;
+          inherit publish format;
         };
 
         devShells = {
