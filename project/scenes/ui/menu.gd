@@ -8,6 +8,7 @@ enum SpecKind {
 	LABEL,
 }
 
+
 ## Menu item builder
 class Spec:
 	var _node: Control
@@ -20,34 +21,40 @@ class Spec:
 	var _hidden: bool = false
 	var _visible_when: Callable
 
+
 	func action(action_: StringName) -> Spec:
 		_action = action_
 		return self
+
 
 	func focus(value: bool = true) -> Spec:
 		_focus = value
 		return self
 
+
 	func toggled(value: bool = true) -> Spec:
 		_button_pressed = value
 		return self
-	
+
+
 	func visible_when(callback: Callable) -> Spec:
 		_visible_when = callback
 		return self
+
 
 	func debug_only() -> Spec:
 		if not OS.is_debug_build():
 			_hidden = true
 		return self
 
+
 	func desktop_only() -> Spec:
 		if not OS.has_feature("pc"):
 			_hidden = true
 		return self
 
-
 # Menu item factory functions
+
 
 static func button(text: String, callback: Callable) -> Spec:
 	var spec := Spec.new()
@@ -71,7 +78,6 @@ static func label(text: String) -> Spec:
 	spec._text = text
 	return spec
 
-
 # Menu instance
 
 @onready var background: ColorRect = %Background
@@ -81,7 +87,7 @@ static func label(text: String) -> Spec:
 @onready var _templates := {
 	SpecKind.BUTTON: %ButtonTemplate,
 	SpecKind.CHECKBOX: %CheckBoxTemplate,
-	SpecKind.LABEL: %LabelTemplate
+	SpecKind.LABEL: %LabelTemplate,
 }
 
 var _spec: Array[Spec] = []
@@ -112,11 +118,11 @@ func _process(_delta: float) -> void:
 func _on_visibility_changed() -> void:
 	if visible:
 		var is_any_focused := false
-		
+
 		for x in _spec:
 			if is_instance_valid(x._node) and x._visible_when:
 				x._node.visible = x._visible_when.call()
-				
+
 			if x._node.visible and x._node is Button:
 				if not is_any_focused or x._focus:
 					x._node.grab_focus()

@@ -1,7 +1,6 @@
 class_name GameState
 extends Node
 
-
 @onready var save_state: SaveState = %SaveState
 @onready var pausing: Pausing = %Pausing
 @onready var replay: Replay = %Replay
@@ -15,11 +14,12 @@ var _at_main_menu := true
 
 # Public Methods
 
+
 func sync_object_state(key: StringName, obj: Object) -> void:
 	save_state.sync_object_state(key, obj)
 
-
 # Interface Methods
+
 
 func _ready() -> void:
 	assert(save_state)
@@ -43,9 +43,9 @@ func _ready() -> void:
 		util.printdbg("CLI args: ", args)
 		if OK == replay.load_from_file(args[0]):
 			replay.start()
-	
+
 	util.aok(get_window().focus_exited.connect(_pause))
-	
+
 	# NOTE: GameState node is the first child of the tree root.
 	#       i.e., this node is visited FIRST, before any level-specific logic.
 	#       We need to call-deferred if we want to run something after.
@@ -76,7 +76,6 @@ func _notification(what: int) -> void:
 	match what:
 		MainLoop.NOTIFICATION_APPLICATION_FOCUS_OUT:
 			_pause()
-
 
 # Private Methods
 
@@ -149,25 +148,15 @@ func _is_not_at_main_menu() -> bool:
 
 
 func _build_menu() -> void:
-	menu.build([
-		Menu.button("Start Game", _unpause)
-			.visible_when(_is_at_main_menu)
-			.focus(),
-		Menu.button("Continue", _unpause)
-			.action("ui_cancel")
-			.visible_when(_is_not_at_main_menu)
-			.focus(),
-		Menu.button("Save Game", _save_game_dialog)
-			.visible_when(_is_not_at_main_menu)
-			.desktop_only(),
-		Menu.button("Load Game", _load_game_dialog)
-			.desktop_only(),
-		Menu.button("Load Replay", _replay_open_dialog)
-			.desktop_only(),
-		Menu.checkbox("Palette Filter", palette_filter.set_visible)
-			.toggled(palette_filter.visible),
-		Menu.checkbox("Dither Filter", dither_filter.set_visible)
-			.toggled(dither_filter.visible),
-		Menu.button("Quit", _save_replay_and_quit)
-			.desktop_only(),
-	])
+	menu.build(
+		[
+			Menu.button("Start Game", _unpause).visible_when(_is_at_main_menu).focus(),
+			Menu.button("Continue", _unpause).action("ui_cancel").visible_when(_is_not_at_main_menu).focus(),
+			Menu.button("Save Game", _save_game_dialog).visible_when(_is_not_at_main_menu).desktop_only(),
+			Menu.button("Load Game", _load_game_dialog).desktop_only(),
+			Menu.button("Load Replay", _replay_open_dialog).desktop_only(),
+			Menu.checkbox("Palette Filter", palette_filter.set_visible).toggled(palette_filter.visible),
+			Menu.checkbox("Dither Filter", dither_filter.set_visible).toggled(dither_filter.visible),
+			Menu.button("Quit", _save_replay_and_quit).desktop_only(),
+		],
+	)

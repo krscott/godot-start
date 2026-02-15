@@ -1,5 +1,6 @@
 class_name PlayerInput
 extends Node
+
 const gdserde_class := &"PlayerInput"
 const gdserde_props := [
 	&"look",
@@ -30,7 +31,10 @@ func _is_listening() -> bool:
 func _physics_process(_delta: float) -> void:
 	if _is_listening():
 		move = Input.get_vector(
-			"move_left", "move_right", "move_forward", "move_backward"
+			"move_left",
+			"move_right",
+			"move_forward",
+			"move_backward",
 		)
 		sprint = Input.is_action_pressed("sprint")
 		crouch = Input.is_action_pressed("crouch")

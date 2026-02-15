@@ -4,23 +4,26 @@
 ##       JSON, etc.
 class_name GdSerde
 
-static var _property_list_cache := {}
+static var _property_list_cache := { }
+
 
 class GdSerdeProperty:
 	var name: StringName
 	var type: Variant.Type
 
+
 	func _init(name_: StringName, type_: Variant.Type) -> void:
 		name = name_
 		type = type_
+
 
 	func _to_string() -> String:
 		return "GdSerdeProperty<%s: %s>" % [name, type_string(type)]
 
 
 static func _create_property_list(
-	obj: Object,
-	prop_filter: Array
+		obj: Object,
+		prop_filter: Array,
 ) -> Array[GdSerdeProperty]:
 	var out: Array[GdSerdeProperty] = []
 	for item in obj.get_property_list():
@@ -58,7 +61,6 @@ static func _get_obj_prop_list(obj: Object) -> Array[GdSerdeProperty]:
 		gdserde_class = &"Node3D"
 		prop_filter = [&"transform"]
 
-
 	if gdserde_class:
 		if _property_list_cache.has(gdserde_class):
 			prop_list = _property_list_cache[gdserde_class]
@@ -70,7 +72,7 @@ static func _get_obj_prop_list(obj: Object) -> Array[GdSerdeProperty]:
 		assert(
 			false,
 			"Object %s not optimized for serialization, set gdserde_class" %
-			[str(obj)]
+			[str(obj)],
 		)
 		prop_list = _create_property_list(obj, [])
 
@@ -84,7 +86,7 @@ static func serialize(value: Variant) -> Variant:
 		if obj.has_method(&"gdserde_serialize"):
 			return obj.call(&"gdserde_serialize")
 
-		var out := {}
+		var out := { }
 		for prop in _get_obj_prop_list(obj):
 			out[prop.name] = serialize(obj.get(prop.name))
 		return out

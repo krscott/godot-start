@@ -1,7 +1,6 @@
 class_name Pausing
 extends Node
 
-
 var paused := false
 
 

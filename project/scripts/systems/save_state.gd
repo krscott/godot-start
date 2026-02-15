@@ -1,23 +1,21 @@
 class_name SaveState
 extends Node
 
-
 signal savedata_saving
 signal savedata_loaded
 
-
 ## Dictionary[StringName, Dictionary]
-var _savedata_state := {}
+var _savedata_state := { }
 ## Dictionary[StringName, Object]
-var _savedata_refs := {}
+var _savedata_refs := { }
 
 ## Player quick save
 var _quick_save: PackedByteArray
 ## Save of initial game state
 var _quick_save_zero: PackedByteArray
 
-
 # Public Methods
+
 
 func save_object_state(key: StringName, obj: Object) -> void:
 	_savedata_state[key] = GdSerde.serialize_object(obj)
@@ -84,14 +82,14 @@ func load_from_file(filename: String) -> Error:
 
 	return err
 
-
 # Interface Methods
+
 
 func _ready() -> void:
 	call_deferred(&"_root_ready")
 
-
 # Private Methods
+
 
 func _root_ready() -> void:
 	_quick_save_zero = _serialize_savedata()
@@ -103,9 +101,9 @@ func _deserialize_savedata(packed_data: PackedByteArray) -> Error:
 	if unpacked_state is not Dictionary:
 		printerr("Save data is not a Dictionary")
 		return ERR_INVALID_DATA
-		
+
 	_savedata_state = unpacked_state
-	
+
 	for k: StringName in _savedata_refs:
 		if is_instance_valid(_savedata_refs[k]):
 			var obj: Object = _savedata_refs[k]
@@ -128,7 +126,7 @@ func _serialize_savedata() -> PackedByteArray:
 			save_object_state(k, obj)
 		else:
 			util.expect_true(_savedata_refs.erase(k))
-	
+
 	if OS.is_debug_build():
 		util.printdbg("Saved savedata: ", JSON.stringify(_savedata_state))
 	return var_to_bytes(_savedata_state)

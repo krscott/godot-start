@@ -1,5 +1,6 @@
 class_name FreeCam
 extends Camera3D
+
 const gdserde_class := &"FreeCam"
 const gdserde_props := [&"transform"]
 
@@ -9,7 +10,6 @@ const gdserde_props := [&"transform"]
 
 @export var base_speed := 5.0
 @export var sprint_speed := 20.0
-
 
 var look_origin := Vector2.ZERO
 
@@ -41,7 +41,7 @@ func _physics_process(delta: float) -> void:
 			+ Vector3(0, updown, 0)
 		).normalized()
 
-		position += direction * speed;
+		position += direction * speed
 
 
 func _process(_delta: float) -> void:

@@ -3,17 +3,17 @@
 ##       adding or removing nodes from the group may cause unexpected behavior
 class_name PersistGroup
 extends Node
+
 const gdserde_class := &"PersistGroup"
 
 @export var unique_state_key: String
 @export var group_name := &"persist"
 
-
 ## Unique node keys (relative path)
 var _keys: Array[String] = []
 ## References to nodes
 var _nodes: Array[Node] = []
-var _output := {}
+var _output := { }
 
 
 func gdserde_serialize() -> Variant:
@@ -51,11 +51,11 @@ func gdserde_deserialize(dict: Dictionary) -> Error:
 func _ready() -> void:
 	assert(unique_state_key, "Must specify project-unique state key string")
 	assert(group_name)
-	
+
 	var parent := get_parent()
-	
+
 	await parent.ready
-	
+
 	_keys.clear()
 	_nodes.clear()
 	for node in parent.get_tree().get_nodes_in_group(group_name):

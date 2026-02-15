@@ -10,6 +10,7 @@ var is_active := false
 var frames := []
 var current_frame := 0
 
+
 func _physics_process(_delta: float) -> void:
 	if not enabled:
 		return
@@ -18,6 +19,7 @@ func _physics_process(_delta: float) -> void:
 		load_frame.emit(next())
 	else:
 		request_frame.emit()
+
 
 func load_from_file(filename: String) -> Error:
 	var err := OK
@@ -42,6 +44,7 @@ func load_from_file(filename: String) -> Error:
 
 	return err
 
+
 func save_to_file(filename: String) -> Error:
 	var err := OK
 
@@ -61,29 +64,34 @@ func save_to_file(filename: String) -> Error:
 
 	return err
 
+
 func start() -> void:
 	assert(frames, "No replay loaded")
 	if frames:
 		is_active = true
 
+
 func stop() -> void:
 	is_active = false
+
 
 func restart() -> void:
 	current_frame = 0
 	start()
 
+
 func next() -> Dictionary:
 	assert(is_active)
 	if current_frame >= frames.size():
 		assert(false)
-		return {}
+		return { }
 
 	var out: Dictionary = frames[current_frame]
 	current_frame += 1
 	if current_frame >= frames.size():
 		stop()
 	return out
+
 
 func add_frame(frame: Dictionary) -> void:
 	assert(not is_active)

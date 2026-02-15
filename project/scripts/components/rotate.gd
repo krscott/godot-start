@@ -5,5 +5,6 @@ extends Node
 
 @onready var parent: Node3D = get_parent()
 
+
 func _physics_process(delta: float) -> void:
 	parent.rotate(Vector3.UP, speed * delta)
