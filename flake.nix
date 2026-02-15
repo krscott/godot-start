@@ -36,6 +36,7 @@
         baseDevShell = devPkgs.mkShellNoCC {
           buildInputs = with devPkgs; [
             (callPackage ./nix/install-export-templates.nix { })
+            butler # itch.io uploader
             godot_4
             python3
             steam-run-free
@@ -64,6 +65,7 @@
           web = pkgs.godot-start.override { preset = "Web"; };
           windows = pkgs.godot-start.override { preset = "Windows"; };
 
+          # Names mush match scripts/publish
           linux-archive = mkArchive "Linux";
           macos-archive = mkArchive "macOS";
           windows-archive = mkArchive "Windows";

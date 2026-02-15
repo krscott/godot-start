@@ -13,12 +13,17 @@
   python3,
   steam-run-free,
   util-linux,
+  zip,
 }:
 let
   strIf = b: flag: if b then flag else "";
 
   # NixOS and Web builds require wrapper
   wrapper = (preset == "Linux" || preset == "Web") && !archive;
+
+  archiveBuildInputs = [
+    zip
+  ];
 in
 stdenvNoCC.mkDerivation {
   name = "godot-start";
@@ -29,7 +34,8 @@ stdenvNoCC.mkDerivation {
     (callPackage ./nix/install-export-templates.nix { })
     util-linux # getopt
     makeWrapper
-  ];
+  ]
+  ++ (if archive then archiveBuildInputs else [ ]);
 
   buildPhase = ''
     TMPDIR="''${TMPDIR:-/tmp}"

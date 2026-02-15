@@ -1,0 +1,22 @@
+#!/usr/bin/env sh
+set -eu
+
+BUTLER_TARGET="okayscott/godot-start"
+
+command -v butler
+type butler
+
+pub() {
+	CHANNEL="$1"
+	RESULT_DIR=$(nix build ".#${CHANNEL}-archive" --no-link --print-out-paths)
+	RESULT_ZIP=$(find "$RESULT_DIR/share" -type f -iname '*.zip' -print -quit)
+	(
+		set -x
+		butler push "$RESULT_ZIP" "$BUTLER_TARGET:$CHANNEL"
+	)
+}
+
+pub web
+pub windows
+pub linux
+pub macos
