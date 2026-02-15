@@ -3,14 +3,22 @@ set -euo pipefail
 shopt -s failglob
 shopt -s globstar
 
-if command -v nix >/dev/null && ls ./**/*.nix >/dev/null 2>&1; then
+iscmd() {
+	command -v "$1" >/dev/null
+}
+
+anyfiles() {
+	find . -type f -name "*.$1" -print -quit | grep -q .
+}
+
+if iscmd nix && anyfiles "nix"; then
 	(
 		set -x
 		nix fmt ./**/*.nix
 	)
 fi
 
-if command -v gdscript-formatter >/dev/null && ls ./**/*.gd >/dev/null 2>&1; then
+if iscmd gdscript-formatter && anyfiles "gd"; then
 	(
 		set -x
 		gdscript-formatter ./**/*.gd
