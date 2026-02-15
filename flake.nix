@@ -56,14 +56,20 @@
             archive = true;
           };
 
-        publish = pkgs.writeShellScriptBin "publish" ''
+        writeScript =
+          runtimeInputs: name: text:
+          pkgs.writeShellApplication {
+            inherit name runtimeInputs text;
+          };
+
+        publish = writeScript [ pkgs.butler ] "publish" ''
           set -eu
           pub() {
             CHANNEL="$1"
             ZIP="$2"
             (
                 set -x
-                ${pkgs.butler}/bin/butler push "$ZIP" "$BUTLER_TARGET:$CHANNEL"
+                butler push "$ZIP" "$BUTLER_TARGET:$CHANNEL"
             )
           }
 
@@ -73,7 +79,7 @@
           pub macos "${self.packages.${system}.macos-archive}"
         '';
 
-        format = pkgs.writeShellScriptBin "format" ''
+        format = writeScript [ pkgs.gdscript-formatter ] "format" ''
           ./scripts/format "$@"
         '';
       in

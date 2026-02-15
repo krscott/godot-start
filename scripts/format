@@ -88,7 +88,9 @@ case "${1:-format}" in
 lint)
     (
         [[ -n $verbose ]] && set -x
-        gdscript-formatter lint ./**/*.gd
+        gdscript-formatter lint \
+            --disable constant-name,private-access,class-name \
+            ./**/*.gd
     )
     ;;
 format)

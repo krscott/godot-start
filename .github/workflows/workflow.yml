@@ -19,5 +19,8 @@ jobs:
     - name: Check nix
       run: nix flake show '.?submodules=1'
 
+    - name: Check lint
+      run: nix run '.?submodules=1#format' -- lint -v
+
     - name: Check format
-      run: nix run '.?submodules=1#format' -- --check
+      run: nix run '.?submodules=1#format' -- --check -v
