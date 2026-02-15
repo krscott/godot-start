@@ -55,6 +55,22 @@
             archive = true;
           };
 
+        publish = pkgs.writeShellScriptBin "publish" ''
+          set -eu
+          pub() {
+            CHANNEL="$1"
+            ZIP="$2"
+            (
+                set -x
+                ${pkgs.butler}/bin/butler push "$ZIP" "$BUTLER_TARGET:$CHANNEL"
+            )
+          }
+
+          pub web "${self.packages.${system}.web-archive}"
+          pub windows "${self.packages.${system}.windows-archive}"
+          pub linux "${self.packages.${system}.linux-archive}"
+          pub macos "${self.packages.${system}.macos-archive}"
+        '';
       in
       {
         packages = {
@@ -65,11 +81,12 @@
           web = pkgs.godot-start.override { preset = "Web"; };
           windows = pkgs.godot-start.override { preset = "Windows"; };
 
-          # Names mush match scripts/publish
           linux-archive = mkArchive "Linux";
           macos-archive = mkArchive "macOS";
           windows-archive = mkArchive "Windows";
           web-archive = mkArchive "Web";
+
+          inherit publish;
         };
 
         devShells = {

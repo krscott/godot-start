@@ -46,9 +46,11 @@ nix develop
 
 To enable butler uploads in CI:
 
-1. Edit `scripts/publish` with your project info
-2. [Login to butler and get your API key](https://itch.io/docs/butler/login.html)
-3. Create a "butler" environment and add BUTLER_API_KEY [as a secret](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets)
+1. [Login to butler and get your API key](https://itch.io/docs/butler/login.html)
+2. Create a "butler" [environment](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets)
+   and add your API key and TARGET. e.g.
+  - secret: BUTLER_API_KEY=...
+  - env var: BUTLER_TARGET=<itch-account>/godot-start
 
 ## Improvements
 

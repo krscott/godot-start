@@ -3,12 +3,12 @@ name: Release
 on:
   release:
     types:
-    - created
     - published
 
 jobs:
   release:
     runs-on: ubuntu-latest
+    environment: butler
 
     steps:
     - uses: actions/checkout@v4
@@ -17,6 +17,9 @@ jobs:
         github_access_token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Publish to Itch.io
-      run: ./publish.sh
+      env:
+        BUTLER_TARGET: ${{ vars.BUTLER_TARGET }}
+        BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+      run: nix run .#publish
 
 
