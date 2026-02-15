@@ -6,7 +6,11 @@ shopt -s globstar
 usage() {
     # NOTE: Don't forget to update OPTIONS/LONGOPTS below!
     cat <<EOF
-Usage: $(basename "$0") [options]
+Usage: $(basename "$0") [options] [command]
+
+Commands:
+    format              Run formatter (default)
+    lint                Run linter
 
 Options:
     -c, --check         Check formatting without editing
@@ -70,7 +74,7 @@ while true; do
     shift
 done
 
-(($# > 0)) && die "Too many arguments"
+(($# > 1)) && die "Too many arguments"
 
 iscmd() {
     command -v "$1" >/dev/null
@@ -80,16 +84,31 @@ anyfiles() {
     find . -type f -name "*.$1" -print -quit | grep -q .
 }
 
-if iscmd nix && anyfiles "nix"; then
+case "${1:-format}" in
+lint)
     (
-        set -x
-        nix fmt ./**/*.nix -- $args_nix
+        [[ -n $verbose ]] && set -x
+        gdscript-formatter lint ./**/*.gd
     )
-fi
+    ;;
+format)
+    if anyfiles "gd"; then
+        (
+            [[ -n $verbose ]] && set -x
+            gdscript-formatter $args_gd ./**/*.gd
+        )
+    fi
 
-if iscmd gdscript-formatter && anyfiles "gd"; then
-    (
-        set -x
-        gdscript-formatter $args_gd ./**/*.gd
-    )
-fi
+    if iscmd nix && anyfiles "nix"; then
+        (
+            [[ -n $verbose ]] && set -x
+            nix fmt ./**/*.nix -- $args_nix
+        )
+    fi
+    ;;
+*)
+    error "Unknown command '$1'"
+    usage
+    exit 3
+    ;;
+esac
