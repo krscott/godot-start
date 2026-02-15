@@ -9,13 +9,11 @@ To start a project with this template, run:
 
 ## AI Use
 
-This template does not contain the output of Generative AI.
-
-This project is tagged `no-ai`, following the
+This project does not contain the output of Generative AI, and is tagged `no-ai` following the
 [itch.io AI disclosure guidelines](https://itch.io/docs/creators/quality-guidelines#ai-disclosure)
 
-This is to allow derivative projects to publish under a no-AI policy.
-If AI is used in derivative projects, this section must be removed.
+This is to allow projects using this template to publish under a no-AI policy.
+If AI is used in derivative projects, that project must remove this section.
 
 ## Features
 
