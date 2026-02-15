@@ -44,6 +44,8 @@ func _ready() -> void:
 		if OK == replay.load_from_file(args[0]):
 			replay.start()
 	
+	util.aok(get_window().focus_exited.connect(_pause))
+	
 	# NOTE: GameState node is the first child of the tree root.
 	#       i.e., this node is visited FIRST, before any level-specific logic.
 	#       We need to call-deferred if we want to run something after.
