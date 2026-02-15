@@ -3,24 +3,93 @@ set -euo pipefail
 shopt -s failglob
 shopt -s globstar
 
+usage() {
+    # NOTE: Don't forget to update OPTIONS/LONGOPTS below!
+    cat <<EOF
+Usage: $(basename "$0") [options]
+
+Options:
+    -c, --check         Check formatting without editing
+    -h, --help          Display this help message
+    -v, --verbose       Enable debug messages
+EOF
+}
+
+# NOTE: Use ':' suffix to specify opt has an arg
+OPTIONS="chv"
+LONGOPTS="check,help,verbose"
+
+# NOTE: getopt comes from 'util-linux' package
+PARSED=$(getopt -o "$OPTIONS" -l "$LONGOPTS" -n "$0" -- "$@") || {
+    usage >&2
+    exit 2
+}
+eval set -- "$PARSED"
+
+die() {
+    echo "$*" >&2
+    echo
+    usage >&2
+    exit 2
+}
+
+log() {
+    local c="$1"
+    shift
+    [[ $c ]] && echo -ne "\033[${c}m" >&2
+    echo -e "$@" >&2
+    [[ $c ]] && echo -ne '\033[0m' >&2
+    return 0
+}
+debug() {
+    [[ $verbose ]] && log "" "$@"
+    return 0
+}
+warn() { log "0;33" "$@"; }
+error() { log "0;31" "$@"; }
+
+args_nix=
+args_gd=
+verbose=
+while true; do
+    case "$1" in
+    -c | --check)
+        args_nix=--check
+        args_gd=--check
+        ;;
+    -h | --help)
+        usage
+        exit 0
+        ;;
+    -v | --verbose) verbose=1 ;;
+    --)
+        shift
+        break
+        ;;
+    esac
+    shift
+done
+
+(($# > 0)) && die "Too many arguments"
+
 iscmd() {
-	command -v "$1" >/dev/null
+    command -v "$1" >/dev/null
 }
 
 anyfiles() {
-	find . -type f -name "*.$1" -print -quit | grep -q .
+    find . -type f -name "*.$1" -print -quit | grep -q .
 }
 
 if iscmd nix && anyfiles "nix"; then
-	(
-		set -x
-		nix fmt ./**/*.nix
-	)
+    (
+        set -x
+        nix fmt ./**/*.nix -- $args_nix
+    )
 fi
 
 if iscmd gdscript-formatter && anyfiles "gd"; then
-	(
-		set -x
-		gdscript-formatter ./**/*.gd
-	)
+    (
+        set -x
+        gdscript-formatter $args_gd ./**/*.gd
+    )
 fi
