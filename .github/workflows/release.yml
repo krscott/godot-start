@@ -1,0 +1,22 @@
+name: Release
+
+on:
+  release:
+    types:
+    - created
+    - published
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: cachix/install-nix-action@v31
+      with:
+        github_access_token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Publish to Itch.io
+      run: ./publish.sh
+
+

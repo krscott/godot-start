@@ -42,6 +42,14 @@ Start nix dev shell
 nix develop
 ```
 
+## Publish to itch.io
+
+To enable butler uploads in CI:
+
+1. Edit `scripts/publish` with your project info
+2. [Login to butler and get your API key](https://itch.io/docs/butler/login.html)
+3. Create a "butler" environment and add BUTLER_API_KEY [as a secret](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets)
+
 ## Improvements
 
 - Fix home-manager setup / support nixGL
