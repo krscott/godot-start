@@ -72,6 +72,12 @@ func _process(_delta: float) -> void:
 			_pause()
 
 
+func _notification(what: int) -> void:
+	match what:
+		MainLoop.NOTIFICATION_APPLICATION_FOCUS_OUT:
+			_pause()
+
+
 # Private Methods
 
 
