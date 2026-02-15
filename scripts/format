@@ -1,8 +1,18 @@
 #!/usr/bin/env bash
 set -euo pipefail
+shopt -s failglob
 shopt -s globstar
 
-if command -v nix >/dev/null; then
-	set -x
-	nix fmt ./**/*.nix
+if command -v nix >/dev/null && ls ./**/*.nix >/dev/null 2>&1; then
+	(
+		set -x
+		nix fmt ./**/*.nix
+	)
+fi
+
+if command -v gdscript-formatter >/dev/null && ls ./**/*.gd >/dev/null 2>&1; then
+	(
+		set -x
+		gdscript-formatter ./**/*.gd
+	)
 fi

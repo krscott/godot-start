@@ -37,6 +37,7 @@
           buildInputs = with devPkgs; [
             (callPackage ./nix/install-export-templates.nix { })
             butler # itch.io uploader
+            gdscript-formatter
             godot_4
             python3
             steam-run-free
