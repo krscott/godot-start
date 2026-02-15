@@ -10,6 +10,7 @@ enum SpecKind {
 
 ## Menu item builder
 class Spec:
+	var _node: Control
 	var _kind: SpecKind = SpecKind.NONE
 	var _text: String
 	var _callback: Callable
@@ -17,6 +18,7 @@ class Spec:
 	var _button_pressed: bool = false
 	var _focus: bool = false
 	var _hidden: bool = false
+	var _visible_when: Callable
 
 	func action(action_: StringName) -> Spec:
 		_action = action_
@@ -29,9 +31,18 @@ class Spec:
 	func toggled(value: bool = true) -> Spec:
 		_button_pressed = value
 		return self
+	
+	func visible_when(callback: Callable) -> Spec:
+		_visible_when = callback
+		return self
 
 	func debug_only() -> Spec:
 		if not OS.is_debug_build():
+			_hidden = true
+		return self
+
+	func desktop_only() -> Spec:
+		if not OS.has_feature("pc"):
 			_hidden = true
 		return self
 
@@ -63,6 +74,7 @@ static func label(text: String) -> Spec:
 
 # Menu instance
 
+@onready var background: ColorRect = %Background
 @onready var title_label: Label = %Title
 
 @onready var _items_container: Node = %ItemsContainer
@@ -74,10 +86,10 @@ static func label(text: String) -> Spec:
 
 var _spec: Array[Spec] = []
 var _was_visible_last_frame := false
-var _initial_focus: Control = null
 
 
 func _ready() -> void:
+	assert(background)
 	assert(title_label)
 	assert(_items_container)
 	title_label.text = ProjectSettings.get_setting("application/config/name")
@@ -90,6 +102,7 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	if _was_visible_last_frame and visible:
+		background.visible = get_tree().paused
 		for x in _spec:
 			if x._action and Input.is_action_just_pressed(x._action):
 				x._callback.call()
@@ -98,8 +111,18 @@ func _process(_delta: float) -> void:
 
 func _on_visibility_changed() -> void:
 	if visible:
-		assert(_initial_focus, "No node is set to initial focus")
-		_initial_focus.grab_focus()
+		var is_any_focused := false
+		
+		for x in _spec:
+			if is_instance_valid(x._node) and x._visible_when:
+				x._node.visible = x._visible_when.call()
+				
+			if x._node.visible and x._node is Button:
+				if not is_any_focused or x._focus:
+					x._node.grab_focus()
+					is_any_focused = true
+
+		assert(is_any_focused)
 
 
 func _get_template(kind: SpecKind) -> Control:
@@ -111,8 +134,7 @@ func _create_item(x: Spec) -> Node:
 	var new_node: Control = _get_template(x._kind).duplicate()
 	_items_container.add_child(new_node)
 	new_node.show()
-	if x._focus or (_initial_focus == null and new_node is Button):
-		_initial_focus = new_node
+	x._node = new_node
 	return new_node
 
 

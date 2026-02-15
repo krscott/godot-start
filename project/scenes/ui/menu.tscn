@@ -11,6 +11,7 @@ script = ExtResource("1_6tw0m")
 metadata/_custom_type_script = "uid://bn5av54g3r5s4"
 
 [node name="Background" type="ColorRect" parent="."]
+unique_name_in_owner = true
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0

@@ -11,6 +11,7 @@ extends Node
 @onready var palette_filter: ColorRect = %PaletteFilter
 @onready var dither_filter: ColorRect = %DitherFilter
 
+var _at_main_menu := true
 
 # Public Methods
 
@@ -42,13 +43,12 @@ func _ready() -> void:
 		util.printdbg("CLI args: ", args)
 		if OK == replay.load_from_file(args[0]):
 			replay.start()
-
-	_unpause()
 	
 	# NOTE: GameState node is the first child of the tree root.
 	#       i.e., this node is visited FIRST, before any level-specific logic.
 	#       We need to call-deferred if we want to run something after.
 	call_deferred(&"_build_menu")
+	menu.call_deferred(&"show")
 
 
 func _physics_process(_delta: float) -> void:
@@ -62,7 +62,10 @@ func _process(_delta: float) -> void:
 		elif Input.is_action_just_pressed("quick_load"):
 			save_state.quickload()
 		elif Input.is_action_just_pressed("quit"):
-			_save_replay_and_quit()
+			if OS.has_feature("pc"):
+				_save_replay_and_quit()
+			else:
+				_pause()
 		elif Input.is_action_just_pressed("ui_cancel"):
 			_pause()
 
@@ -105,6 +108,7 @@ func _replay_open_dialog() -> void:
 
 
 func _unpause() -> void:
+	_at_main_menu = false
 	pausing.unpause()
 	menu.hide()
 	util.set_mouse_captured(true)
@@ -128,17 +132,34 @@ func _load_game_dialog() -> void:
 		var _err := save_state.load_from_file(filename)
 
 
+func _is_at_main_menu() -> bool:
+	return _at_main_menu
+
+
+func _is_not_at_main_menu() -> bool:
+	return not _at_main_menu
+
+
 func _build_menu() -> void:
 	menu.build([
+		Menu.button("Start Game", _unpause)
+			.visible_when(_is_at_main_menu)
+			.focus(),
 		Menu.button("Continue", _unpause)
 			.action("ui_cancel")
+			.visible_when(_is_not_at_main_menu)
 			.focus(),
-		Menu.button("Save Game", _save_game_dialog),
-		Menu.button("Load Game", _load_game_dialog),
-		Menu.button("Load Replay", _replay_open_dialog),
+		Menu.button("Save Game", _save_game_dialog)
+			.visible_when(_is_not_at_main_menu)
+			.desktop_only(),
+		Menu.button("Load Game", _load_game_dialog)
+			.desktop_only(),
+		Menu.button("Load Replay", _replay_open_dialog)
+			.desktop_only(),
 		Menu.checkbox("Palette Filter", palette_filter.set_visible)
 			.toggled(palette_filter.visible),
 		Menu.checkbox("Dither Filter", dither_filter.set_visible)
 			.toggled(dither_filter.visible),
-		Menu.button("Quit", _save_replay_and_quit),
+		Menu.button("Quit", _save_replay_and_quit)
+			.desktop_only(),
 	])
