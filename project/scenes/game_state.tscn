@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://6uyp4hbab8gp"]
+[gd_scene format=3 uid="uid://6uyp4hbab8gp"]
 
 [ext_resource type="Script" uid="uid://ygjvluupbdtm" path="res://scenes/game_state.gd" id="1_aj67o"]
 [ext_resource type="Script" uid="uid://cu714ln7qv2gu" path="res://scripts/systems/save_state.gd" id="2_3oy0g"]
@@ -17,41 +17,41 @@ shader = ExtResource("7_q5byu")
 shader = ExtResource("8_vsyf1")
 shader_parameter/pixel_size = 2
 
-[node name="GameState" type="Node"]
+[node name="GameState" type="Node" unique_id=974512371]
 script = ExtResource("1_aj67o")
 metadata/_custom_type_script = "uid://ygjvluupbdtm"
 
-[node name="SaveState" type="Node" parent="."]
+[node name="SaveState" type="Node" parent="." unique_id=305363120]
 unique_name_in_owner = true
 script = ExtResource("2_3oy0g")
 metadata/_custom_type_script = "uid://cu714ln7qv2gu"
 
-[node name="Pausing" type="Node" parent="."]
+[node name="Pausing" type="Node" parent="." unique_id=1235145499]
 unique_name_in_owner = true
 script = ExtResource("2_dq14d")
 metadata/_custom_type_script = "uid://n2spkoxc2iv5"
 
-[node name="Replay" type="Node" parent="."]
+[node name="Replay" type="Node" parent="." unique_id=808360111]
 unique_name_in_owner = true
 script = ExtResource("3_rerck")
 metadata/_custom_type_script = "uid://mahcrqfjlyyq"
 
-[node name="PlayerInput" type="Node" parent="."]
+[node name="PlayerInput" type="Node" parent="." unique_id=820497993]
 unique_name_in_owner = true
 script = ExtResource("4_qn400")
 metadata/_custom_type_script = "uid://skj8dxeivfvs"
 
-[node name="SystemDialog" type="Node" parent="."]
+[node name="SystemDialog" type="Node" parent="." unique_id=887202933]
 unique_name_in_owner = true
 script = ExtResource("6_rxqo8")
 metadata/_custom_type_script = "uid://btc74n06ykolu"
 
-[node name="Menu" parent="." instance=ExtResource("5_vsnwl")]
+[node name="Menu" parent="." unique_id=1709348178 instance=ExtResource("5_vsnwl")]
 unique_name_in_owner = true
 
-[node name="PostProcessing" type="CanvasLayer" parent="."]
+[node name="PostProcessing" type="CanvasLayer" parent="." unique_id=1427585307]
 
-[node name="PaletteFilter" type="ColorRect" parent="PostProcessing"]
+[node name="PaletteFilter" type="ColorRect" parent="PostProcessing" unique_id=1840524435]
 unique_name_in_owner = true
 visible = false
 material = SubResource("ShaderMaterial_q5byu")
@@ -62,7 +62,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="DitherFilter" type="ColorRect" parent="PostProcessing"]
+[node name="DitherFilter" type="ColorRect" parent="PostProcessing" unique_id=1046001627]
 unique_name_in_owner = true
 visible = false
 material = SubResource("ShaderMaterial_3oy0g")
