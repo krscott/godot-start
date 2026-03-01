@@ -24,7 +24,7 @@ albedo_texture = ExtResource("3_lo5wi")
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4icbv"]
 albedo_color = Color(0, 0, 0, 1)
 
-[node name="Level" type="CanvasLayer" unique_id=453955467]
+[node name="MouselookLevel" type="Node3D" unique_id=1431554155]
 
 [node name="PersistGroup" type="Node" parent="." unique_id=821707653]
 script = ExtResource("1_nxlid")
@@ -39,6 +39,7 @@ transform = Transform3D(0.9182944, 0.3015499, -0.25652108, -3.72529e-08, 0.64794
 
 [node name="FreeCam" type="Camera3D" parent="." unique_id=1955267743 groups=["persist"]]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 3, 1, 0)
+current = true
 script = ExtResource("2_am13w")
 take_control_on_ready = true
 metadata/_custom_type_script = "uid://dfati240tvaw1"
