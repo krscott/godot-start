@@ -28,6 +28,8 @@
           overlays = [ localOverlay ];
         };
 
+        godot-start-debug = pkgs.godot-start.override { debug = true; };
+
         devPkgs = import nixpkgs {
           inherit system;
           config.allowUnfree = true; # required for aseprite
@@ -82,12 +84,17 @@
         format = writeScript [ pkgs.gdscript-formatter ] "format" ''
           ./scripts/format "$@"
         '';
+
+        test-headless = pkgs.writeShellScriptBin "test-headless" ''
+          ./scripts/test-headless --binary "${godot-start-debug}/bin/godot-start-bin" -- "$@"
+        '';
       in
       {
         packages = {
           inherit (pkgs) godot-start;
           default = pkgs.godot-start;
-          debug = pkgs.godot-start.override { debug = true; };
+
+          debug = godot-start-debug;
 
           web = pkgs.godot-start.override { preset = "Web"; };
           windows = pkgs.godot-start.override { preset = "Windows"; };
@@ -97,7 +104,7 @@
           windows-archive = mkArchive "Windows";
           web-archive = mkArchive "Web";
 
-          inherit publish format;
+          inherit publish format test-headless;
         };
 
         devShells = {
