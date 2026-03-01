@@ -29,6 +29,10 @@ func pause() -> void:
 	util.set_mouse_captured(false)
 
 
+func is_menu_open() -> bool:
+	return menu.visible
+
+
 func _ready() -> void:
 	assert(menu)
 	assert(replay_system)

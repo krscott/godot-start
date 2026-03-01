@@ -38,9 +38,10 @@ dither_filter = NodePath("../DitherFilter")
 palette_filter = NodePath("../PaletteFilter")
 metadata/_custom_type_script = "uid://n2spkoxc2iv5"
 
-[node name="ReplaySystem" type="Node" parent="." unique_id=916268345 node_paths=PackedStringArray("player_input", "save_state", "system_dialog")]
+[node name="ReplaySystem" type="Node" parent="." unique_id=916268345 node_paths=PackedStringArray("pause_menu_system", "player_input", "save_state", "system_dialog")]
 unique_name_in_owner = true
 script = ExtResource("4_7ti0s")
+pause_menu_system = NodePath("../PauseMenuSystem")
 player_input = NodePath("../PlayerInput")
 save_state = NodePath("../SaveState")
 system_dialog = NodePath("../SystemDialog")

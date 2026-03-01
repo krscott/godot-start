@@ -1,6 +1,7 @@
 class_name ReplaySystem
 extends Node
 
+@export var pause_menu_system: PauseMenuSystem
 @export var player_input: PlayerInput
 @export var save_state: SaveState
 @export var system_dialog: SystemDialog
@@ -14,6 +15,7 @@ func run_from_file(filename: String) -> void:
 
 
 func _ready() -> void:
+	assert(pause_menu_system)
 	assert(player_input)
 	assert(save_state)
 	assert(system_dialog)
@@ -33,7 +35,7 @@ func _replay_load_frame(frame: Dictionary) -> void:
 		player_input.listening = false
 	else:
 		print("REPLAY DONE")
-		gamestate._pause() # TODO
+		pause_menu_system.pause()
 
 
 func _replay_save_frame() -> void:
@@ -58,4 +60,4 @@ func _replay_open_dialog() -> void:
 	if filename:
 		var _err := replay.load_from_file(filename)
 		_restart_replay()
-		gamestate._unpause() # TODO
+		pause_menu_system.unpause()
