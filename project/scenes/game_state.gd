@@ -8,14 +8,14 @@ extends Node
 @onready var menu: Menu = %Menu
 @onready var system_dialog: SystemDialog = %SystemDialog
 
-
 # Public Methods
+
 
 func sync_object_state(key: StringName, obj: Object) -> void:
 	save_state.sync_object_state(key, obj)
 
-
 # Interface Methods
+
 
 func _ready() -> void:
 	assert(save_state)
@@ -48,6 +48,5 @@ func _process(_delta: float) -> void:
 				pause_menu_system.pause()
 		elif Input.is_action_just_pressed("ui_cancel"):
 			pause_menu_system.pause()
-
 
 # Private Methods

@@ -13,9 +13,9 @@ func _on_completed(filename: String = "") -> void:
 
 
 func file_dialog(
-	file_mode: FileDialog.FileMode,
-	filter: String = "",
-	description: String = "",
+		file_mode: FileDialog.FileMode,
+		filter: String = "",
+		description: String = "",
 ) -> String:
 	var fd := FileDialog.new()
 	add_child(fd)

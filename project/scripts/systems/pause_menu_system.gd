@@ -1,7 +1,6 @@
 class_name PauseMenuSystem
 extends Node
 
-
 # TODO: Move this to separate system
 @export var capture_mouse := true
 
@@ -14,7 +13,6 @@ extends Node
 
 var paused := false
 var _at_main_menu := true
-
 
 
 func unpause() -> void:
@@ -38,7 +36,7 @@ func _ready() -> void:
 	assert(system_dialog)
 	assert(dither_filter)
 	assert(palette_filter)
-	
+
 	process_mode = PROCESS_MODE_ALWAYS
 	util.aok(get_window().focus_exited.connect(pause))
 	call_deferred(&"_build_menu")

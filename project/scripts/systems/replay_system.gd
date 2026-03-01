@@ -1,11 +1,9 @@
 class_name ReplaySystem
 extends Node
 
-
 @export var player_input: PlayerInput
 @export var save_state: SaveState
 @export var system_dialog: SystemDialog
-
 
 @onready var replay: Replay = $Replay
 
@@ -20,7 +18,7 @@ func _ready() -> void:
 	assert(save_state)
 	assert(system_dialog)
 	assert(replay)
-	
+
 	util.aok(replay.load_frame.connect(_replay_load_frame))
 	util.aok(replay.request_frame.connect(_replay_save_frame))
 
