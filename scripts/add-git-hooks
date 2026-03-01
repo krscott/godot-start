@@ -1,0 +1,17 @@
+#!/usr/bin/env sh
+set -eu
+
+cat <<EOS >.git/hooks/pre-push
+set -eu
+
+echo === pre-push hook start ===
+
+if ! ./scripts/format --check; then
+    echo "To fix, run: ./scripts/format"
+    exit 1
+fi
+
+./scripts/format lint
+
+echo === pre-push hook end ===
+EOS
