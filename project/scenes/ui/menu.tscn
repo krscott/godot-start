@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://bn5av54g3r5s4" path="res://scenes/ui/menu.gd" id="1_6tw0m"]
 [ext_resource type="Theme" uid="uid://badm4dbubdqto" path="res://scenes/ui/menu_theme.tres" id="2_wedc3"]
 [ext_resource type="Script" uid="uid://ujr3w0i2aica" path="res://scripts/components/debug_only.gd" id="3_c2n5p"]
+[ext_resource type="LabelSettings" uid="uid://donjsdao6jlfe" path="res://scenes/ui/title_label_settings.tres" id="3_cx0sj"]
 [ext_resource type="Script" uid="uid://c27847cdx02wd" path="res://scenes/ui/version_label.gd" id="4_w6y0u"]
 
 [node name="Menu" type="CanvasLayer" unique_id=1839284131]
@@ -39,8 +40,8 @@ size_flags_vertical = 4
 [node name="Title" type="Label" parent="Menu/ItemsContainer" unique_id=345306180]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 100
 text = "Title"
+label_settings = ExtResource("3_cx0sj")
 
 [node name="LabelTemplate" type="Label" parent="Menu/ItemsContainer" unique_id=254989406]
 unique_name_in_owner = true
