@@ -3,7 +3,7 @@ extends Node
 
 @onready var save_state: SaveState = %SaveState
 @onready var pausing: Pausing = %Pausing
-@onready var replay: Replay = %Replay
+@onready var replay_system: ReplaySystem = %ReplaySystem
 @onready var player_input: PlayerInput = %PlayerInput
 @onready var menu: Menu = %Menu
 @onready var system_dialog: SystemDialog = %SystemDialog
@@ -24,7 +24,7 @@ func sync_object_state(key: StringName, obj: Object) -> void:
 func _ready() -> void:
 	assert(save_state)
 	assert(pausing)
-	assert(replay)
+	assert(replay_system)
 	assert(player_input)
 	assert(menu)
 	assert(system_dialog)
@@ -35,14 +35,10 @@ func _ready() -> void:
 
 	sync_object_state(&"player_input", player_input)
 
-	util.aok(replay.load_frame.connect(_replay_load_frame))
-	util.aok(replay.request_frame.connect(_replay_save_frame))
-
 	var args := OS.get_cmdline_user_args()
 	if args:
 		util.printdbg("CLI args: ", args)
-		if OK == replay.load_from_file(args[0]):
-			replay.start()
+		replay_system.run_from_file(args[0])
 
 	util.aok(get_window().focus_exited.connect(_pause))
 
@@ -53,10 +49,6 @@ func _ready() -> void:
 	menu.call_deferred(&"show")
 
 
-func _physics_process(_delta: float) -> void:
-	player_input.listening = not replay.is_active
-
-
 func _process(_delta: float) -> void:
 	if not menu.visible:
 		if Input.is_action_just_pressed("quick_save"):
@@ -65,7 +57,7 @@ func _process(_delta: float) -> void:
 			save_state.quickload()
 		elif Input.is_action_just_pressed("quit"):
 			if OS.has_feature("pc"):
-				_save_replay_and_quit()
+				replay_system._save_replay_and_quit()
 			else:
 				_pause()
 		elif Input.is_action_just_pressed("ui_cancel"):
@@ -80,38 +72,6 @@ func _notification(what: int) -> void:
 # Private Methods
 
 
-func _replay_load_frame(frame: Dictionary) -> void:
-	util.aok(GdSerde.deserialize_object(player_input, frame))
-	if replay.is_active:
-		player_input.listening = false
-	else:
-		print("REPLAY DONE")
-		_pause()
-
-
-func _replay_save_frame() -> void:
-	replay.add_frame(GdSerde.serialize_object(player_input))
-
-
-func _save_replay_and_quit() -> void:
-	if replay.enabled:
-		util.aok(replay.save_to_file("replay.dat"))
-
-	await get_tree().process_frame
-	get_tree().quit()
-
-
-func _restart_replay() -> void:
-	save_state.reset()
-	replay.restart()
-
-
-func _replay_open_dialog() -> void:
-	var filename := await system_dialog.file_open_dialog("*.dat", "Replay File")
-	if filename:
-		var _err := replay.load_from_file(filename)
-		_restart_replay()
-		_unpause()
 
 
 func _unpause() -> void:
@@ -161,13 +121,13 @@ func _build_menu() -> void:
 			.desktop_only(),
 			Menu.button("Load Game", _load_game_dialog) #
 			.desktop_only(),
-			Menu.button("Load Replay", _replay_open_dialog) #
+			Menu.button("Load Replay", replay_system._replay_open_dialog) #
 			.desktop_only(),
 			Menu.checkbox("Palette Filter", palette_filter.set_visible) #
 			.toggled(palette_filter.visible),
 			Menu.checkbox("Dither Filter", dither_filter.set_visible) #
 			.toggled(dither_filter.visible),
-			Menu.button("Quit", _save_replay_and_quit) #
+			Menu.button("Quit", replay_system._save_replay_and_quit) #
 			.desktop_only(),
 		],
 	)

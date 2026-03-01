@@ -4,6 +4,7 @@
 [ext_resource type="Script" uid="uid://cu714ln7qv2gu" path="res://scripts/systems/save_state.gd" id="2_3oy0g"]
 [ext_resource type="Script" uid="uid://n2spkoxc2iv5" path="res://scripts/systems/pausing.gd" id="2_dq14d"]
 [ext_resource type="Script" uid="uid://mahcrqfjlyyq" path="res://scripts/systems/replay.gd" id="3_rerck"]
+[ext_resource type="Script" uid="uid://bgvdp2xkv0yr3" path="res://scripts/systems/replay_system.gd" id="4_7ti0s"]
 [ext_resource type="Script" uid="uid://skj8dxeivfvs" path="res://scripts/systems/player_input.gd" id="4_qn400"]
 [ext_resource type="PackedScene" uid="uid://dkhqxc2w4rda4" path="res://scenes/ui/menu.tscn" id="5_vsnwl"]
 [ext_resource type="Script" uid="uid://btc74n06ykolu" path="res://scripts/systems/system_dialog.gd" id="6_rxqo8"]
@@ -31,8 +32,15 @@ unique_name_in_owner = true
 script = ExtResource("2_dq14d")
 metadata/_custom_type_script = "uid://n2spkoxc2iv5"
 
-[node name="Replay" type="Node" parent="." unique_id=808360111]
+[node name="ReplaySystem" type="Node" parent="." unique_id=916268345 node_paths=PackedStringArray("player_input", "save_state", "system_dialog")]
 unique_name_in_owner = true
+script = ExtResource("4_7ti0s")
+player_input = NodePath("../PlayerInput")
+save_state = NodePath("../SaveState")
+system_dialog = NodePath("../SystemDialog")
+metadata/_custom_type_script = "uid://bgvdp2xkv0yr3"
+
+[node name="Replay" type="Node" parent="ReplaySystem" unique_id=808360111]
 script = ExtResource("3_rerck")
 metadata/_custom_type_script = "uid://mahcrqfjlyyq"
 
