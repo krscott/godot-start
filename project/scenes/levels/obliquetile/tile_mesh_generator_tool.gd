@@ -35,7 +35,14 @@ class MeshBuilder:
 		size += 1
 
 
-	func add_quad(p0: Vector3, p1: Vector3, p2: Vector3, uv0: Vector2, uv1: Vector2, uv2: Vector2) -> void:
+	func add_quad(
+			p0: Vector3,
+			p1: Vector3,
+			p2: Vector3,
+			uv0: Vector2,
+			uv1: Vector2,
+			uv2: Vector2,
+	) -> void:
 		var i := size
 
 		var dp1 := p1 - p0
@@ -58,7 +65,14 @@ class MeshBuilder:
 		util.expect_false(indices.push_back(i + 3))
 
 
-	func add_tri(p0: Vector3, p1: Vector3, p2: Vector3, uv0: Vector2, uv1: Vector2, uv2: Vector2) -> void:
+	func add_tri(
+			p0: Vector3,
+			p1: Vector3,
+			p2: Vector3,
+			uv0: Vector2,
+			uv1: Vector2,
+			uv2: Vector2,
+	) -> void:
 		var i := size
 
 		var dp1 := p1 - p0
@@ -198,7 +212,12 @@ static func _ramp(dx: float, dy: float, dz: float) -> ArrayMesh:
 	return b.build()
 
 
-static func _create_mesh(verts: PackedVector3Array, normals: PackedVector3Array, uvs: PackedVector2Array, indices: PackedInt32Array) -> ArrayMesh:
+static func _create_mesh(
+		verts: PackedVector3Array,
+		normals: PackedVector3Array,
+		uvs: PackedVector2Array,
+		indices: PackedInt32Array,
+) -> ArrayMesh:
 	var surface := []
 	var mesh := ArrayMesh.new()
 
@@ -213,7 +232,12 @@ static func _create_mesh(verts: PackedVector3Array, normals: PackedVector3Array,
 	return mesh
 
 
-func _add_mesh_instance(parent: Node3D, position: Vector3, mesh: ArrayMesh, material_override: Resource) -> void:
+func _add_mesh_instance(
+		parent: Node3D,
+		position: Vector3,
+		mesh: ArrayMesh,
+		material_override: Resource,
+) -> void:
 	var mi := MeshInstance3D.new()
 	mi.position = position
 	mi.mesh = mesh
