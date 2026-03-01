@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://ygjvluupbdtm" path="res://scenes/game_state.gd" id="1_aj67o"]
 [ext_resource type="Script" uid="uid://cu714ln7qv2gu" path="res://scripts/systems/save_state.gd" id="2_3oy0g"]
-[ext_resource type="Script" uid="uid://n2spkoxc2iv5" path="res://scripts/systems/pausing.gd" id="2_dq14d"]
+[ext_resource type="Script" uid="uid://n2spkoxc2iv5" path="res://scripts/systems/pause_menu_system.gd" id="2_dq14d"]
 [ext_resource type="Script" uid="uid://mahcrqfjlyyq" path="res://scripts/systems/replay.gd" id="3_rerck"]
 [ext_resource type="Script" uid="uid://bgvdp2xkv0yr3" path="res://scripts/systems/replay_system.gd" id="4_7ti0s"]
 [ext_resource type="Script" uid="uid://skj8dxeivfvs" path="res://scripts/systems/player_input.gd" id="4_qn400"]
@@ -11,12 +11,12 @@
 [ext_resource type="Shader" uid="uid://cucunjhgkuj2r" path="res://shaders/palette-post.gdshader" id="7_q5byu"]
 [ext_resource type="Shader" uid="uid://ctckeik4qa432" path="res://shaders/dither-post.gdshader" id="8_vsyf1"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_q5byu"]
-shader = ExtResource("7_q5byu")
-
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_3oy0g"]
 shader = ExtResource("8_vsyf1")
 shader_parameter/pixel_size = 2
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_q5byu"]
+shader = ExtResource("7_q5byu")
 
 [node name="GameState" type="Node" unique_id=974512371]
 script = ExtResource("1_aj67o")
@@ -27,9 +27,15 @@ unique_name_in_owner = true
 script = ExtResource("2_3oy0g")
 metadata/_custom_type_script = "uid://cu714ln7qv2gu"
 
-[node name="Pausing" type="Node" parent="." unique_id=1235145499]
+[node name="PauseMenuSystem" type="Node" parent="." unique_id=1235145499 node_paths=PackedStringArray("menu", "replay_system", "save_state", "system_dialog", "dither_filter", "palette_filter")]
 unique_name_in_owner = true
 script = ExtResource("2_dq14d")
+menu = NodePath("../Menu")
+replay_system = NodePath("../ReplaySystem")
+save_state = NodePath("../SaveState")
+system_dialog = NodePath("../SystemDialog")
+dither_filter = NodePath("../DitherFilter")
+palette_filter = NodePath("../PaletteFilter")
 metadata/_custom_type_script = "uid://n2spkoxc2iv5"
 
 [node name="ReplaySystem" type="Node" parent="." unique_id=916268345 node_paths=PackedStringArray("player_input", "save_state", "system_dialog")]
@@ -54,15 +60,12 @@ unique_name_in_owner = true
 script = ExtResource("6_rxqo8")
 metadata/_custom_type_script = "uid://btc74n06ykolu"
 
-[node name="Menu" parent="." unique_id=1709348178 instance=ExtResource("5_vsnwl")]
-unique_name_in_owner = true
-
-[node name="PostProcessing" type="CanvasLayer" parent="." unique_id=1427585307]
-
-[node name="PaletteFilter" type="ColorRect" parent="PostProcessing" unique_id=1840524435]
-unique_name_in_owner = true
+[node name="DitherFilter" type="CanvasLayer" parent="." unique_id=1427585307]
 visible = false
-material = SubResource("ShaderMaterial_q5byu")
+
+[node name="DitherFilter" type="ColorRect" parent="DitherFilter" unique_id=1046001627]
+unique_name_in_owner = true
+material = SubResource("ShaderMaterial_3oy0g")
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -70,10 +73,14 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="DitherFilter" type="ColorRect" parent="PostProcessing" unique_id=1046001627]
+[node name="Menu" parent="." unique_id=1709348178 instance=ExtResource("5_vsnwl")]
 unique_name_in_owner = true
+
+[node name="PaletteFilter" type="CanvasLayer" parent="." unique_id=1251717995]
 visible = false
-material = SubResource("ShaderMaterial_3oy0g")
+
+[node name="PaletteFilter" type="ColorRect" parent="PaletteFilter" unique_id=618054725]
+material = SubResource("ShaderMaterial_q5byu")
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
