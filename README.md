@@ -29,7 +29,9 @@ Batteries included. Delete what you don't want.
 
 ## Development
 
-A nix env is provided, but purely optional.
+### Nix
+
+A nix env is provided, but is optional.
 
 Update dependencies
 ```
@@ -39,6 +41,22 @@ nix flake update
 Start nix dev shell
 ```
 nix develop
+```
+
+### Shell Utils
+
+See
+```
+./scripts/bld --help
+./scripts/format --help
+./scripts/test-headless --help
+```
+
+### Git Hooks
+
+Add recommended git hooks with:
+```
+./scripts/add-git-hooks
 ```
 
 ## Publish to itch.io
