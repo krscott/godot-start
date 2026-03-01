@@ -1,0 +1,66 @@
+[gd_scene format=4 uid="uid://cag8ibjci0305"]
+
+[ext_resource type="Script" uid="uid://0lvv7uanxm8t" path="res://scenes/levels/obliquetile/tile_mesh_generator_tool.gd" id="1_r82f4"]
+[ext_resource type="Material" uid="uid://c6bwwg6bxdiaw" path="res://scenes/levels/obliquetile/test_material.tres" id="2_pplqu"]
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_pplqu"]
+_surfaces = [{
+"aabb": AABB(0, 0, 0, 1, 1e-05, 1),
+"attribute_data": PackedByteArray("AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AACAPwAAgD8="),
+"format": 34359742487,
+"index_count": 6,
+"index_data": PackedByteArray("AAABAAIAAgABAAMA"),
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 4,
+"vertex_data": PackedByteArray("AAAAAAAAAAAAAAAAAACAPwAAAAAAAAAAAAAAAAAAAAAAAIA/AACAPwAAAAAAAIA//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/78=")
+}]
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_l3w3u"]
+_surfaces = [{
+"aabb": AABB(0, 0, 0, 1, 0.5, 1),
+"attribute_data": PackedByteArray("AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AACAPwAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAIA/AACAPwAAAAAAAAAAAACAPwAAAAAAAAAAAACAPwAAgD8AAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AACAPwAAgD8="),
+"format": 34359742487,
+"index_count": 24,
+"index_data": PackedByteArray("AAABAAIAAgABAAMABAAFAAYABgAFAAcACAAJAAoACgAJAAsADAANAA4ADgANAA8A"),
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 16,
+"vertex_data": PackedByteArray("AAAAAAAAAD8AAAAAAACAPwAAAD8AAAAAAAAAAAAAAD8AAIA/AACAPwAAAD8AAIA/AAAAAAAAAD8AAIA/AACAPwAAAD8AAIA/AAAAAAAAAAAAAIA/AACAPwAAAAAAAIA/AAAAAAAAAD8AAAAAAAAAAAAAAD8AAIA/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAIA/AACAPwAAAD8AAIA/AACAPwAAAD8AAAAAAACAPwAAAAAAAIA/AACAPwAAAAAAAAAA/3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f/9//38AgP9//3//fwCA/3//f/9/AID/f/9//38AgAAA/3//f/+/AAD/f/9//78AAP9//3//vwAA/3//f/+/////f/9//7////9//3//v////3//f/+/////f/9//78=")
+}]
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_og0wk"]
+_surfaces = [{
+"aabb": AABB(0, 0, 0, 1, 0.5, 1),
+"attribute_data": PackedByteArray("AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AACAPwAAgD8AAAAAAAAAAAAAgD8AAIA/AAAAAAAAgD8AAAAAAAAAAAAAgD8AAIA/AAAAAAAAgD8="),
+"format": 34359742487,
+"index_count": 12,
+"index_data": PackedByteArray("AAABAAIAAgABAAMABAAFAAYABwAIAAkA"),
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 10,
+"vertex_data": PackedByteArray("AAAAAAAAAD8AAAAAAACAPwAAAD8AAAAAAAAAAAAAAAAAAIA/AACAPwAAAAAAAIA/AAAAAAAAAD8AAAAAAAAAAAAAAAAAAIA/AAAAAAAAAAAAAAAAAACAPwAAAAAAAIA/AACAPwAAAD8AAAAAAACAPwAAAAAAAAAA/39U1ds22rb/f1TV2zbatv9/VNXbNtq2/39U1ds22rYAAP9//3//vwAA/3//f/+/AAD/f/9//7////9//3//v////3//f/+/////f/9//78=")
+}]
+
+[node name="ObliqueLibrary" type="Node3D" unique_id=895952662]
+
+[node name="TileMeshGeneratorTool" type="Node" parent="." unique_id=2137500939]
+script = ExtResource("1_r82f4")
+material = ExtResource("2_pplqu")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=411191543]
+transform = Transform3D(0.9659258, -0.25, 0.066987306, 0, 0.25881907, 0.9659258, -0.25881904, -0.93301266, 0.25000003, 0, 5, 0)
+
+[node name="@MeshInstance3D@38400" type="MeshInstance3D" parent="." unique_id=225563128]
+material_override = ExtResource("2_pplqu")
+mesh = SubResource("ArrayMesh_pplqu")
+
+[node name="@MeshInstance3D@38401" type="MeshInstance3D" parent="." unique_id=987275668]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0)
+material_override = ExtResource("2_pplqu")
+mesh = SubResource("ArrayMesh_l3w3u")
+
+[node name="@MeshInstance3D@38402" type="MeshInstance3D" parent="." unique_id=2020203881]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 0)
+material_override = ExtResource("2_pplqu")
+mesh = SubResource("ArrayMesh_og0wk")

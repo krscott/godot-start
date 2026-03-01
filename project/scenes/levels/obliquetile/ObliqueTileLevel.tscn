@@ -1,0 +1,5 @@
+[gd_scene format=3 uid="uid://lmp14m6v5wf4"]
+
+[node name="ObliqueTileLevel" type="Node3D" unique_id=919855827]
+
+[node name="GridMap" type="GridMap" parent="." unique_id=690059227]

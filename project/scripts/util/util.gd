@@ -41,6 +41,10 @@ static func expect_true(x: bool, context := "") -> void:
 	assert(x, context)
 
 
+static func expect_false(x: bool, context := "") -> void:
+	assert(not x, context)
+
+
 ## Tries to cast Variant to Dictionary, otherise returns empty Dictionary
 static func try_as_dict(x: Variant) -> Dictionary:
 	if x is Dictionary:
