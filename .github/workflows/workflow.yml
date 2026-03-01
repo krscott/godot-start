@@ -24,3 +24,10 @@ jobs:
 
     - name: Check format
       run: nix run '.?submodules=1#format' -- --check -v
+
+    - name: Build
+      run: nix build '.?submodules=1#debug'
+
+    - name: Test
+      # Reuses cached debug build from previous step
+      run: nix run '.?submodules=1#test-headless'
