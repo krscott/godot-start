@@ -6,7 +6,7 @@ var generate_tiles_action := _generate
 
 @export var meshlib_name: String = "test"
 @export var collisions: bool
-@export var material: Resource
+@export var material: Material
 
 @onready var parent: Node3D = get_parent() 
 
@@ -18,11 +18,18 @@ func _generate() -> void:
 	for child in parent.get_children():
 		if child is MeshInstance3D:
 			child.queue_free()
+	
+	var meshes: Array[ArrayMesh] = [
+		_quad(1, 0, 1),
+		_box(1, 0.5, 1),
+		_ramp(1, 0.5, 1),
+	]
 
 	var ml := MeshLibrary.new()
-	_add_lib_mesh(ml, Vector3.ZERO, _quad(1, 0, 1), material)
-	_add_lib_mesh(ml, Vector3.RIGHT, _box(1, 0.5, 1), material)
-	_add_lib_mesh(ml, Vector3.RIGHT * 2, _ramp(1, 0.5, 1), material)
+	
+	for i in meshes.size():
+		_add_lib_mesh(ml, Vector3.RIGHT * i, meshes[i])
+		
 	util.aok(ResourceSaver.save(ml, filepath))
 
 
@@ -242,13 +249,14 @@ func _add_lib_mesh(
 		ml: MeshLibrary,
 		position: Vector3,
 		mesh: ArrayMesh,
-		material_override: Resource,
 ) -> void:
+	if material:
+		for i in mesh.get_surface_count():
+			mesh.surface_set_material(i, material)
+			
 	var mi := MeshInstance3D.new()
 	mi.position = position
 	mi.mesh = mesh
-	if material_override:
-		mi.material_override = material_override
 	parent.add_child(mi)
 	mi.owner = get_tree().edited_scene_root
 	
