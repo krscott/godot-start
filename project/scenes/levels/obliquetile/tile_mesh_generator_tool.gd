@@ -1,23 +1,29 @@
 @tool
 extends Node
 
-@export_tool_button("Generate Tiles", "MeshInstance3D")
+@export_tool_button("Generate MeshLibrary", "MeshInstance3D")
 var generate_tiles_action := _generate
 
+@export var meshlib_name: String = "test"
+@export var collisions: bool
 @export var material: Resource
 
+@onready var parent: Node3D = get_parent() 
 
 func _generate() -> void:
-	var parent: Node3D = get_parent()
-	print("Generating tiles on ", parent)
+	assert(meshlib_name)
+	var filepath := str( "res://assets/meshlibrary/", meshlib_name, ".meshlib")
+	print("Generating MeshLibrary: ", filepath)
 
 	for child in parent.get_children():
 		if child is MeshInstance3D:
 			child.queue_free()
 
-	_add_mesh_instance(parent, Vector3.ZERO, _quad(1, 0, 1), material)
-	_add_mesh_instance(parent, Vector3.RIGHT, _box(1, 0.5, 1), material)
-	_add_mesh_instance(parent, Vector3.RIGHT * 2, _ramp(1, 0.5, 1), material)
+	var ml := MeshLibrary.new()
+	_add_lib_mesh(ml, Vector3.ZERO, _quad(1, 0, 1), material)
+	_add_lib_mesh(ml, Vector3.RIGHT, _box(1, 0.5, 1), material)
+	_add_lib_mesh(ml, Vector3.RIGHT * 2, _ramp(1, 0.5, 1), material)
+	util.aok(ResourceSaver.save(ml, filepath))
 
 
 class MeshBuilder:
@@ -232,8 +238,8 @@ static func _create_mesh(
 	return mesh
 
 
-func _add_mesh_instance(
-		parent: Node3D,
+func _add_lib_mesh(
+		ml: MeshLibrary,
 		position: Vector3,
 		mesh: ArrayMesh,
 		material_override: Resource,
@@ -245,3 +251,12 @@ func _add_mesh_instance(
 		mi.material_override = material_override
 	parent.add_child(mi)
 	mi.owner = get_tree().edited_scene_root
+	
+	var id := ml.get_last_unused_item_id()
+	ml.create_item(id)
+	ml.set_item_mesh(id, mesh)
+	
+	if collisions:
+		mi.create_convex_collision(true, true)
+		var coll_shape: CollisionShape3D = mi.get_child(0).get_child(0)
+		ml.set_item_shapes(id, [coll_shape.shape])

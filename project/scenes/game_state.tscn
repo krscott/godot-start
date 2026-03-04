@@ -30,6 +30,7 @@ metadata/_custom_type_script = "uid://cu714ln7qv2gu"
 [node name="PauseMenuSystem" type="Node" parent="." unique_id=1235145499 node_paths=PackedStringArray("menu", "replay_system", "save_state", "system_dialog", "dither_filter", "palette_filter")]
 unique_name_in_owner = true
 script = ExtResource("2_dq14d")
+capture_mouse = false
 menu = NodePath("../Menu")
 replay_system = NodePath("../ReplaySystem")
 save_state = NodePath("../SaveState")
