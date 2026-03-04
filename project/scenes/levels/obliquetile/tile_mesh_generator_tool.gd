@@ -8,17 +8,18 @@ var generate_tiles_action := _generate
 @export var collisions: bool
 @export var material: Material
 
-@onready var parent: Node3D = get_parent() 
+@onready var parent: Node3D = get_parent()
+
 
 func _generate() -> void:
 	assert(meshlib_name)
-	var filepath := str( "res://assets/meshlibrary/", meshlib_name, ".meshlib")
+	var filepath := str("res://assets/meshlibrary/", meshlib_name, ".meshlib")
 	print("Generating MeshLibrary: ", filepath)
 
 	for child in parent.get_children():
 		if child is MeshInstance3D:
 			child.queue_free()
-	
+
 	var meshes: Array[ArrayMesh] = [
 		_quad(1, 0, 1),
 		_box(1, 0.5, 1),
@@ -26,10 +27,10 @@ func _generate() -> void:
 	]
 
 	var ml := MeshLibrary.new()
-	
+
 	for i in meshes.size():
 		_add_lib_mesh(ml, Vector3.RIGHT * i, meshes[i])
-		
+
 	util.aok(ResourceSaver.save(ml, filepath))
 
 
@@ -253,17 +254,17 @@ func _add_lib_mesh(
 	if material:
 		for i in mesh.get_surface_count():
 			mesh.surface_set_material(i, material)
-			
+
 	var mi := MeshInstance3D.new()
 	mi.position = position
 	mi.mesh = mesh
 	parent.add_child(mi)
 	mi.owner = get_tree().edited_scene_root
-	
+
 	var id := ml.get_last_unused_item_id()
 	ml.create_item(id)
 	ml.set_item_mesh(id, mesh)
-	
+
 	if collisions:
 		mi.create_convex_collision(true, true)
 		var coll_shape: CollisionShape3D = mi.get_child(0).get_child(0)
