@@ -1,6 +1,7 @@
 var script: Script
 var lines: Array[String] = []
 var conditions: Array[DialogCondition] = []
+var next_node: CaptiveSequenceNode
 
 func get_lines() -> Array[String]:
 	return lines
@@ -39,10 +40,10 @@ func remove_condition(condition: DialogCondition) -> void:
 func remove_all_conditions() -> void:
 	conditions.clear()
 
-func get_next_node() -> Node:
+func get_next_node() -> CaptiveSequenceNode:
     pass
 
-func set_next_node(node: Node) -> void:
+func set_next_node(node: CaptiveSequenceNode) -> void:
 	next_node = node
 
 func is_available() -> bool:

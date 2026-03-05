@@ -1,14 +1,14 @@
 class_name SequenceBuilder
 extends Node
 
-var root_node: Node
+var root_node: CaptiveSequenceNode
 
-func process_json_entry(data: Variant, parent: Node) -> void:
-	# For each key, create Node with the key name as the node's ID
+func process_json_entry(data: Variant, parent: CaptiveSequenceNode) -> void:
+	# For each key, create CaptiveSequenceNode with the key name as the node's ID
 	# Handle possible data types here.
 	if typeof(data) == TYPE_DICTIONARY:
 		for key in data.keys():
-			var new_node := Node.new()
+			var new_node := CaptiveSequenceNode.new()
 			new_node.name = key
 			new_node.set_id(key)
 			parent.add_child(new_node)
@@ -16,7 +16,6 @@ func process_json_entry(data: Variant, parent: Node) -> void:
 	if typeof(data) == TYPE_ARRAY:
 		for entry in data:
 			process_json_entry(entry, parent)
-	# TODO: 
 	if typeof(data) == TYPE_INT:
 		parent.set_value(data)
 	if typeof(data) == TYPE_STRING:
@@ -26,16 +25,16 @@ func process_json_entry(data: Variant, parent: Node) -> void:
 	if typeof(data) == TYPE_NIL:
 		parent.set_value(null)
 
-func build_from_file(filepath: String) -> Node:
+func build_from_file(filepath: String) -> CaptiveSequenceNode:
 	# read the file
 	# TODO LATER, let's assume JSON for now and parse yaml -> JSON
 	# Walk JSON depth-first, building nodes and links
 	# Return the root node
 	var file := FileAccess.open(filepath, FileAccess.READ)
 	var file_text := file.get_as_text()
-	var root_node := Node.new()
+	var root_node := CaptiveSequenceNode.new()
 	root_node.name = "root"
-	root_node.add_child(Node.new())
+	root_node.add_child(CaptiveSequenceNode.new())
 
 	# Now, recursively build the tree based on the JSON.
 	# It will be a "Variant"
