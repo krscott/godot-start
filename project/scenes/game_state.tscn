@@ -8,6 +8,7 @@
 [ext_resource type="Script" uid="uid://skj8dxeivfvs" path="res://scripts/systems/player_input.gd" id="4_qn400"]
 [ext_resource type="PackedScene" uid="uid://dkhqxc2w4rda4" path="res://scenes/ui/menu.tscn" id="5_vsnwl"]
 [ext_resource type="Script" uid="uid://btc74n06ykolu" path="res://scripts/systems/system_dialog.gd" id="6_rxqo8"]
+[ext_resource type="Script" path="res://dialog_system/SequenceBuilder.gd" id="9_seqbuilder"]
 [ext_resource type="Shader" uid="uid://cucunjhgkuj2r" path="res://shaders/palette-post.gdshader" id="7_q5byu"]
 [ext_resource type="Shader" uid="uid://ctckeik4qa432" path="res://shaders/dither-post.gdshader" id="8_vsyf1"]
 
@@ -61,6 +62,10 @@ metadata/_custom_type_script = "uid://skj8dxeivfvs"
 unique_name_in_owner = true
 script = ExtResource("6_rxqo8")
 metadata/_custom_type_script = "uid://btc74n06ykolu"
+
+[node name="SequenceBuilder" type="Node" parent="." unique_id=887202934]
+unique_name_in_owner = true
+script = ExtResource("9_seqbuilder")
 
 [node name="DitherFilter" type="CanvasLayer" parent="." unique_id=1427585307]
 visible = false

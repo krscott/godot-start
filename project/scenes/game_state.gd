@@ -5,6 +5,7 @@ extends Node
 @onready var _pause_menu_system: PauseMenuSystem = %PauseMenuSystem
 @onready var _replay_system: ReplaySystem = %ReplaySystem
 @onready var player_input: PlayerInput = %PlayerInput
+@onready var _sequence_builder: SequenceBuilder = %SequenceBuilder
 
 # Public Methods
 
@@ -20,8 +21,12 @@ func _ready() -> void:
 	assert(_pause_menu_system)
 	assert(_replay_system)
 	assert(player_input)
+	assert(_sequence_builder)
 
 	util.printdbg("DEBUG BUILD")
+	
+	# Test SequenceBuilder
+	_sequence_builder.debug_build_from_file("res://dialog_system/test_json.json")
 
 	sync_object_state(&"player_input", player_input)
 

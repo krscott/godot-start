@@ -1,0 +1,34 @@
+{
+    "talk_some_guy_01": {
+        "cond": "is_guy_happy",
+        "true": [
+            {
+                "text": "I'm happy."
+            },
+            {
+                "text": "What about you?",
+                "choice": [
+                    {
+                        "text": "Yes",
+                        "key": "player_happy",
+                        "value": true
+                    },
+                    {
+                        "text": "What?",
+                        "next": "talk_some_guy_02"
+                    }
+                ]
+            },
+            {
+                "next": "talk_some_guy_02"
+            }
+        ],
+        "false": [
+            {
+                "text": "I'm sad. Go away.",
+                "next": "talk_some_guy_02"
+            }
+        ],
+        "text": "Poopity scoop. Scoop dee poopity woop"
+    }
+}
