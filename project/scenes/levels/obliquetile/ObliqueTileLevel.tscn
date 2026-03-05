@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://lmp14m6v5wf4"]
 
 [ext_resource type="MeshLibrary" uid="uid://q2vjmi8n4ipj" path="res://assets/meshlibrary/test.meshlib" id="1_6f4l4"]
+[ext_resource type="PackedScene" uid="uid://bwcxyj2dueo8r" path="res://scenes/levels/obliquetile/player.tscn" id="2_vmmfd"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_6f4l4"]
 
@@ -46,3 +47,5 @@ shape = SubResource("SphereShape3D_vmmfd")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="RigidBody3D" unique_id=439081567]
 mesh = SubResource("SphereMesh_ppqqn")
+
+[node name="Player" parent="." unique_id=1920999902 instance=ExtResource("2_vmmfd")]
