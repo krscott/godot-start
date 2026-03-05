@@ -1,8 +1,30 @@
 class_name SequenceBuilder
 extends Node
 
-func build_node(node: Variant, parent: Node) -> void:
-    pass
+var root_node: Node
+
+func process_json_entry(data: Variant, parent: Node) -> void:
+    # For each key, create Node with the key name as the node's ID
+    # Handle possible data types here.
+    if typeof(data) == TYPE_DICTIONARY:
+        for key in data.keys():
+            var new_node := Node.new()
+            new_node.name = key
+            new_node.ID = key
+            parent.add_child(new_node)
+            process_json_entry(data[key], new_node)
+    if typeof(data) == TYPE_ARRAY:
+        for entry in data:
+            process_json_entry(entry, parent)
+    # TODO: 
+    if typeof(data) == TYPE_INT:
+        parent.value = data
+    if typeof(data) == TYPE_STRING:
+        parent.value = data
+    if typeof(data) == TYPE_BOOL:
+        parent.value = data
+    if typeof(data) == TYPE_NIL:
+        parent.value = null
 
 func build_from_file(filepath: String) -> Node:
     # read the file
@@ -19,18 +41,13 @@ func build_from_file(filepath: String) -> Node:
     # It will be a "Variant"
     var json = JSON.new()
     var error := json.parse(file_text)
-    
+
+
     if error == OK:
         var data_received = json.data
-        if typeof(data_received) == TYPE_DICTIONARY:
-            #build_node(data_received, parent)
-            print("Dictionary: ", data_received)
-        elif typeof(data_received) == TYPE_ARRAY:
-            for item in data_received:
-                #build_node(item, parent)
-                print("Array: ", item)
-        else:
-            printerr("Invalid JSON data: ", data_received)
+        # Now, recursively process the entries.
+        process_json_entry(data_received, root_node)
+
 
     return root_node
 
