@@ -1,7 +1,7 @@
 [gd_scene format=4 uid="uid://cag8ibjci0305"]
 
-[ext_resource type="Script" uid="uid://0lvv7uanxm8t" path="res://scenes/levels/obliquetile/tile_mesh_generator_tool.gd" id="1_r82f4"]
-[ext_resource type="Material" uid="uid://c6bwwg6bxdiaw" path="res://scenes/levels/obliquetile/test_material.tres" id="2_pplqu"]
+[ext_resource type="Script" uid="uid://0lvv7uanxm8t" path="res://scenes/levels/obliquetile/tile_mesh_generator_tool.gd" id="1_6uswi"]
+[ext_resource type="Material" uid="uid://c6bwwg6bxdiaw" path="res://scenes/levels/obliquetile/test_material.tres" id="2_337sx"]
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_j7gwk"]
 _surfaces = [{
@@ -51,18 +51,18 @@ _surfaces = [{
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_rde3k"]
 points = PackedVector3Array(1.0077376, 0.02390115, 0.9919299, -0.0077376366, -0.007834017, -0.0077376366, -0.0077376366, 0.515873, -0.0077376366, -0.0077376366, -0.007834017, 1.0077376, 1.0077376, -0.007834017, -0.0077376366, 1.0077376, 0.515873, -0.0077376366, 1.0077376, -0.007834017, 1.0077376, -0.0077376366, 0.02390115, 0.9919299, 1.0077376, 0.515873, 0.008070111, -0.0077376366, 0.515873, 0.008070111, -0.0077376366, 0.008007944, 1.0077376, 1.0077376, 0.008007944, 1.0077376, 1.0077376, 0.103264675, 0.83325565)
 
-[node name="ObliqueLibrary" type="Node3D" unique_id=895952662]
+[node name="ObliqueMeshlibTool" type="Node3D" unique_id=895952662]
 
 [node name="TileMeshGeneratorTool" type="Node" parent="." unique_id=2137500939]
-script = ExtResource("1_r82f4")
+script = ExtResource("1_6uswi")
 collisions = true
-material = ExtResource("2_pplqu")
+material = ExtResource("2_337sx")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=411191543]
 transform = Transform3D(0.9659258, -0.25, 0.066987306, 0, 0.25881907, 0.9659258, -0.25881904, -0.93301266, 0.25000003, 0, 5, 0)
 
 [node name="@MeshInstance3D@26740" type="MeshInstance3D" parent="." unique_id=2052617071]
-material_override = ExtResource("2_pplqu")
+material_override = ExtResource("2_337sx")
 mesh = SubResource("ArrayMesh_j7gwk")
 
 [node name="_MeshInstance3D_26740_col" type="StaticBody3D" parent="@MeshInstance3D@26740" unique_id=1402469976]
@@ -72,7 +72,7 @@ shape = SubResource("ConvexPolygonShape3D_yprcs")
 
 [node name="@MeshInstance3D@26741" type="MeshInstance3D" parent="." unique_id=743882406]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0)
-material_override = ExtResource("2_pplqu")
+material_override = ExtResource("2_337sx")
 mesh = SubResource("ArrayMesh_n85b0")
 
 [node name="_MeshInstance3D_26741_col" type="StaticBody3D" parent="@MeshInstance3D@26741" unique_id=73341496]
@@ -82,7 +82,7 @@ shape = SubResource("ConvexPolygonShape3D_wk1sq")
 
 [node name="@MeshInstance3D@26742" type="MeshInstance3D" parent="." unique_id=390744817]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 0)
-material_override = ExtResource("2_pplqu")
+material_override = ExtResource("2_337sx")
 mesh = SubResource("ArrayMesh_722xu")
 
 [node name="_MeshInstance3D_26742_col" type="StaticBody3D" parent="@MeshInstance3D@26742" unique_id=278890275]
