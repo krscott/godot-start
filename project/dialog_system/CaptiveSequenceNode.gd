@@ -2,7 +2,7 @@ class_name CaptiveSequenceNode
 extends Node
 
 var ID: String
-var links: Array = []
+var links: Array[Link] = []
 var value: Variant = null
 
 func get_id() -> String:
@@ -14,13 +14,13 @@ func set_id(id: String) -> void:
 func get_links():
 	return links
 
-func set_links(links) -> void:
+func set_links(links: Array) -> void:
 	links = links
 
-func add_link(link) -> void:
+func add_link(link: Link) -> void:
 	links.append(link)
 
-func remove_link(link) -> void:
+func remove_link(link: Link) -> void:
 	links.erase(link)
 
 func remove_all_links() -> void:

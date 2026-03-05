@@ -44,7 +44,7 @@ func remove_all_conditions() -> void:
 	conditions.clear()
 
 func get_next_node() -> CaptiveSequenceNode:
-    pass
+	return next_node
 
 func set_next_node(node: CaptiveSequenceNode) -> void:
 	next_node = node

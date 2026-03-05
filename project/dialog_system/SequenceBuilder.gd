@@ -17,12 +17,16 @@ func process_json_entry(data: Variant, parent: CaptiveSequenceNode) -> void:
 		for entry in data:
 			process_json_entry(entry, parent)
 	if typeof(data) == TYPE_INT:
+		print("Setting int value: ", data)
 		parent.set_value(data)
 	if typeof(data) == TYPE_STRING:
+		print("Setting string value: ", data)
 		parent.set_value(data)
 	if typeof(data) == TYPE_BOOL:
+		print("Setting bool value: ", data)
 		parent.set_value(data)
 	if typeof(data) == TYPE_NIL:
+		print("Setting nil value")
 		parent.set_value(null)
 
 func build_from_file(filepath: String) -> CaptiveSequenceNode:
