@@ -1,9 +1,9 @@
 class_name Link
 extends Node
 
-var script: Script
+var sequence_script: CaptiveSequenceScript
 var lines: Array[String] = []
-var conditions: Array[DialogCondition] = []
+var conditions: Array[DialogueCondition] = []
 var next_node: CaptiveSequenceNode
 
 func get_lines() -> Array[String]:
@@ -22,22 +22,22 @@ func remove_all_lines() -> void:
 	lines.clear()
 
 
-func get_script() -> Script:
-	return script
+func get_sequence_script() -> CaptiveSequenceScript:
+	return sequence_script
 
-func set_script(script: Script) -> void:
-	script = script
+func set_sequence_script(new_script: CaptiveSequenceScript) -> void:
+	sequence_script = new_script
 
-func get_conditions() -> Array[DialogCondition]:
+func get_conditions() -> Array[DialogueCondition]:
 	return conditions
 
-func set_conditions(conditions: Array[DialogCondition]) -> void:
+func set_conditions(conditions: Array[DialogueCondition]) -> void:
 	conditions = conditions
 
-func add_condition(condition: DialogCondition) -> void:
+func add_condition(condition: DialogueCondition) -> void:
 	conditions.append(condition)
 
-func remove_condition(condition: DialogCondition) -> void:
+func remove_condition(condition: DialogueCondition) -> void:
 	conditions.erase(condition)
 
 func remove_all_conditions() -> void:
@@ -50,7 +50,7 @@ func set_next_node(node: CaptiveSequenceNode) -> void:
 	next_node = node
 
 func is_available() -> bool:
-    for condition in conditions:
-        if not condition.evaluate():
-            return false
-    return true
+	for condition in conditions:
+		if not condition.evaluate():
+			return false
+	return true

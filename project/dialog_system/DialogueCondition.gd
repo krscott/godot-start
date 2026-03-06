@@ -1,6 +1,6 @@
-class_name DialogCondition
-extends RefCounted
+class_name DialogueCondition
+extends Node
 
-@abstract
-func evaluate() -> bool:
-    pass # Implemented in subclass
+# Must be implemented in subclass
+func evaluate():
+	pass # Implemented in subclass
