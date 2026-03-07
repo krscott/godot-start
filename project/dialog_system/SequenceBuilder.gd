@@ -9,7 +9,7 @@ var callbacks_global_registry: %CallbackRegistry
 func process_link_entry(data: Variant, construction_map: Dictionary) -> Link:
 	var new_link := Link.new()
 	# Process conditions
-	if data["conds"]
+	if data["conds"] != null:
 		for condition in data["conds"]:
 			var new_condition := DialogueCondition.new()
 			# Look up conditions in a global dictionary of conditions.
@@ -22,12 +22,12 @@ func process_link_entry(data: Variant, construction_map: Dictionary) -> Link:
 			
 
 	# Process text
-	if data["text"]
+	if data["text"] != null:
 		for line in data["text"]:
 			new_link.add_line(line)
 
 	# Process callbacks
-	if data["callbacks"]:
+	if data["callbacks"] != null:
 		var callbacks_to_add: Array[Callable] = {}
 		for callback_type in data["callbacks"].keys(): # ex: "before_dialogue"
 			for id_valuepair in data["callbacks"][callback_type]:
@@ -48,13 +48,16 @@ func process_link_entry(data: Variant, construction_map: Dictionary) -> Link:
 	return new_link
 
 
-func process_nodes_entry(data: Variant, construction_map: Dictionary) -> void:
-	for key in data.keys():
-		var new_node := CaptiveSequenceNode.new()
-		new_node.name = key
-		new_node.set_id(key)
-		process_nodes_entry(data[key], construction_map)
+func process_node_entry(data: Variant, construction_map: Dictionary) -> void:
+	var new_node := CaptiveSequenceNode.new()
+	new_node.name = data["id"]
+	new_node.set_id(data["id"])
+	for link_id in data["links"]:
+		var new_link := process_link_entry(data["links"][link_id], construction_map)
+		new_node.add_link(new_link)
 
+	return new_node
+	
 
 func build_from_file(filepath: String) -> CaptiveSequenceNode:
 	# read the file
@@ -78,7 +81,10 @@ func build_from_file(filepath: String) -> CaptiveSequenceNode:
 	if error == OK:
 		var data_received = json.data
 		# Now, recursively process the entries.
-		process_json_entry(data_received, root_node, construction_map)
+		for node_id in data_received.keys():
+			process_node_entry(data_received[node_id], construction_map)
+
+	# Now connect links together
 
 
 	return root_node
