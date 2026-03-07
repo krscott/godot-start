@@ -20,7 +20,6 @@ func process_link_entry(data: Variant, link_to_node_map: Dictionary) -> Link:
 				new_condition.set_eval_args([condition["value"]])
 				new_link.add_condition(new_condition)
 			
-
 	# Process text
 	if data["text"] != null:
 		for line in data["text"]:
@@ -79,7 +78,6 @@ func build_from_file(filepath: String) -> CaptiveSequenceNode:
 	# It will be a "Variant"
 	var json = JSON.new()
 	var error := json.parse(file_text)
-
 
 	if error == OK:
 		var data_received = json.data
