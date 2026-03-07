@@ -43,7 +43,7 @@ func _toggle_flip_frame(animation_: StringName, frame_: int) -> void:
 
 func _flip_frame_horizontal_tool() -> void:
 	if Engine.is_editor_hint():
-		var undo_redo := EditorInterface.get_editor_undo_redo()
+		var undo_redo := EditorInterface2.get_editor_undo_redo()
 		undo_redo.create_action("Flip Frame")
 		undo_redo.add_do_method(self, &"_toggle_flip_frame", animation, frame)
 		undo_redo.add_undo_method(self, &"_toggle_flip_frame", animation, frame)
