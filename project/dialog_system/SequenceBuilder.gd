@@ -7,6 +7,16 @@ func process_json_entry(data: Variant, parent: CaptiveSequenceNode) -> void:
 	# For each key, create CaptiveSequenceNode with the key name as the node's ID
 	# Handle possible data types here.
 	if typeof(data) == TYPE_DICTIONARY:
+		if data.has("cond"):
+			var new_link := Link.new()
+			new_link.set_sequence_script(CaptiveSequenceScript.new())
+			new_link.set_conditions(data["cond"])
+			parent.add_link(new_link)
+			if data.has("true"):
+				process_json_entry(data["true"], new_link)
+			if data.has("false"):
+				process_json_entry(data["false"], new_link)
+			return
 		for key in data.keys():
 			var new_node := CaptiveSequenceNode.new()
 			new_node.name = key
