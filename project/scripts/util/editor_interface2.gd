@@ -18,7 +18,14 @@ class EditorUndoRedoManager2:
 			backward_undo_ops: bool = false,
 			mark_unsaved: bool = true,
 	) -> void:
-		_internal.call(&"create_action", name, merge_mode, custom_context, backward_undo_ops, mark_unsaved)
+		_internal.call(
+			&"create_action",
+			name,
+			merge_mode,
+			custom_context,
+			backward_undo_ops,
+			mark_unsaved,
+		)
 
 
 	func add_do_method(object: Object, method: StringName, ...args: Array) -> void:
