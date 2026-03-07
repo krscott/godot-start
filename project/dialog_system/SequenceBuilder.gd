@@ -6,7 +6,7 @@ var conditions_global_registry: %ConditionRegistry
 var callbacks_global_registry: %CallbackRegistry
 
 
-func process_link_entry(data: Variant, construction_map: Dictionary) -> Link:
+func process_link_entry(data: Variant, link_to_node_map: Dictionary) -> Link:
 	var new_link := Link.new()
 	# Process conditions
 	if data["conds"] != null:
@@ -43,7 +43,7 @@ func process_link_entry(data: Variant, construction_map: Dictionary) -> Link:
 	# Add the ID of the next node to the mapping 
 	# It's a mapping of this LINK to NEXT NODE.
 	if data["next"] != null:
-		construction_map[new_link.get_id()] = data["next"]
+		link_to_node_map[new_link] = data["next"]
 
 	return new_link
 
@@ -59,6 +59,8 @@ func process_node_entry(data: Variant, construction_map: Dictionary) -> void:
 	return new_node
 	
 
+# ASSUMPTION: All nodes that can reach each other are in the same file.
+
 func build_from_file(filepath: String) -> CaptiveSequenceNode:
 	# read the file
 	# TODO LATER, let's assume JSON for now and parse yaml -> JSON
@@ -70,7 +72,8 @@ func build_from_file(filepath: String) -> CaptiveSequenceNode:
 	root_node.name = "root"
 	root_node.add_child(CaptiveSequenceNode.new())
 
-	var construction_map := {}
+	var node_id_to_node_map := {}
+	var link_to_node_map := {} # Maps which links will connect to which following nodes.
 
 	# Now, recursively build the tree based on the JSON.
 	# It will be a "Variant"
@@ -81,14 +84,21 @@ func build_from_file(filepath: String) -> CaptiveSequenceNode:
 	if error == OK:
 		var data_received = json.data
 		# Now, recursively process the entries.
+
+		# For each key in the top-level JSON, create the node and add it to the map
 		for node_id in data_received.keys():
-			process_node_entry(data_received[node_id], construction_map)
+			var new_node := process_node_entry(data_received[node_id], link_to_node_map)
+			node_id_to_node_map[node_id] = new_node
+			for json_object in data_received[node_id]:
+				var new_link := process_link_entry(json_object, link_to_node_map)
+				new_node.add_link(new_link)
 
-	# Now connect links together
-
+		# Now connect links, which will be in the construction map.
+		for link in link_to_node_map.keys():
+			var next_link_node_id = link_to_node_map[link]
+			if next_link_node_id != null:
+				var next_node = node_id_to_node_map[next_link_node_id]
+				link.set_next_node(next_node)
+			
 
 	return root_node
-
-func debug_build_from_file(filepath: String) -> void:
-	var sequence := build_from_file(filepath)
-	print(sequence)
