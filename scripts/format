@@ -14,21 +14,25 @@ Commands:
 
 Options:
     -c, --check         Check formatting without editing
+    -u, --updated       Only run on uncommitted files
     -h, --help          Display this help message
     -v, --verbose       Enable debug messages
 EOF
 }
 
 # NOTE: Use ':' suffix to specify opt has an arg
-OPTIONS="chv"
-LONGOPTS="check,help,verbose"
+OPTIONS="chuv"
+LONGOPTS="check,help,updated,verbose"
 
 # NOTE: getopt comes from 'util-linux' package
-PARSED=$(getopt -o "$OPTIONS" -l "$LONGOPTS" -n "$0" -- "$@") || {
-    usage >&2
-    exit 2
-}
-eval set -- "$PARSED"
+# Check if getopt is available, fallback to simple parsing if not
+if command -v getopt &>/dev/null; then
+    PARSED=$(getopt -o "$OPTIONS" -l "$LONGOPTS" -n "$0" -- "$@") || {
+        usage >&2
+        exit 2
+    }
+    eval set -- "$PARSED"
+fi
 
 die() {
     echo "$*" >&2
@@ -54,8 +58,9 @@ error() { log "0;31" "$@"; }
 
 args_nix=
 args_gd=
+updated=
 verbose=
-while true; do
+while [[ $# -gt 0 ]]; do
     case "$1" in
     -c | --check)
         args_nix=--check
@@ -65,9 +70,17 @@ while true; do
         usage
         exit 0
         ;;
+    -u | --updated) updated=1 ;;
     -v | --verbose) verbose=1 ;;
     --)
         shift
+        break
+        ;;
+    -*)
+        die "Unknown option: $1"
+        ;;
+    *)
+        # Non-option argument, stop parsing
         break
         ;;
     esac
@@ -84,28 +97,88 @@ anyfiles() {
     find . -type f -name "*.$1" -print -quit | grep -q .
 }
 
+git_updated_files() {
+    local ext="$1"
+    UPDATED_FILES=()
+
+    git rev-parse --is-inside-work-tree >/dev/null 2>&1 ||
+        die "--updated requires running in a git repository"
+
+    local path
+    local -A seen=()
+    while IFS= read -r -d '' path; do
+        [[ $path == *."$ext" ]] || continue
+        [[ -f $path ]] || continue
+        [[ -n ${seen["$path"]+x} ]] && continue
+        seen["$path"]=1
+        UPDATED_FILES+=("$path")
+    done < <(
+        git diff --name-only -z --diff-filter=ACMR &&
+            git diff --cached --name-only -z --diff-filter=ACMR &&
+            git ls-files --others --exclude-standard -z
+    )
+}
+
 case "${1:-format}" in
 lint)
-    (
-        [[ -n $verbose ]] && set -x
-        gdscript-formatter lint \
-            --disable constant-name,private-access,class-name \
-            ./**/*.gd
-    )
-    ;;
-format)
-    if anyfiles "gd"; then
+    if [[ -n $updated ]]; then
+        git_updated_files "gd"
+        if ((${#UPDATED_FILES[@]} > 0)); then
+            (
+                [[ -n $verbose ]] && set -x
+                gdscript-formatter lint \
+                    --disable constant-name,private-access,class-name \
+                    "${UPDATED_FILES[@]}"
+            )
+        else
+            debug "No updated .gd files to lint"
+        fi
+    else
         (
             [[ -n $verbose ]] && set -x
-            gdscript-formatter $args_gd ./**/*.gd
+            gdscript-formatter lint \
+                --disable constant-name,private-access,class-name \
+                ./**/*.gd
         )
     fi
+    ;;
+format)
+    if [[ -n $updated ]]; then
+        git_updated_files "gd"
+        if ((${#UPDATED_FILES[@]} > 0)); then
+            (
+                [[ -n $verbose ]] && set -x
+                gdscript-formatter $args_gd "${UPDATED_FILES[@]}"
+            )
+        else
+            debug "No updated .gd files to format"
+        fi
 
-    if iscmd nix && anyfiles "nix"; then
-        (
-            [[ -n $verbose ]] && set -x
-            nix fmt ./**/*.nix -- $args_nix
-        )
+        if iscmd nix; then
+            git_updated_files "nix"
+            if ((${#UPDATED_FILES[@]} > 0)); then
+                (
+                    [[ -n $verbose ]] && set -x
+                    nix fmt "${UPDATED_FILES[@]}" -- $args_nix
+                )
+            else
+                debug "No updated .nix files to format"
+            fi
+        fi
+    else
+        if anyfiles "gd"; then
+            (
+                [[ -n $verbose ]] && set -x
+                gdscript-formatter $args_gd ./**/*.gd
+            )
+        fi
+
+        if iscmd nix && anyfiles "nix"; then
+            (
+                [[ -n $verbose ]] && set -x
+                nix fmt ./**/*.nix -- $args_nix
+            )
+        fi
     fi
     ;;
 *)

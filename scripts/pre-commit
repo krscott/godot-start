@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+set -eu
+
+echo "=== pre-commit hook start ==="
+
+./scripts/format -u
+./scripts/format -u lint
+
+echo "=== pre-commit hook end ==="
