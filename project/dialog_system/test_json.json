@@ -3,7 +3,7 @@
         {
             "conds": [
                 {
-                    "type": "is_guy_happy",
+                    "identifier": "is_guy_happy",
                     "value": true
                 }
             ],
@@ -13,14 +13,18 @@
                 "Oscar: It's a solid choice"
             ],
             "callbacks": {
-                "before_dialogue": {
-                    "set_happy_acknowledged": [
-                        true
-                    ]
-                },
-                "after_dialogue": {
-                    "clear_text_buffer": []
-                }
+                "before_dialogue": [
+                    {
+                        "identifier": "set_happy_acknowledged",
+                        "values": [true]
+                    }
+                ],
+                "after_dialogue": [
+                    {
+                        "identifier": "clear_text_buffer",
+                        "values": [true]
+                    }
+                ]
             },
             "next": "talk_some_guy_02"
         },
@@ -32,5 +36,13 @@
                 "Oscar: You didn't make a choice to show up here"
             ]
         }
-    ]
+    ],
+    "talk_some_guy_02": {
+        "conds": [],
+        "text": [
+            "Choice C",
+            "Pablo: Choice C will always show up since there are no conditions",
+            "Oscar: You didn't make a choice to show up here"
+        ]
+    }
 }

@@ -1,10 +1,19 @@
 class_name Link
-extends Node
+extends RefCounted
 
+var id: String
 var sequence_script: CaptiveSequenceScript
 var lines: Array[String] = []
 var conditions: Array[DialogueCondition] = []
 var next_node: CaptiveSequenceNode
+var callbacks: Dictionary = {}
+
+
+func get_id() -> String:
+	return id
+
+func set_id(id: String) -> void:
+	id = id
 
 func get_lines() -> Array[String]:
 	return lines
@@ -20,7 +29,6 @@ func remove_line(line: String) -> void:
 
 func remove_all_lines() -> void:
 	lines.clear()
-
 
 func get_sequence_script() -> CaptiveSequenceScript:
 	return sequence_script
@@ -54,3 +62,15 @@ func is_available() -> bool:
 		if not condition.evaluate():
 			return false
 	return true
+
+func get_callbacks() -> Dictionary:
+	return callbacks
+
+func set_callbacks(callbacks: Dictionary) -> void:
+	callbacks = callbacks
+
+func add_callback(callback: String, args: Array[Variant]) -> void:
+	callbacks[callback] = args
+
+func get_choice_line() -> String:
+	return lines[0]

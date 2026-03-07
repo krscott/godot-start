@@ -1,5 +1,5 @@
 class_name CaptiveSequenceNode
-extends Node
+extends RefCounted
 
 var ID: String
 var links: Array[Link] = []
