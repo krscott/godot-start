@@ -3,7 +3,7 @@ class_name FancySprite3D
 extends AnimatedSprite3D
 
 @export_tool_button("Flip Frame Horizontal", "PingPongLoop")
-var flip_frame_horizontal := _flip_frame_h
+var flip_frame_horizontal_tool := _flip_frame_horizontal_tool
 
 @export_storage var flip_animations: PackedStringArray
 @export_storage var flip_frames: PackedInt32Array
@@ -41,9 +41,10 @@ func _toggle_flip_frame(animation_: StringName, frame_: int) -> void:
 	#flip_h = not flip_h
 
 
-func _flip_frame_h() -> void:
-	var undo_redo := EditorInterface.get_editor_undo_redo()
-	undo_redo.create_action("Flip Frame")
-	undo_redo.add_do_method(self, &"_toggle_flip_frame", animation, frame)
-	undo_redo.add_undo_method(self, &"_toggle_flip_frame", animation, frame)
-	undo_redo.commit_action()
+func _flip_frame_horizontal_tool() -> void:
+	if Engine.is_editor_hint():
+		var undo_redo := EditorInterface.get_editor_undo_redo()
+		undo_redo.create_action("Flip Frame")
+		undo_redo.add_do_method(self, &"_toggle_flip_frame", animation, frame)
+		undo_redo.add_undo_method(self, &"_toggle_flip_frame", animation, frame)
+		undo_redo.commit_action()
