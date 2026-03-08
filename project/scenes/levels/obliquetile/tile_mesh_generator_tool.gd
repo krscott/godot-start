@@ -14,7 +14,6 @@ var generate_tiles_action := _generate
 @export var tile_grass_ramp: Vector2i
 @export var tile_wall: Vector2i
 
-
 @onready var parent: Node3D = get_parent()
 
 
@@ -135,8 +134,10 @@ class MeshFactory:
 	var tileset_grid_size := Vector2.ONE
 	var tileset_size: Vector2
 
+
 	func _uv(tile: Vector2i, u: float, v: float) -> Vector2:
 		return (Vector2(tile) + Vector2(u, v)) * tileset_grid_size / tileset_size
+
 
 	func quad(dx: float, dy: float, dz: float, tile: Vector2i) -> ArrayMesh:
 		assert(dx > 0.0)
@@ -206,18 +207,24 @@ class MeshFactory:
 		return b.build()
 
 
-	func ramp(dx: float, dy: float, dz: float, tile_top: Vector2i, tile_side: Vector2i) -> ArrayMesh:
+	func ramp(
+			dx: float,
+			dy: float,
+			dz: float,
+			tile_top: Vector2i,
+			tile_side: Vector2i,
+	) -> ArrayMesh:
 		assert(dx > 0.0)
 		assert(dy > 0.0)
 		assert(dz > 0.0)
 
 		var b := MeshBuilder.new()
-		
+
 		var frac := dz / (dy + dz)
-		
+
 		var y1 := dy - dy * frac
 		var z1 := dz * frac
-		
+
 		var frac_uv := dy
 
 		# Split ramp in two to repeat UV section
