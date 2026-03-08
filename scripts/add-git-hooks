@@ -3,4 +3,5 @@ set -eu
 
 SCRIPT_DIR="$(dirname "$(readlink -f -- "$0")")"
 
-cp "$SCRIPT_DIR/pre-commit" .git/hooks/pre-commit
+set -x
+cp "$SCRIPT_DIR/pre-commit" .git/hooks

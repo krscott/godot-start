@@ -3,7 +3,27 @@ set -eu
 
 echo "=== pre-commit hook start ==="
 
-./scripts/format -u
-./scripts/format -u lint
+while IFS= read -r file; do
+    [ -n "$file" ] || continue
+    [ -f "$file" ] || continue
+
+    case "$file" in
+    *.gd)
+        ./scripts/format --file "$file"
+        if ! git diff --quiet -- "$file"; then
+            git add -- "$file"
+        fi
+        ./scripts/format --file "$file" lint
+        ;;
+    *.nix)
+        ./scripts/format --file "$file"
+        if ! git diff --quiet -- "$file"; then
+            git add -- "$file"
+        fi
+        ;;
+    esac
+done <<EOF
+$(git diff --cached --name-only --diff-filter=ACMR)
+EOF
 
 echo "=== pre-commit hook end ==="

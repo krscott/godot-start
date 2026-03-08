@@ -14,15 +14,15 @@ Commands:
 
 Options:
     -c, --check         Check formatting without editing
-    -u, --updated       Only run on uncommitted files
+    -f, --file FILE     Only run on a single file
     -h, --help          Display this help message
     -v, --verbose       Enable debug messages
 EOF
 }
 
 # NOTE: Use ':' suffix to specify opt has an arg
-OPTIONS="chuv"
-LONGOPTS="check,help,updated,verbose"
+OPTIONS="cf:hv"
+LONGOPTS="check,file:,help,verbose"
 
 # NOTE: getopt comes from 'util-linux' package
 # Check if getopt is available, fallback to simple parsing if not
@@ -58,7 +58,7 @@ error() { log "0;31" "$@"; }
 
 args_nix=
 args_gd=
-updated=
+file=
 verbose=
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -70,7 +70,11 @@ while [[ $# -gt 0 ]]; do
         usage
         exit 0
         ;;
-    -u | --updated) updated=1 ;;
+    -f | --file)
+        [[ ${2:-} ]] || die "--file requires an argument"
+        file="$2"
+        shift
+        ;;
     -v | --verbose) verbose=1 ;;
     --)
         shift
@@ -97,42 +101,18 @@ anyfiles() {
     find . -type f -name "*.$1" -print -quit | grep -q .
 }
 
-git_updated_files() {
-    local ext="$1"
-    UPDATED_FILES=()
-
-    git rev-parse --is-inside-work-tree >/dev/null 2>&1 ||
-        die "--updated requires running in a git repository"
-
-    local path
-    local -A seen=()
-    while IFS= read -r -d '' path; do
-        [[ $path == *."$ext" ]] || continue
-        [[ -f $path ]] || continue
-        [[ -n ${seen["$path"]+x} ]] && continue
-        seen["$path"]=1
-        UPDATED_FILES+=("$path")
-    done < <(
-        git diff --name-only -z --diff-filter=ACMR &&
-            git diff --cached --name-only -z --diff-filter=ACMR &&
-            git ls-files --others --exclude-standard -z
-    )
-}
-
 case "${1:-format}" in
 lint)
-    if [[ -n $updated ]]; then
-        git_updated_files "gd"
-        if ((${#UPDATED_FILES[@]} > 0)); then
-            (
-                [[ -n $verbose ]] && set -x
-                gdscript-formatter lint \
-                    --disable constant-name,private-access,class-name \
-                    "${UPDATED_FILES[@]}"
-            )
-        else
-            debug "No updated .gd files to lint"
-        fi
+    if [[ -n $file ]]; then
+        [[ -f $file ]] || die "File not found: $file"
+        [[ $file == *.gd ]] || die "--file for lint must be a .gd file"
+
+        (
+            [[ -n $verbose ]] && set -x
+            gdscript-formatter lint \
+                --disable constant-name,private-access,class-name \
+                "$file"
+        )
     else
         (
             [[ -n $verbose ]] && set -x
@@ -143,27 +123,22 @@ lint)
     fi
     ;;
 format)
-    if [[ -n $updated ]]; then
-        git_updated_files "gd"
-        if ((${#UPDATED_FILES[@]} > 0)); then
+    if [[ -n $file ]]; then
+        [[ -f $file ]] || die "File not found: $file"
+
+        if [[ $file == *.gd ]]; then
             (
                 [[ -n $verbose ]] && set -x
-                gdscript-formatter $args_gd "${UPDATED_FILES[@]}"
+                gdscript-formatter $args_gd "$file"
+            )
+        elif [[ $file == *.nix ]]; then
+            iscmd nix || die "nix is required to format .nix files"
+            (
+                [[ -n $verbose ]] && set -x
+                nix fmt "$file" -- $args_nix
             )
         else
-            debug "No updated .gd files to format"
-        fi
-
-        if iscmd nix; then
-            git_updated_files "nix"
-            if ((${#UPDATED_FILES[@]} > 0)); then
-                (
-                    [[ -n $verbose ]] && set -x
-                    nix fmt "${UPDATED_FILES[@]}" -- $args_nix
-                )
-            else
-                debug "No updated .nix files to format"
-            fi
+            die "--file must be a .gd or .nix file"
         fi
     else
         if anyfiles "gd"; then
