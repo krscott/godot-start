@@ -47,7 +47,6 @@ func process_link_entry(data: Variant, link_to_node_map: Dictionary) -> Link:
 
 func process_node_entry(data: Variant, construction_map: Dictionary) -> CaptiveSequenceNode:
 	var new_node := CaptiveSequenceNode.new()
-	new_node.name = data["id"]
 	new_node.set_id(data["id"])
 	for link_id in data["links"]:
 		var new_link := process_link_entry(data["links"][link_id], construction_map)
@@ -66,8 +65,7 @@ func build_from_file(filepath: String) -> CaptiveSequenceNode:
 	var file := FileAccess.open(filepath, FileAccess.READ)
 	var file_text := file.get_as_text()
 	var root_node := CaptiveSequenceNode.new()
-	root_node.name = "root"
-	root_node.add_child(CaptiveSequenceNode.new())
+	root_node.set_id("root")
 
 	var node_id_to_node_map := {}
 	var link_to_node_map := {} # Maps which links will connect to which following nodes.
