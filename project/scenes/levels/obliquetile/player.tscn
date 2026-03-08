@@ -6,13 +6,13 @@
 [node name="Player" type="Node3D" unique_id=1920999902]
 
 [node name="FancySprite3D" type="AnimatedSprite3D" parent="." unique_id=258600184]
+flip_h = true
 pixel_size = 0.08
 billboard = 2
 double_sided = false
 texture_filter = 0
 sprite_frames = ExtResource("1_htjmx")
-animation = &"walk-w"
-frame = 1
+animation = &"walk-e"
 script = ExtResource("2_27wc5")
 flip_animations = PackedStringArray("walk-n", "walk-s", "walk-e", "walk-e")
 flip_frames = PackedInt32Array(1, 1, 0, 1)
