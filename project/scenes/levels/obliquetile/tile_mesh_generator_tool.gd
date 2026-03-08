@@ -8,6 +8,13 @@ var generate_tiles_action := _generate
 @export var collisions: bool
 @export var material: Material
 
+@export var tileset_grid_size := Vector2.ONE
+@export var tileset_size: Vector2
+@export var tile_grass_center: Vector2i
+@export var tile_grass_ramp: Vector2i
+@export var tile_wall: Vector2i
+
+
 @onready var parent: Node3D = get_parent()
 
 
@@ -20,10 +27,16 @@ func _generate() -> void:
 		if child is MeshInstance3D:
 			child.queue_free()
 
+	var factory := MeshFactory.new()
+	factory.tileset_grid_size = tileset_grid_size
+	factory.tileset_size = tileset_size
+
 	var meshes: Array[ArrayMesh] = [
-		_quad(1, 0, 1),
-		_box(1, 0.5, 1),
-		_ramp(1, 0.5, 1),
+		factory.quad(1, 0, 1, tile_grass_center),
+		factory.box(1, 0.5, 1, tile_grass_center, tile_wall),
+		factory.ramp(1, 0.5, 1, tile_grass_ramp, tile_wall),
+		factory.box(1, 1, 1, tile_grass_center, tile_wall),
+		factory.ramp(1, 1, 1, tile_grass_ramp, tile_wall),
 	]
 
 	var ml := MeshLibrary.new()
@@ -118,132 +131,136 @@ class MeshBuilder:
 		return mesh
 
 
-static func _quad(dx: float, dy: float, dz: float) -> ArrayMesh:
-	assert(dx > 0.0)
-	assert(dz > 0.0)
+class MeshFactory:
+	var tileset_grid_size := Vector2.ONE
+	var tileset_size: Vector2
 
-	var b := MeshBuilder.new()
+	func _uv(tile: Vector2i, u: float, v: float) -> Vector2:
+		return (Vector2(tile) + Vector2(u, v)) * tileset_grid_size / tileset_size
 
-	b.add_quad(
-		Vector3(0.0, dy, 0.0),
-		Vector3(dx, dy, 0.0),
-		Vector3(0.0, dy, dz),
-		Vector2(0.0, 0.0),
-		Vector2(1.0, 0.0),
-		Vector2(0.0, 1.0),
-	)
+	func quad(dx: float, dy: float, dz: float, tile: Vector2i) -> ArrayMesh:
+		assert(dx > 0.0)
+		assert(dz > 0.0)
 
-	return b.build()
+		var b := MeshBuilder.new()
 
+		b.add_quad(
+			Vector3(0.0, dy, 0.0),
+			Vector3(dx, dy, 0.0),
+			Vector3(0.0, dy, dz),
+			_uv(tile, 0.0, 0.0),
+			_uv(tile, 1.0, 0.0),
+			_uv(tile, 0.0, 1.0),
+		)
 
-static func _box(dx: float, dy: float, dz: float) -> ArrayMesh:
-	assert(dx > 0.0)
-	assert(dy > 0.0)
-	assert(dz > 0.0)
-
-	var b := MeshBuilder.new()
-
-	# Top
-	b.add_quad(
-		Vector3(0.0, dy, 0.0),
-		Vector3(dx, dy, 0.0),
-		Vector3(0.0, dy, dz),
-		Vector2(0.0, 0.0),
-		Vector2(1.0, 0.0),
-		Vector2(0.0, 1.0),
-	)
-
-	# Front
-	b.add_quad(
-		Vector3(0.0, dy, dz),
-		Vector3(dx, dy, dz),
-		Vector3(0.0, 0.0, dz),
-		Vector2(0.0, 0.0),
-		Vector2(1.0, 0.0),
-		Vector2(0.0, 1.0),
-	)
-
-	# Left
-	b.add_quad(
-		Vector3(0.0, dy, 0.0),
-		Vector3(0.0, dy, dz),
-		Vector3(0.0, 0.0, 0.0),
-		Vector2(0.0, 0.0),
-		Vector2(1.0, 0.0),
-		Vector2(0.0, 1.0),
-	)
-
-	# Right
-	b.add_quad(
-		Vector3(dx, dy, dz),
-		Vector3(dx, dy, 0.0),
-		Vector3(dx, 0.0, dz),
-		Vector2(0.0, 0.0),
-		Vector2(1.0, 0.0),
-		Vector2(0.0, 1.0),
-	)
-
-	return b.build()
+		return b.build()
 
 
-static func _ramp(dx: float, dy: float, dz: float) -> ArrayMesh:
-	assert(dx > 0.0)
-	assert(dy > 0.0)
-	assert(dz > 0.0)
+	func box(dx: float, dy: float, dz: float, tile_top: Vector2i, tile_side: Vector2i) -> ArrayMesh:
+		assert(dx > 0.0)
+		assert(dy > 0.0)
+		assert(dz > 0.0)
 
-	var b := MeshBuilder.new()
+		var b := MeshBuilder.new()
 
-	# Top
-	b.add_quad(
-		Vector3(0.0, dy, 0.0),
-		Vector3(dx, dy, 0.0),
-		Vector3(0.0, 0.0, dz),
-		Vector2(0.0, 0.0),
-		Vector2(1.0, 0.0),
-		Vector2(0.0, 1.0),
-	)
+		# Top
+		b.add_quad(
+			Vector3(0.0, dy, 0.0),
+			Vector3(dx, dy, 0.0),
+			Vector3(0.0, dy, dz),
+			_uv(tile_top, 0.0, 0.0),
+			_uv(tile_top, 1.0, 0.0),
+			_uv(tile_top, 0.0, 1.0),
+		)
 
-	# Left
-	b.add_tri(
-		Vector3(0.0, dy, 0.0),
-		Vector3(0.0, 0.0, dz),
-		Vector3(0.0, 0.0, 0.0),
-		Vector2(0.0, 0.0),
-		Vector2(1.0, 1.0),
-		Vector2(0.0, 1.0),
-	)
+		# Front
+		b.add_quad(
+			Vector3(0.0, dy, dz),
+			Vector3(dx, dy, dz),
+			Vector3(0.0, 0.0, dz),
+			_uv(tile_side, 0.0, 0.0),
+			_uv(tile_side, 1.0, 0.0),
+			_uv(tile_side, 0.0, dy),
+		)
 
-	# Right
-	b.add_tri(
-		Vector3(dx, 0.0, dz),
-		Vector3(dx, dy, 0.0),
-		Vector3(dx, 0.0, 0.0),
-		Vector2(0.0, 1.0),
-		Vector2(1.0, 0.0),
-		Vector2(1.0, 1.0),
-	)
+		# Left
+		b.add_quad(
+			Vector3(0.0, dy, 0.0),
+			Vector3(0.0, dy, dz),
+			Vector3(0.0, 0.0, 0.0),
+			_uv(tile_side, 0.0, 0.0),
+			_uv(tile_side, 1.0, 0.0),
+			_uv(tile_side, 0.0, dy),
+		)
 
-	return b.build()
+		# Right
+		b.add_quad(
+			Vector3(dx, dy, dz),
+			Vector3(dx, dy, 0.0),
+			Vector3(dx, 0.0, dz),
+			_uv(tile_side, 0.0, 0.0),
+			_uv(tile_side, 1.0, 0.0),
+			_uv(tile_side, 0.0, dy),
+		)
+
+		return b.build()
 
 
-static func _create_mesh(
-		verts: PackedVector3Array,
-		normals: PackedVector3Array,
-		uvs: PackedVector2Array,
-		indices: PackedInt32Array,
-) -> ArrayMesh:
-	var surface := []
-	var mesh := ArrayMesh.new()
+	func ramp(dx: float, dy: float, dz: float, tile_top: Vector2i, tile_side: Vector2i) -> ArrayMesh:
+		assert(dx > 0.0)
+		assert(dy > 0.0)
+		assert(dz > 0.0)
 
-	var _size := surface.resize(Mesh.ARRAY_MAX)
-	surface[Mesh.ARRAY_VERTEX] = verts
-	surface[Mesh.ARRAY_NORMAL] = normals
-	surface[Mesh.ARRAY_TEX_UV] = uvs
-	surface[Mesh.ARRAY_INDEX] = indices
+		var b := MeshBuilder.new()
+		
+		var frac := dz / (dy + dz)
+		
+		var y1 := dy - dy * frac
+		var z1 := dz * frac
+		
+		var frac_uv := dy
 
-	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, surface)
+		# Split ramp in two to repeat UV section
+		# Top (upper section)
+		b.add_quad(
+			Vector3(0.0, dy, 0.0),
+			Vector3(dx, dy, 0.0),
+			Vector3(0.0, y1, z1),
+			_uv(tile_top, 0.0, 0.0),
+			_uv(tile_top, 1.0, 0.0),
+			_uv(tile_top, 0.0, 1.0),
+		)
+		# Top (lower section)
+		b.add_quad(
+			Vector3(0.0, y1, z1),
+			Vector3(dx, y1, z1),
+			Vector3(0.0, 0.0, dz),
+			_uv(tile_top, 0.0, 0.0),
+			_uv(tile_top, 1.0, 0.0),
+			_uv(tile_top, 0.0, frac_uv),
+		)
 
-	return mesh
+		# Left
+		b.add_tri(
+			Vector3(0.0, dy, 0.0),
+			Vector3(0.0, 0.0, dz),
+			Vector3(0.0, 0.0, 0.0),
+			_uv(tile_side, 0.0, 0.0),
+			_uv(tile_side, 1.0, 1.0),
+			_uv(tile_side, 0.0, dy),
+		)
+
+		# Right
+		b.add_tri(
+			Vector3(dx, 0.0, dz),
+			Vector3(dx, dy, 0.0),
+			Vector3(dx, 0.0, 0.0),
+			_uv(tile_side, 0.0, 1.0),
+			_uv(tile_side, 1.0, 0.0),
+			_uv(tile_side, 1.0, dy),
+		)
+
+		return b.build()
 
 
 func _add_lib_mesh(
