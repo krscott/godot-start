@@ -45,12 +45,21 @@ func process_link_entry(data: Variant, link_to_node_map: Dictionary) -> Link:
 	return new_link
 
 
-func process_node_entry(data: Variant, construction_map: Dictionary) -> CaptiveSequenceNode:
+## Build one CaptiveSequenceNode from a top-level value.
+## node_id: the key (e.g. "talk_some_guy_01"). data: either an Array of link dicts or a single link dict.
+func process_node_entry(node_id: String, data: Variant, link_to_node_map: Dictionary) -> CaptiveSequenceNode:
 	var new_node := CaptiveSequenceNode.new()
-	new_node.set_id(data["id"])
-	for link_id in data["links"]:
-		var new_link := process_link_entry(data["links"][link_id], construction_map)
+	new_node.set_id(node_id)
+
+	if data is Array:
+		for link_data in data:
+			var new_link := process_link_entry(link_data, link_to_node_map)
+			new_node.add_link(new_link)
+	elif data is Dictionary:
+		var new_link := process_link_entry(data, link_to_node_map)
 		new_node.add_link(new_link)
+	else:
+		push_error("process_node_entry: expected Array or Dictionary, got %s" % type_string(typeof(data)))
 
 	return new_node
 	
@@ -81,11 +90,8 @@ func build_from_file(filepath: String) -> CaptiveSequenceNode:
 
 		# For each key in the top-level JSON, create the node and add it to the map
 		for node_id in data_received.keys():
-			var new_node := process_node_entry(data_received[node_id], link_to_node_map)
+			var new_node := process_node_entry(node_id, data_received[node_id], link_to_node_map)
 			node_id_to_node_map[node_id] = new_node
-			for json_object in data_received[node_id]:
-				var new_link := process_link_entry(json_object, link_to_node_map)
-				new_node.add_link(new_link)
 
 		# Now connect links, which will be in the construction map.
 		for link in link_to_node_map.keys():

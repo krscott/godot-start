@@ -5,7 +5,9 @@ extends Object
 ## Uses static state so no autoload or instance is needed.
 ## Access via ConditionRegistry.register() / ConditionRegistry.get_condition() anywhere.
 
-static var _conditions: Dictionary = {}  # StringName -> Callable
+static var _conditions: Dictionary = {
+	is_guy_happy: () => 
+}  # StringName -> Callable
 
 
 static func register(identifier: StringName, callable: Callable) -> void:
