@@ -82,3 +82,6 @@ func run_test_dialogue_flow() -> void:
 
 	# 5. Start traversal.
 	visitor.visit(root, player_input)
+
+	# Ensure the happy state is set to false
+	#assert(GlobalState.get_flag(&"is_guy_happy") == false)

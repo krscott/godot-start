@@ -16,13 +16,17 @@
                 "before_dialogue": [
                     {
                         "identifier": "set_happy_acknowledged",
-                        "values": [true]
+                        "values": [
+                            false
+                        ]
                     }
                 ],
                 "after_dialogue": [
                     {
                         "identifier": "clear_text_buffer",
-                        "values": [true]
+                        "values": [
+                            true
+                        ]
                     }
                 ]
             },

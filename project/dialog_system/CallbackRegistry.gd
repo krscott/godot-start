@@ -27,8 +27,9 @@ static func has_callback(identifier: StringName) -> bool:
 
 # The conditions
 
-static func _set_happy_acknowledged():
-	pass
+static func _set_happy_acknowledged(value: bool):
+	print("setting happy acknowledged to: ", value)
+	GlobalState.set_flag(&"is_guy_happy", value)
 
 
 static func _clear_text_buffer():

@@ -84,7 +84,9 @@ func advance() -> void:
 ## Returns the next node after fully traversing a link.
 func _traverse_link(link: Link) -> CaptiveSequenceNode:
 	print("Traversing link: ", link.get_id())
+	print("firing before_dialogue callback")
 	_fire_callback(link, &"before_dialogue")
+
 
 	# lines[0] is the choice/title line; lines[1:] are the body.
 	var body := link.get_lines().slice(1)
