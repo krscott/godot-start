@@ -11,6 +11,7 @@ var flip_frame_horizontal_tool := _flip_frame_horizontal_tool
 
 func _ready() -> void:
 	util.aok(frame_changed.connect(_on_change_frame))
+	util.aok(animation_changed.connect(_on_change_frame))
 
 
 func _on_change_frame() -> void:
