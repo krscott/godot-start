@@ -6,7 +6,7 @@ extends Object
 ## Access via ConditionRegistry.register() / ConditionRegistry.get_condition() anywhere.
 
 static var _conditions: Dictionary = {
-	"is_guy_happy": callable(self , "_is_guy_happy")
+	"is_guy_happy": Callable(self , "_is_guy_happy")
 } # StringName -> Callable
 
 

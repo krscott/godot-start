@@ -6,8 +6,8 @@ extends Object
 ## Access via CallbackRegistry.register() / CallbackRegistry.get_callback() anywhere.
 
 static var _callbacks: Dictionary = {
-	set_happy_acknowledged: callable(self , "_set_happy_acknowledged"),
-	clear_text_buffer: callable(self , "_clear_text_buffer")
+	"set_happy_acknowledged": Callable(self , "_set_happy_acknowledged"),
+	"clear_text_buffer": Callable(self , "_clear_text_buffer")
 } # StringName -> Callable
 
 
