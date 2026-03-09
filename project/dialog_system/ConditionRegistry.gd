@@ -6,8 +6,8 @@ extends Object
 ## Access via ConditionRegistry.register() / ConditionRegistry.get_condition() anywhere.
 
 static var _conditions: Dictionary = {
-	is_guy_happy: () => 
-}  # StringName -> Callable
+	"is_guy_happy": callable(self , "_is_guy_happy")
+} # StringName -> Callable
 
 
 static func register(identifier: StringName, callable: Callable) -> void:
@@ -20,3 +20,9 @@ static func get_condition(identifier: StringName) -> Variant:
 
 static func has_condition(identifier: StringName) -> bool:
 	return _conditions.has(identifier)
+
+
+# The conditions
+
+static func _is_guy_happy(convo_state):
+	print("Game state TODO")
