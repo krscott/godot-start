@@ -37,7 +37,7 @@ func process_link_entry(data: Variant, link_to_node_map: Dictionary) -> Link:
 					push_error("Callback identifier not found in global registry: " + id_valuepair["identifier"])
 				else:
 					var callback_args = id_valuepair["values"]
-					callbacks_to_add[callback_type] = cb_callable.bindv(callback_args)
+					callbacks_to_add[StringName(callback_type)] = cb_callable.bindv(callback_args)
 		new_link.set_callbacks(callbacks_to_add)
 	
 	# Add the ID of the next node to the mapping 

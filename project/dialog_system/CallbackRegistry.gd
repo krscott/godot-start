@@ -32,5 +32,5 @@ static func _set_happy_acknowledged(value: bool):
 	GlobalState.set_flag(&"is_guy_happy", value)
 
 
-static func _clear_text_buffer():
+static func _clear_text_buffer(args):
 	pass

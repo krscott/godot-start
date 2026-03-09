@@ -12,14 +12,14 @@ var callbacks: Dictionary = {}
 func get_id() -> String:
 	return id
 
-func set_id(id: String) -> void:
-	id = id
+func set_id(new_id: String) -> void:
+	id = new_id
 
 func get_lines() -> Array[String]:
 	return lines
 
-func set_lines(lines: Array[String]) -> void:
-	lines = lines
+func set_lines(new_lines: Array[String]) -> void:
+	lines = new_lines
 
 func add_line(line: String) -> void:
 	lines.append(line)
@@ -39,8 +39,8 @@ func set_sequence_script(new_script: CaptiveSequenceScript) -> void:
 func get_conditions() -> Array[DialogueCondition]:
 	return conditions
 
-func set_conditions(conditions: Array[DialogueCondition]) -> void:
-	conditions = conditions
+func set_conditions(new_conditions: Array[DialogueCondition]) -> void:
+	conditions = new_conditions
 
 func add_condition(condition: DialogueCondition) -> void:
 	conditions.append(condition)
@@ -66,8 +66,8 @@ func is_available() -> bool:
 func get_callbacks() -> Dictionary:
 	return callbacks
 
-func set_callbacks(callbacks: Dictionary) -> void:
-	callbacks = callbacks
+func set_callbacks(new_callbacks: Dictionary) -> void:
+	callbacks = new_callbacks
 
 func add_callback(callback: String, args: Array[Variant]) -> void:
 	callbacks[callback] = args

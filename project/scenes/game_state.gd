@@ -51,7 +51,7 @@ func _process(_delta: float) -> void:
 
 
 ## Called when the user selects "Start Game" from the menu. Runs the test dialogue flow.
-func run_test_dialogue_flow() -> void:
+func run_test_dialogue_flow() -> void: ## async via await visitor.visit()
 	# 1. Build the sequence from disk.
 	var root := _sequence_builder.build_from_file("res://dialog_system/test_json.json")
 
@@ -80,8 +80,8 @@ func run_test_dialogue_flow() -> void:
 		visitor.queue_free()
 	)
 
-	# 5. Start traversal.
-	visitor.visit(root, player_input)
+	# 5. Start traversal and wait for it to fully complete.
+	await visitor.visit(root, player_input)
 
-	# Ensure the happy state is set to false
-	#assert(GlobalState.get_flag(&"is_guy_happy") == false)
+	# Verify the before_dialogue callback set is_guy_happy to false.
+	assert(GlobalState.get_flag(&"is_guy_happy") == false)
