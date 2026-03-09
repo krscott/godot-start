@@ -101,5 +101,7 @@ func build_from_file(filepath: String) -> CaptiveSequenceNode:
 				var next_node = node_id_to_node_map[next_link_node_id]
 				link.set_next_node(next_node)
 			
+	print("Debugging node_id_to_node_map", node_id_to_node_map)
+	print("Debugging link_to_node_map", link_to_node_map)
 
 	return root_node

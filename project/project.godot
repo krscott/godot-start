@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 [autoload]
 
 gamestate="*res://scenes/game_state.tscn"
+GlobalState="*res://scripts/systems/global_state.gd"
 
 [debug]
 
