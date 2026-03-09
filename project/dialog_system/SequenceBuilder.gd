@@ -12,9 +12,11 @@ func process_link_entry(data: Variant, link_to_node_map: Dictionary) -> Link:
 			var new_condition := DialogueCondition.new()
 			# Look up conditions in a global dictionary of conditions. 
 			var cond_callable = ConditionRegistry.get_condition(condition["identifier"])
+			print("debugging cond_callable: ", cond_callable)
 			if cond_callable == null:
 				push_error("Condition identifier not found in global registry: " + condition["identifier"])
 			else:
+				print("not null!: ")
 				new_condition.set_eval_condition(cond_callable)
 				new_condition.set_eval_args([condition["value"]])
 				new_link.add_condition(new_condition) #
@@ -74,8 +76,7 @@ func build_from_file(filepath: String) -> CaptiveSequenceNode:
 	# Return the root node
 	var file := FileAccess.open(filepath, FileAccess.READ)
 	var file_text := file.get_as_text()
-	var root_node := CaptiveSequenceNode.new()
-	root_node.set_id("root")
+	var first_node
 
 	var node_id_to_node_map := {}
 	var link_to_node_map := {} # Maps which links will connect to which following nodes.
@@ -93,6 +94,8 @@ func build_from_file(filepath: String) -> CaptiveSequenceNode:
 		for node_id in data_received.keys():
 			var new_node := process_node_entry(node_id, data_received[node_id], link_to_node_map)
 			node_id_to_node_map[node_id] = new_node
+			if not first_node:
+				first_node = new_node
 
 		# Now connect links, which will be in the construction map.
 		for link in link_to_node_map.keys():
@@ -100,8 +103,8 @@ func build_from_file(filepath: String) -> CaptiveSequenceNode:
 			if next_link_node_id != null:
 				var next_node = node_id_to_node_map[next_link_node_id]
 				link.set_next_node(next_node)
-			
+
 	print("Debugging node_id_to_node_map", node_id_to_node_map)
 	print("Debugging link_to_node_map", link_to_node_map)
 
-	return root_node
+	return first_node

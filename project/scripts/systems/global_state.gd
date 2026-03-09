@@ -1,4 +1,3 @@
-class_name GlobalState
 extends Node
 
 ## Pan-scene key-value state (e.g. dialogue flags, story progress).
@@ -48,4 +47,4 @@ func gdserde_deserialize(dict: Dictionary) -> Error:
 
 
 func _ready() -> void:
-	gamestate.sync_object_state(&"global_state", self)
+	gamestate.sync_object_state(&"global_state", self )

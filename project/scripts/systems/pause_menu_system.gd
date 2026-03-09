@@ -15,6 +15,11 @@ var paused := false
 var _at_main_menu := true
 
 
+func _on_start_game_pressed() -> void:
+	unpause()
+	gamestate.run_test_dialogue_flow()
+
+
 func unpause() -> void:
 	paused = false
 	_at_main_menu = false
@@ -81,7 +86,7 @@ func _is_not_at_main_menu() -> bool:
 func _build_menu() -> void:
 	menu.build(
 		[
-			Menu.button("Start Game", unpause) #
+			Menu.button("Start Game", _on_start_game_pressed) #
 			.visible_when(_is_at_main_menu) #
 			.focus(),
 			Menu.button("Continue", unpause).action("ui_cancel") #

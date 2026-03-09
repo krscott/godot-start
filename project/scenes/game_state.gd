@@ -25,12 +25,6 @@ func _ready() -> void:
 
 	util.printdbg("DEBUG BUILD")
 
-	# Add function here!
-
-	# Provider exposes RefCounted builder; node in tree so we can use %SequenceBuilder
-	var _sequence := _sequence_builder.build_from_file("res://dialog_system/test_json.json")
-	print(_sequence)
-
 	sync_object_state(&"player_input", player_input)
 
 	var args := OS.get_cmdline_user_args()
@@ -54,3 +48,37 @@ func _process(_delta: float) -> void:
 			_pause_menu_system.pause()
 
 # Private Methods
+
+
+## Called when the user selects "Start Game" from the menu. Runs the test dialogue flow.
+func run_test_dialogue_flow() -> void:
+	# 1. Build the sequence from disk.
+	var root := _sequence_builder.build_from_file("res://dialog_system/test_json.json")
+
+	# 2. Set the flag that the first node's condition checks.
+	GlobalState.set_flag(&"is_guy_happy", true)
+
+	# 3. Create a SequenceVisitor, add it to the tree so it can use await.
+	var visitor := SequenceVisitor.new()
+	add_child(visitor)
+
+	# 4. Wire up signal handlers so we can see the flow in the output log.
+	visitor.show_choices.connect(func(choices: Array) -> void:
+		print("[DIALOGUE] Choices:")
+		for i in choices.size():
+			print("  [", i, "] ", choices[i])
+		# Auto-select the first choice so the test runs without manual input.
+		visitor.choose.call_deferred(0)
+	)
+	visitor.show_line.connect(func(line: String) -> void:
+		print("[DIALOGUE] ", line)
+		visitor.advance.call_deferred()
+		visitor.advance.call_deferred()
+	)
+	visitor.dialogue_ended.connect(func() -> void:
+		print("[DIALOGUE] Dialogue ended, control returned to player.")
+		visitor.queue_free()
+	)
+
+	# 5. Start traversal.
+	visitor.visit(root, player_input)

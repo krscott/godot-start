@@ -47,7 +47,11 @@ func set_next_node(node: CaptiveSequenceNode) -> void:
 	next_node = node
 
 func is_available() -> bool:
+	print("debugging conditions: ", conditions)
     for condition in conditions:
+        print("debugging condition: ", condition)
         if not condition.evaluate():
+            print("condition not met")
             return false
+    print("condition met")
     return true

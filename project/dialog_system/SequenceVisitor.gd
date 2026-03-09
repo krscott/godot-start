@@ -48,6 +48,7 @@ func visit(start_node: CaptiveSequenceNode, player_input: PlayerInput) -> void:
 	while current != null:
 		var available: Array[Link] = _get_available_links(current)
 
+		print("**** available: ", available)
 		if available.is_empty():
 			break
 
@@ -82,6 +83,7 @@ func advance() -> void:
 
 ## Returns the next node after fully traversing a link.
 func _traverse_link(link: Link) -> CaptiveSequenceNode:
+	print("Traversing link: ", link.get_id())
 	_fire_callback(link, &"before_dialogue")
 
 	# lines[0] is the choice/title line; lines[1:] are the body.
@@ -97,8 +99,10 @@ func _traverse_link(link: Link) -> CaptiveSequenceNode:
 
 ## Returns links whose conditions all pass (or that have no conditions).
 func _get_available_links(node: CaptiveSequenceNode) -> Array[Link]:
+	print("**** Getting available links for node: ", node.get_id())
 	var out: Array[Link] = []
 	for link in node.get_links():
+		print("**** link: ", link.get_id())
 		if link.is_available():
 			out.append(link)
 	return out
