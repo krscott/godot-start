@@ -7,7 +7,7 @@ var root_node: CaptiveSequenceNode
 func process_link_entry(data: Variant, link_to_node_map: Dictionary) -> Link:
 	var new_link := Link.new()
 	# Process conditions asdf
-	if data["conds"] != null:
+	if data.has("conds"):
 		for condition in data["conds"]:
 			var new_condition := DialogueCondition.new()
 			# Look up conditions in a global dictionary of conditions. 
@@ -20,12 +20,13 @@ func process_link_entry(data: Variant, link_to_node_map: Dictionary) -> Link:
 				new_link.add_condition(new_condition) #
 			
 	# Process text
-	if data["text"] != null:
+	if data.has("text"):
 		for line in data["text"]:
 			new_link.add_line(line)
 
 	# Process callbacks
-	if data["callbacks"] != null:
+	print("debugging data: ", data)
+	if data.has("callbacks"):
 		var callbacks_to_add: Dictionary = {} # callback_type -> Callable
 		for callback_type in data["callbacks"].keys(): # ex: "before_dialogue"
 			for id_valuepair in data["callbacks"][callback_type]:
@@ -39,7 +40,7 @@ func process_link_entry(data: Variant, link_to_node_map: Dictionary) -> Link:
 	
 	# Add the ID of the next node to the mapping 
 	# It's a mapping of this LINK to NEXT NODE.
-	if data["next"] != null:
+	if data.has("next"):
 		link_to_node_map[new_link] = data["next"]
 
 	return new_link
