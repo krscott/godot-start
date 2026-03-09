@@ -25,4 +25,4 @@ static func has_condition(identifier: StringName) -> bool:
 # The conditions
 
 static func _is_guy_happy(convo_state):
-	print("Game state TODO")
+	return GlobalState.get_flag("is_guy_happy")

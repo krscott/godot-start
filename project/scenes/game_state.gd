@@ -25,6 +25,8 @@ func _ready() -> void:
 
 	util.printdbg("DEBUG BUILD")
 
+	# Add function here!
+
 	# Provider exposes RefCounted builder; node in tree so we can use %SequenceBuilder
 	var _sequence := _sequence_builder.build_from_file("res://dialog_system/test_json.json")
 	print(_sequence)
