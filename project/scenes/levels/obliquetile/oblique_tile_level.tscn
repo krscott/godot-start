@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://lmp14m6v5wf4"]
 
 [ext_resource type="MeshLibrary" uid="uid://q2vjmi8n4ipj" path="res://assets/meshlibrary/test.meshlib" id="1_7367b"]
+[ext_resource type="Script" uid="uid://dgpbhxs8ofy5g" path="res://scenes/levels/mouselook/components/remove_on_game_start.gd" id="2_bwg66"]
 [ext_resource type="PackedScene" uid="uid://bwcxyj2dueo8r" path="res://scenes/levels/obliquetile/player.tscn" id="2_ycx6c"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_6f4l4"]
@@ -45,6 +46,10 @@ data = {
 
 [node name="RigidBody3D" type="RigidBody3D" parent="." unique_id=916085575]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.12143341, 1.7552598, 0.051014245)
+
+[node name="RemoveOnGameStart" type="Node" parent="RigidBody3D" unique_id=1932684640]
+script = ExtResource("2_bwg66")
+metadata/_custom_type_script = "uid://dgpbhxs8ofy5g"
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="RigidBody3D" unique_id=44185165]
 shape = SubResource("SphereShape3D_vmmfd")

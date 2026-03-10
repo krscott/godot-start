@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 [autoload]
 
 gamestate="*res://scenes/game_state.tscn"
+signalbus="*uid://b2mmgrdlgnuf7"
 
 [debug]
 

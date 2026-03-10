@@ -14,8 +14,12 @@ extends Node
 var paused := false
 var _at_main_menu := true
 
+# Public Methods
+
 
 func unpause() -> void:
+	if _at_main_menu:
+		signalbus.game_started.emit()
 	paused = false
 	_at_main_menu = false
 	menu.hide()
@@ -31,6 +35,8 @@ func pause() -> void:
 
 func is_menu_open() -> bool:
 	return menu.visible
+
+# Interface Methods
 
 
 func _ready() -> void:
@@ -56,6 +62,8 @@ func _notification(what: int) -> void:
 	match what:
 		MainLoop.NOTIFICATION_APPLICATION_FOCUS_OUT:
 			pause()
+
+# Private Methods
 
 
 func _save_game_dialog() -> void:
@@ -84,7 +92,8 @@ func _build_menu() -> void:
 			Menu.button("Start Game", unpause) #
 			.visible_when(_is_at_main_menu) #
 			.focus(),
-			Menu.button("Continue", unpause).action("ui_cancel") #
+			Menu.button("Continue", unpause) #
+			.action("ui_cancel") #
 			.visible_when(_is_not_at_main_menu) #
 			.focus(),
 			Menu.button("Save Game", _save_game_dialog) #
