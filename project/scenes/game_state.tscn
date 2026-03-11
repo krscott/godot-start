@@ -12,10 +12,14 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/dialogue_ui.tscn" id="10_dlgui"]
 [ext_resource type="Shader" uid="uid://cucunjhgkuj2r" path="res://shaders/palette-post.gdshader" id="7_q5byu"]
 [ext_resource type="Shader" uid="uid://ctckeik4qa432" path="res://shaders/dither-post.gdshader" id="8_vsyf1"]
+[ext_resource type="Shader" uid="uid://b6r0sgv5nhjac" path="res://shaders/stretch-post.gdshader" id="9_ou381"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_3oy0g"]
 shader = ExtResource("8_vsyf1")
 shader_parameter/pixel_size = 2
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_hinck"]
+shader = ExtResource("9_ou381")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_q5byu"]
 shader = ExtResource("7_q5byu")
@@ -83,6 +87,17 @@ mouse_filter = 2
 
 [node name="DialogueUI" parent="." instance=ExtResource("10_dlgui")]
 unique_name_in_owner = true
+
+[node name="StretchFilter" type="CanvasLayer" parent="." unique_id=1734074323]
+
+[node name="StretchFilter" type="ColorRect" parent="StretchFilter" unique_id=1814341450]
+material = SubResource("ShaderMaterial_hinck")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 
 [node name="Menu" parent="." unique_id=1709348178 instance=ExtResource("5_vsnwl")]
 unique_name_in_owner = true

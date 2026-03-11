@@ -24,11 +24,16 @@ EOF
 # NOTE: Use ':' suffix to specify opt has an arg
 OPTIONS="dwzhv"
 LONGOPTS="debug,wrapped,zip,help,verbose"
-PARSED=$(getopt -o "$OPTIONS" -l "$LONGOPTS" -n "$0" -- "$@") || {
-    usage >&2
-    exit 2
-}
-eval set -- "$PARSED"
+
+# NOTE: getopt comes from 'util-linux' package
+# Check if getopt is available, fallback to simple parsing if not
+if command -v getopt &>/dev/null; then
+    PARSED=$(getopt -o "$OPTIONS" -l "$LONGOPTS" -n "$0" -- "$@") || {
+        usage >&2
+        exit 2
+    }
+    eval set -- "$PARSED"
+fi
 
 die() {
     echo "$*" >&2
@@ -56,7 +61,7 @@ zip=
 export_type="release"
 wrapped=
 verbose=
-while true; do
+while [[ $# -gt 0 ]]; do
     case "$1" in
     -d | --debug)
         export_type="debug"
@@ -64,7 +69,7 @@ while true; do
     -w | --wrapped)
         wrapped=1
         ;;
-    -z | --archive)
+    -z | --zip)
         zip=1
         ;;
     -h | --help)
@@ -74,6 +79,13 @@ while true; do
     -v | --verbose) verbose=1 ;;
     --)
         shift
+        break
+        ;;
+    -*)
+        die "Unknown option: $1"
+        ;;
+    *)
+        # Non-option argument, stop parsing
         break
         ;;
     esac

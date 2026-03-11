@@ -18,10 +18,11 @@ config/icon="res://icon.svg"
 
 [autoload]
 
+signalbus="*uid://b2mmgrdlgnuf7"
 gamestate="*res://scenes/game_state.tscn"
 ConditionRegistry="*res://dialog_system/ConditionRegistry.gd"
 CallbackRegistry="*res://dialog_system/CallbackRegistry.gd"
-GlobalState="*res://scripts/systems/global_state.gd"
+EventState="*res://scripts/systems/event_state.gd"
 
 [debug]
 

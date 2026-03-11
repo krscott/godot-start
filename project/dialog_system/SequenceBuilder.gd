@@ -49,7 +49,7 @@ func process_link_entry(data: Variant, link_to_node_map: Dictionary) -> Link:
 ## node_id: the key (e.g. "talk_some_guy_01"). data: either an Array of link dicts or a single link dict.
 func process_node_entry(node_id: String, data: Variant, link_to_node_map: Dictionary) -> CaptiveSequenceNode:
 	var new_node := CaptiveSequenceNode.new()
-	new_node.set_id(node_id)
+	new_node.id = node_id
 
 	if data is Array:
 		for link_data in data:
