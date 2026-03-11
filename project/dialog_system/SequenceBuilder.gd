@@ -12,11 +12,9 @@ func process_link_entry(data: Variant, link_to_node_map: Dictionary) -> Link:
 			var new_condition := DialogueCondition.new()
 			# Look up conditions in a global dictionary of conditions. 
 			var cond_callable = ConditionRegistry.get_condition(condition["identifier"])
-			print("debugging cond_callable: ", cond_callable)
 			if cond_callable == null:
 				push_error("Condition identifier not found in global registry: " + condition["identifier"])
 			else:
-				print("not null!: ")
 				new_condition.set_eval_condition(cond_callable)
 				new_condition.set_eval_args([condition["value"]])
 				new_link.add_condition(new_condition) #
@@ -27,7 +25,6 @@ func process_link_entry(data: Variant, link_to_node_map: Dictionary) -> Link:
 			new_link.add_line(line)
 
 	# Process callbacks
-	print("debugging data: ", data)
 	if data.has("callbacks"):
 		var callbacks_to_add: Dictionary = {} # callback_type -> Callable
 		for callback_type in data["callbacks"].keys(): # ex: "before_dialogue"
