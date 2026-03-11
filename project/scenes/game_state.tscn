@@ -85,10 +85,9 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-<<<<<<< HEAD
 [node name="DialogueUI" parent="." instance=ExtResource("10_dlgui")]
 unique_name_in_owner = true
-=======
+
 [node name="StretchFilter" type="CanvasLayer" parent="." unique_id=1734074323]
 
 [node name="StretchFilter" type="ColorRect" parent="StretchFilter" unique_id=1814341450]
@@ -99,7 +98,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
->>>>>>> main
 
 [node name="Menu" parent="." unique_id=1709348178 instance=ExtResource("5_vsnwl")]
 unique_name_in_owner = true

@@ -47,4 +47,12 @@ func gdserde_deserialize(dict: Dictionary) -> Error:
 
 
 func _ready() -> void:
-	gamestate.sync_object_state(&"event_state", self)
+	# Defer so gamestate autoload (scene) is guaranteed ready; guards against nil if run before tree is ready.
+	if gamestate:
+		call_deferred(&"sync_to_gamestate")
+
+
+func sync_to_gamestate() -> void:
+	var gs: GameState = gamestate as GameState
+	if gs:
+		gs.sync_object_state(&"event_state", self)
