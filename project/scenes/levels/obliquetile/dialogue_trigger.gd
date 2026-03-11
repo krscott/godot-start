@@ -12,4 +12,7 @@ func _on_body_entered(body: Node3D) -> void:
 		return
 	if body is CharacterBody3D:
 		_triggered = true
-		gamestate.run_test_dialogue_flow()
+		body.set_physics_process(false)
+		await gamestate.run_test_dialogue_flow()
+		body.set_physics_process(true)
+		_triggered = false

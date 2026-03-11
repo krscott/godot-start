@@ -6,6 +6,7 @@ extends Node
 @onready var _replay_system: ReplaySystem = %ReplaySystem
 @onready var player_input: PlayerInput = %PlayerInput
 @onready var _sequence_builder: SequenceBuilder = %SequenceBuilder.sequence_builder
+@onready var _dialogue_ui: DialogueUI = %DialogueUI
 
 # Public Methods
 
@@ -51,38 +52,15 @@ func _process(_delta: float) -> void:
 # Private Methods
 
 
-## Called when the user selects "Start Game" from the menu. Runs the test dialogue flow.
-func run_test_dialogue_flow() -> void: ## async via await visitor.visit()
-	# 1. Build the sequence from disk.
+func run_test_dialogue_flow() -> void:
 	var root := _sequence_builder.build_from_file("res://dialog_system/test_json.json")
-
-	# 2. Set the flag that the first node's condition checks.
 	GlobalState.set_flag(&"is_guy_happy", true)
 
-	# 3. Create a SequenceVisitor, add it to the tree so it can use await.
 	var visitor := SequenceVisitor.new()
 	add_child(visitor)
 
-	# 4. Wire up signal handlers so we can see the flow in the output log.
-	visitor.show_choices.connect(func(choices: Array) -> void:
-		print("[DIALOGUE] Choices:")
-		for i in choices.size():
-			print("  [", i, "] ", choices[i])
-		# Auto-select the first choice so the test runs without manual input.
-		visitor.choose.call_deferred(0)
-	)
-	visitor.show_line.connect(func(line: String) -> void:
-		print("[DIALOGUE] ", line)
-		visitor.advance.call_deferred()
-		visitor.advance.call_deferred()
-	)
-	visitor.dialogue_ended.connect(func() -> void:
-		print("[DIALOGUE] Dialogue ended, control returned to player.")
-		visitor.queue_free()
-	)
+	_dialogue_ui.bind(visitor)
 
-	# 5. Start traversal and wait for it to fully complete.
 	await visitor.visit(root, player_input)
 
-	# Verify the before_dialogue callback set is_guy_happy to false.
-	assert(GlobalState.get_flag(&"is_guy_happy") == false)
+	visitor.queue_free()
