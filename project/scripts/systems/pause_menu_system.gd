@@ -17,7 +17,9 @@ var _at_main_menu := true
 
 func _on_start_game_pressed() -> void:
 	unpause()
-	#gamestate.run_test_dialogue_flow()
+	var player := get_tree().current_scene.find_child("Player")
+	if player and player.has_method("enable"):
+		player.enable()
 
 
 func unpause() -> void:
