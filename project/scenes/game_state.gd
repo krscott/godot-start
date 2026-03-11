@@ -17,6 +17,7 @@ func sync_object_state(key: StringName, obj: Object) -> void:
 
 
 func _ready() -> void:
+	print("Ready!")
 	assert(_save_state)
 	assert(_pause_menu_system)
 	assert(_replay_system)

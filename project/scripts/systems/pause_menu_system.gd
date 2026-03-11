@@ -17,7 +17,7 @@ var _at_main_menu := true
 
 func _on_start_game_pressed() -> void:
 	unpause()
-	gamestate.run_test_dialogue_flow()
+	#gamestate.run_test_dialogue_flow()
 
 
 func unpause() -> void:
