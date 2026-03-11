@@ -54,7 +54,7 @@ func _process(_delta: float) -> void:
 
 func run_test_dialogue_flow() -> void:
 	var root := _sequence_builder.build_from_file("res://dialog_system/test_json.json")
-	GlobalState.set_flag(&"is_guy_happy", true)
+	EventState.set_flag(&"is_guy_happy", true)
 
 	var visitor := SequenceVisitor.new()
 	add_child(visitor)

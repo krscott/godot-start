@@ -27,5 +27,5 @@ static func has_condition(identifier: StringName) -> bool:
 # The conditions
 
 static func _is_guy_happy(convo_state: Variant) -> bool:
-	print("debugging global state: ", GlobalState.get_flag("is_guy_happy"))
-	return GlobalState.get_flag("is_guy_happy")
+	print("debugging event state: ", EventState.get_flag("is_guy_happy"))
+	return EventState.get_flag("is_guy_happy")

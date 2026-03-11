@@ -2,9 +2,9 @@ extends Node
 
 ## Pan-scene key-value state (e.g. dialogue flags, story progress).
 ## Persists via the same save/load system as PersistGroup (GdSerde + gamestate.sync_object_state).
-## Use from any scene: GlobalState.set_flag("talked_to_guy"), GlobalState.get_state("chapter") etc.
+## Use from any scene: EventState.set_flag("talked_to_guy"), EventState.get_state("chapter") etc.
 
-const gdserde_class := &"GlobalState"
+const gdserde_class := &"EventState"
 
 ## Key -> value; only Variant-friendly types (primitives, Dictionary, Array) survive serialize.
 var _state: Dictionary = {}
@@ -47,4 +47,4 @@ func gdserde_deserialize(dict: Dictionary) -> Error:
 
 
 func _ready() -> void:
-	gamestate.sync_object_state(&"global_state", self )
+	gamestate.sync_object_state(&"event_state", self)
