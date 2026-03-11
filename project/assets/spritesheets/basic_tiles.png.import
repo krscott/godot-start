@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dh6ysfsjeakrw"
-path="res://.godot/imported/littleguy.png-84ab48b9de7835a4a264b78801be3bf4.ctex"
+uid="uid://dgtadmaqmfrav"
+path="res://.godot/imported/basic_tiles.png-d52229f72383c895b180bc1c19128b3d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/spritesheets/littleguy.png"
-dest_files=["res://.godot/imported/littleguy.png-84ab48b9de7835a4a264b78801be3bf4.ctex"]
+source_file="res://assets/spritesheets/basic_tiles.png"
+dest_files=["res://.godot/imported/basic_tiles.png-d52229f72383c895b180bc1c19128b3d.ctex"]
 
 [params]
 

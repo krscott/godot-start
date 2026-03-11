@@ -22,6 +22,8 @@ gamestate="*res://scenes/game_state.tscn"
 ConditionRegistry="*res://dialog_system/ConditionRegistry.gd"
 CallbackRegistry="*res://dialog_system/CallbackRegistry.gd"
 EventState="*res://scripts/systems/event_state.gd"
+signalbus="*uid://b2mmgrdlgnuf7"
+
 
 [debug]
 

@@ -9,6 +9,7 @@ static var _conditions: Dictionary = {}
 # equivalent of "ready" function but for static variables,
 # and is called on the first time the clas is first used.
 static func _static_init() -> void:
+	# Used for testing. Remove this later.
 	_conditions[&"is_guy_happy"] = _is_guy_happy
 
 
