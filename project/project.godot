@@ -18,7 +18,7 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-signalbus="*uid://b2mmgrdlgnuf7"
+signalbus="*res://scripts/signal_bus.gd"
 gamestate="*res://scenes/game_state.tscn"
 ConditionRegistry="*res://dialog_system/ConditionRegistry.gd"
 CallbackRegistry="*res://dialog_system/CallbackRegistry.gd"
