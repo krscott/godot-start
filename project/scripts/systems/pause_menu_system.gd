@@ -17,6 +17,13 @@ var _at_main_menu := true
 # Public Methods
 
 
+func _on_start_game_pressed() -> void:
+	unpause()
+	var player := get_tree().current_scene.find_child("Player")
+	if player and player.has_method("enable"):
+		player.enable()
+
+
 func unpause() -> void:
 	if _at_main_menu:
 		signalbus.game_started.emit()
@@ -89,7 +96,7 @@ func _is_not_at_main_menu() -> bool:
 func _build_menu() -> void:
 	menu.build(
 		[
-			Menu.button("Start Game", unpause) #
+			Menu.button("Start Game", _on_start_game_pressed) #
 			.visible_when(_is_at_main_menu) #
 			.focus(),
 			Menu.button("Continue", unpause) #

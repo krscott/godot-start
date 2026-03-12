@@ -12,14 +12,17 @@ config_version=5
 
 config/name="godot-start"
 config/version="0.1.0"
-run/main_scene="uid://lmp14m6v5wf4"
+run/main_scene="res://scenes/levels/obliquetile/DialogDemo.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://icon.svg"
 
 [autoload]
 
+signalbus="*res://scripts/signal_bus.gd"
 gamestate="*res://scenes/game_state.tscn"
-signalbus="*uid://b2mmgrdlgnuf7"
+ConditionRegistry="*res://dialog_system/ConditionRegistry.gd"
+CallbackRegistry="*res://dialog_system/CallbackRegistry.gd"
+EventState="*res://scripts/systems/event_state.gd"
 
 [debug]
 
@@ -34,6 +37,10 @@ gdscript/warnings/return_value_discarded=1
 
 window/stretch/mode="viewport"
 window/vsync/vsync_mode=0
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/yaml/plugin.cfg")
 
 [global_group]
 

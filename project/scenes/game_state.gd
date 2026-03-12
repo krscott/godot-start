@@ -5,6 +5,8 @@ extends Node
 @onready var _pause_menu_system: PauseMenuSystem = %PauseMenuSystem
 @onready var _replay_system: ReplaySystem = %ReplaySystem
 @onready var player_input: PlayerInput = %PlayerInput
+@onready var _sequence_builder: SequenceBuilder = %SequenceBuilder.sequence_builder
+@onready var _dialogue_ui: DialogueUI = %DialogueUI
 
 # Public Methods
 
@@ -16,10 +18,12 @@ func sync_object_state(key: StringName, obj: Object) -> void:
 
 
 func _ready() -> void:
+	print("Ready!")
 	assert(_save_state)
 	assert(_pause_menu_system)
 	assert(_replay_system)
 	assert(player_input)
+	assert(_sequence_builder)
 
 	util.printdbg("DEBUG BUILD")
 
@@ -46,3 +50,17 @@ func _process(_delta: float) -> void:
 			_pause_menu_system.pause()
 
 # Private Methods
+
+
+func run_test_dialogue_flow() -> void:
+	var root := _sequence_builder.build_from_file("res://dialog_system/test_json.json")
+	EventState.set_flag(&"is_guy_happy", true)
+
+	var visitor := SequenceVisitor.new()
+	add_child(visitor)
+
+	_dialogue_ui.bind(visitor)
+
+	await visitor.visit(root, player_input)
+
+	visitor.queue_free()

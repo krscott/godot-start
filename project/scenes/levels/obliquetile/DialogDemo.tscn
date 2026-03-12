@@ -1,0 +1,80 @@
+[gd_scene format=3 uid="uid://c8yrm5156en5b"]
+
+[ext_resource type="MeshLibrary" uid="uid://q2vjmi8n4ipj" path="res://assets/meshlibrary/test.meshlib" id="1_05mst"]
+[ext_resource type="Script" uid="uid://b1ahcy4rgf74q" path="res://scenes/levels/obliquetile/player.gd" id="2_ounon"]
+[ext_resource type="Script" uid="uid://dbjr35fy5nqo7" path="res://scenes/levels/obliquetile/player_mesh.gd" id="3_ounon"]
+[ext_resource type="Script" uid="uid://dodncww1ormk2" path="res://scenes/levels/obliquetile/dialogue_trigger.gd" id="4_trigger"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_6f4l4"]
+
+[sub_resource type="Sky" id="Sky_0xm2m"]
+sky_material = SubResource("ProceduralSkyMaterial_6f4l4")
+
+[sub_resource type="Environment" id="Environment_vmmfd"]
+background_mode = 2
+sky = SubResource("Sky_0xm2m")
+ambient_light_source = 2
+ambient_light_color = Color(0.796243, 0.796243, 0.796243, 1)
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_ounon"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_player"]
+albedo_color = Color(0.122, 0.471, 0.965, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_nxn18"]
+material = SubResource("StandardMaterial3D_player")
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_trigger"]
+size = Vector3(0.8, 0.8, 0.8)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_trigger"]
+albedo_color = Color(1, 0.85, 0.1, 1)
+emission_enabled = true
+emission = Color(0.6, 0.5, 0, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_trigger"]
+material = SubResource("StandardMaterial3D_trigger")
+size = Vector3(0.8, 0.8, 0.8)
+
+[node name="ObliqueTileLevel" type="Node3D" unique_id=828980077]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=447207381]
+environment = SubResource("Environment_vmmfd")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=570979042]
+transform = Transform3D(0.9182944, 0.3015499, -0.25652108, -3.72529e-08, 0.6479471, 0.7616854, 0.39589825, -0.6994514, 0.59500617, 0, 8.608476, 0)
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=974067808]
+transform = Transform3D(1, 0, 0, 0, 0.95615155, 0.29287237, 0, -0.29287237, 0.95615155, 0, 1.9957123, 5.796584)
+current = true
+
+[node name="GridMap" type="GridMap" parent="." unique_id=280619503]
+mesh_library = ExtResource("1_05mst")
+cell_size = Vector3(1, 1, 1)
+cell_center_x = false
+cell_center_y = false
+cell_center_z = false
+data = {
+"cells": PackedInt32Array(0, 0, 1, 1, 0, 1, 1, 1, 2, 2, 0, 1, 0, 1, 1, 65535, 1, 0, 65535, 0, 2, 65535, 65535, 1, 65535, 2, 0, 0, 2, 1, 1, 2, 0, 2, 2, 0, 2, 1, 0, 0, 65535, 1, 1, 65535, 1, 2, 65535, 1, 65534, 65535, 1, 65534, 0, 1, 2, 3, 1, 1, 3, 1, 0, 3, 1, 65535, 3, 0, 65534, 3, 0, 65534, 2, 0, 65534, 1, 0)
+}
+
+[node name="Player" type="CharacterBody3D" parent="." unique_id=96302898]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.46, 1.6, 1.5)
+script = ExtResource("2_ounon")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player" unique_id=1309685932]
+shape = SubResource("SphereShape3D_ounon")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Player" unique_id=2097887748]
+mesh = SubResource("SphereMesh_nxn18")
+script = ExtResource("3_ounon")
+
+[node name="DialogueTrigger" type="Area3D" parent="." unique_id=455270700]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 1.5, 0.5)
+script = ExtResource("4_trigger")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="DialogueTrigger" unique_id=1745124436]
+shape = SubResource("BoxShape3D_trigger")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="DialogueTrigger" unique_id=1338299981]
+mesh = SubResource("BoxMesh_trigger")
