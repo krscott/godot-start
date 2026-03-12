@@ -3,7 +3,7 @@
 [ext_resource type="SpriteFrames" uid="uid://8sbpwgy03j5q" path="res://assets/spritesheets/littleguy_frames.tres" id="1_htjmx"]
 [ext_resource type="Script" uid="uid://b6mo6yr28xmfn" path="res://scripts/components/fancy_sprite_3d.gd" id="2_27wc5"]
 
-[node name="Player" type="Node3D" unique_id=1920999902]
+[node name="ObliquePlayer" type="Node3D" unique_id=1920999902]
 
 [node name="FancySprite3D" type="AnimatedSprite3D" parent="." unique_id=258600184]
 flip_h = true
