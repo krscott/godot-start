@@ -1,8 +1,9 @@
 [gd_scene format=3 uid="uid://lmp14m6v5wf4"]
 
 [ext_resource type="MeshLibrary" uid="uid://q2vjmi8n4ipj" path="res://assets/meshlibrary/test.meshlib" id="1_7367b"]
+[ext_resource type="Script" uid="uid://bc734u7brvf46" path="res://scenes/levels/mouselook/components/enable_stretch_filter.gd.gd" id="1_bwg66"]
 [ext_resource type="Script" uid="uid://dgpbhxs8ofy5g" path="res://scenes/levels/mouselook/components/remove_on_game_start.gd" id="2_bwg66"]
-[ext_resource type="PackedScene" uid="uid://bwcxyj2dueo8r" path="res://scenes/levels/obliquetile/player.tscn" id="2_ycx6c"]
+[ext_resource type="PackedScene" uid="uid://bwcxyj2dueo8r" path="res://scenes/levels/obliquetile/oblique_player.tscn" id="2_ycx6c"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_6f4l4"]
 
@@ -20,6 +21,10 @@ ambient_light_color = Color(0.796243, 0.796243, 0.796243, 1)
 [sub_resource type="SphereMesh" id="SphereMesh_ppqqn"]
 
 [node name="ObliqueTileLevel" type="Node3D" unique_id=919855827]
+
+[node name="EnableStretchFilter" type="Node" parent="." unique_id=1659594320]
+script = ExtResource("1_bwg66")
+metadata/_custom_type_script = "uid://bc734u7brvf46"
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1232387666]
 environment = SubResource("Environment_vmmfd")
@@ -57,5 +62,5 @@ shape = SubResource("SphereShape3D_vmmfd")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="RigidBody3D" unique_id=439081567]
 mesh = SubResource("SphereMesh_ppqqn")
 
-[node name="Player" parent="." unique_id=1920999902 instance=ExtResource("2_ycx6c")]
+[node name="ObliquePlayer" parent="." unique_id=1920999902 instance=ExtResource("2_ycx6c")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.3909116, 1.1888564, 0)

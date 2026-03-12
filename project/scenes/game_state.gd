@@ -5,6 +5,7 @@ extends Node
 @onready var _pause_menu_system: PauseMenuSystem = %PauseMenuSystem
 @onready var _replay_system: ReplaySystem = %ReplaySystem
 @onready var player_input: PlayerInput = %PlayerInput
+@onready var stretch_filter: CanvasLayer = %StretchFilter
 
 # Public Methods
 
@@ -20,6 +21,7 @@ func _ready() -> void:
 	assert(_pause_menu_system)
 	assert(_replay_system)
 	assert(player_input)
+	assert(stretch_filter)
 
 	util.printdbg("DEBUG BUILD")
 
