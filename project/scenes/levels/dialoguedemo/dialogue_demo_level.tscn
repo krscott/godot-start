@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://bev71dv4qsfw"]
+
+[ext_resource type="Script" uid="uid://cws8nhjc45fo7" path="res://scripts/dialogue/dialogue_entry.gd" id="1_4hhbv"]
+
+[node name="DialogueDemoLevel" type="Node2D" unique_id=1365941502]
+
+[node name="DialogueEntry" type="Node" parent="." unique_id=996939929]
+script = ExtResource("1_4hhbv")
+json_path = "res://assets/dialogue/dialogue_demo.json"
+metadata/_custom_type_script = "uid://cws8nhjc45fo7"

@@ -10,11 +10,9 @@ static var _property_list_cache := { }
 class GdSerdeProperty:
 	var name: StringName
 	var type: Variant.Type
-
-
-	func _init(name_: StringName, type_: Variant.Type) -> void:
-		name = name_
-		type = type_
+	var optional: bool
+	## (original: Variant, value: Variant) -> [Variant, Error]
+	var deser_func: Callable
 
 
 	func _to_string() -> String:
@@ -23,28 +21,45 @@ class GdSerdeProperty:
 
 static func _create_property_list(
 		obj: Object,
-		prop_filter: Array,
+		prop_filter: Variant,
+		prop_optionals: Array,
 ) -> Array[GdSerdeProperty]:
 	var out: Array[GdSerdeProperty] = []
 	for item in obj.get_property_list():
-		if prop_filter and not prop_filter.has(item.name):
-			continue
+		var deser_func := deserialize
+		
+		if prop_filter is Array:
+			var pf_arr: Array = prop_filter
+			if not pf_arr.has(item.name):
+				continue
+		elif prop_filter is Dictionary:
+			var pf_dict: Dictionary = prop_filter
+			if not pf_dict.has(item.name):
+				continue
+			deser_func = pf_dict[item.name]
 
 		match item.name:
-			"RefCounted", "script", "Script Variables", "__meta__":
+			"RefCounted", "script", "Script Variables", "__meta__", "Built-in script":
 				continue
 
 		var name: String = item.name
 		var type: Variant.Type = item.type
 		if not name.ends_with(".gd"):
-			out.push_back(GdSerdeProperty.new(name, type))
+			var prop := GdSerdeProperty.new()
+			prop.name = name
+			prop.type = type
+			prop.deser_func = deser_func
+			prop.optional = prop_optionals.has(name)
+			out.push_back(prop)
 	return out
 
 
 static func _get_obj_prop_list(obj: Object) -> Array[GdSerdeProperty]:
 	var gdserde_class := &""
-	var prop_filter: Array
+	## Array[StringName] | Dictionary[StringName, Callable]
+	var prop_filter: Variant
 	var prop_list: Array[GdSerdeProperty]
+	var prop_optionals: Array = []
 
 	if obj.get_script():
 		if util.has_member(obj, &"gdserde_class"):
@@ -55,7 +70,10 @@ static func _get_obj_prop_list(obj: Object) -> Array[GdSerdeProperty]:
 			elif obj.get_class() != "RefCounted":
 				assert(false, str("Object must define gdserde_props: ", obj))
 			else:
-				prop_filter = []
+				prop_filter = null
+			
+			if util.has_member(obj, &"gdserde_optional"):
+				prop_optionals = obj.get(&"gdserde_optional")
 
 	elif obj is Node3D:
 		gdserde_class = &"Node3D"
@@ -65,7 +83,7 @@ static func _get_obj_prop_list(obj: Object) -> Array[GdSerdeProperty]:
 		if _property_list_cache.has(gdserde_class):
 			prop_list = _property_list_cache[gdserde_class]
 		else:
-			prop_list = _create_property_list(obj, prop_filter)
+			prop_list = _create_property_list(obj, prop_filter, prop_optionals)
 			_property_list_cache[gdserde_class] = prop_list
 			#print_debug("GdSerde: cached ", gdserde_class, " props ", prop_list)
 	else:
@@ -74,7 +92,7 @@ static func _get_obj_prop_list(obj: Object) -> Array[GdSerdeProperty]:
 			"Object %s not optimized for serialization, set gdserde_class" %
 			[str(obj)],
 		)
-		prop_list = _create_property_list(obj, [])
+		prop_list = _create_property_list(obj, [], [])
 
 	assert(prop_list)
 	return prop_list
@@ -112,11 +130,15 @@ static func deserialize(original: Variant, value: Variant) -> Array:
 			return [obj, err]
 
 		for prop in _get_obj_prop_list(obj):
-			match deserialize(obj.get(prop.name), dict[prop.name]):
-				[var x, OK]:
-					obj.set(prop.name, x)
-				var res:
-					return res
+			if dict.has(prop.name):
+				match prop.deser_func.call(obj.get(prop.name), dict[prop.name]):
+					[var x, OK]:
+						obj.set(prop.name, x)
+					[var x, var err]:
+						assert(err is Error)
+						return [x, err]
+			elif not prop.optional:
+				return _err()
 		return _ok(obj)
 
 	return _ok(value)
@@ -129,6 +151,39 @@ static func deserialize_object(obj: Object, value: Dictionary) -> Error:
 	assert(false)
 	return ERR_BUG
 
+
+static func deserialize_object_array(
+	arr: Array, value: Array, factory: Callable
+) -> Error:
+	var err := OK
+	arr.clear()
+	for data: Variant in value:
+		if data is not Dictionary:
+			err = ERR_PARSE_ERROR
+			continue
+		var dict: Dictionary = data
+			
+		var obj: Object = factory.call()
+		var err2 := deserialize_object(obj, dict)
+		if err2:
+			err = err2
+		arr.push_back(obj)
+	return err
+
+## Same as deserialize_object_array, but accepts Variant
+static func deserialize_object_array_var(
+	arr: Array, value: Variant, factory: Callable
+) -> Array:
+	arr.clear()
+	
+	if value is not Array:
+		return [arr, ERR_PARSE_ERROR]
+
+	var input_arr: Array = value
+	return [
+		arr, 
+		GdSerde.deserialize_object_array(arr, input_arr, factory)
+	]
 
 static func clone_object(to: Object, from: Object) -> Error:
 	var dict := serialize_object(from)
