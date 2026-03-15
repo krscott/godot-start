@@ -1,6 +1,0 @@
-[gd_scene format=3 uid="uid://c8echxlir850j"]
-
-[ext_resource type="Script" uid="uid://b4ax21a56xp4n" path="res://scenes/levels/blank/blank_level.gd" id="1_ai87s"]
-
-[node name="BlankLevel" type="Node2D" unique_id=557359395]
-script = ExtResource("1_ai87s")
