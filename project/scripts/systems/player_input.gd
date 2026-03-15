@@ -10,12 +10,13 @@ const gdserde_props := [
 	&"jump",
 ]
 
+@export var replay_system: ReplaySystem
+@export var pause_menu_system: PauseMenuSystem
+
 # TODO: Make parameter
 const sensitivity := 0.2
 const min_angle := -90.0
 const max_angle := 90
-
-var listening := false
 
 var look := Vector2.ZERO
 var move := Vector2.ZERO
@@ -25,7 +26,16 @@ var jump := false
 
 
 func _is_listening() -> bool:
-	return listening and util.is_mouse_captured()
+	var replay_is_inactive := replay_system == null or not replay_system.replay.is_active
+	var menu_is_closed := pause_menu_system == null or not pause_menu_system.is_menu_open()
+	
+	return replay_is_inactive and menu_is_closed
+
+
+func _ready() -> void:
+	# Missing system asserts for debugging, but not actually required for logic
+	assert(replay_system)
+	assert(pause_menu_system)
 
 
 func _physics_process(_delta: float) -> void:

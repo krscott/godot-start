@@ -1,9 +1,10 @@
 [gd_scene format=3 uid="uid://c8lpblcihq5ff"]
 
+[ext_resource type="Script" uid="uid://bu2q2x32c2nug" path="res://scripts/components/level_config.gd" id="1_am13w"]
 [ext_resource type="Script" uid="uid://chi5smarodjo2" path="res://scripts/components/persist_group.gd" id="1_nxlid"]
 [ext_resource type="Script" uid="uid://dfati240tvaw1" path="res://scenes/levels/mouselook/entities/free_cam.gd" id="2_am13w"]
 [ext_resource type="Texture2D" uid="uid://co7fg4r4c84ai" path="res://icon.svg" id="3_lo5wi"]
-[ext_resource type="Script" uid="uid://c1yjf0s7vvoqn" path="res://scenes/levels/mouselook/components/rotate.gd" id="4_kbud1"]
+[ext_resource type="Script" uid="uid://c1yjf0s7vvoqn" path="res://scripts/components/debug_rotate.gd" id="4_kbud1"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_0xm2m"]
 
@@ -25,6 +26,11 @@ albedo_texture = ExtResource("3_lo5wi")
 albedo_color = Color(0, 0, 0, 1)
 
 [node name="MouselookLevel" type="Node3D" unique_id=1431554155]
+
+[node name="LevelConfig" type="Node" parent="." unique_id=437031246]
+script = ExtResource("1_am13w")
+mouse_capture = true
+metadata/_custom_type_script = "uid://bu2q2x32c2nug"
 
 [node name="PersistGroup" type="Node" parent="." unique_id=821707653]
 script = ExtResource("1_nxlid")
@@ -49,7 +55,7 @@ metadata/_custom_type_script = "uid://dfati240tvaw1"
 [node name="TextureBox" type="CSGBox3D" parent="Debug" unique_id=101892094 groups=["persist"]]
 material = SubResource("StandardMaterial3D_lwsif")
 
-[node name="Rotate" type="Node" parent="Debug/TextureBox" unique_id=1610348362]
+[node name="DebugRotate" type="Node" parent="Debug/TextureBox" unique_id=1610348362]
 script = ExtResource("4_kbud1")
 metadata/_custom_type_script = "uid://c1yjf0s7vvoqn"
 
@@ -57,7 +63,7 @@ metadata/_custom_type_script = "uid://c1yjf0s7vvoqn"
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2)
 material = SubResource("StandardMaterial3D_p6tgm")
 
-[node name="Rotate" type="Node" parent="Debug/WhiteBox" unique_id=36109505]
+[node name="DebugRotate" type="Node" parent="Debug/WhiteBox" unique_id=36109505]
 script = ExtResource("4_kbud1")
 metadata/_custom_type_script = "uid://c1yjf0s7vvoqn"
 
@@ -65,6 +71,6 @@ metadata/_custom_type_script = "uid://c1yjf0s7vvoqn"
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2)
 material = SubResource("StandardMaterial3D_4icbv")
 
-[node name="Rotate" type="Node" parent="Debug/BlackBox" unique_id=1452879731]
+[node name="DebugRotate" type="Node" parent="Debug/BlackBox" unique_id=1452879731]
 script = ExtResource("4_kbud1")
 metadata/_custom_type_script = "uid://c1yjf0s7vvoqn"

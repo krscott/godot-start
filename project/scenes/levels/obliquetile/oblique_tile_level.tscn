@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://lmp14m6v5wf4"]
 
 [ext_resource type="MeshLibrary" uid="uid://q2vjmi8n4ipj" path="res://assets/meshlibrary/test.meshlib" id="1_7367b"]
-[ext_resource type="Script" uid="uid://bc734u7brvf46" path="res://scenes/levels/mouselook/components/enable_stretch_filter.gd.gd" id="1_bwg66"]
-[ext_resource type="Script" uid="uid://dgpbhxs8ofy5g" path="res://scenes/levels/mouselook/components/remove_on_game_start.gd" id="2_bwg66"]
+[ext_resource type="Script" uid="uid://bu2q2x32c2nug" path="res://scripts/components/level_config.gd" id="1_bwg66"]
+[ext_resource type="Script" uid="uid://dgpbhxs8ofy5g" path="res://scripts/components/remove_on_game_start.gd" id="2_bwg66"]
 [ext_resource type="PackedScene" uid="uid://bwcxyj2dueo8r" path="res://scenes/levels/obliquetile/oblique_player.tscn" id="2_ycx6c"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_6f4l4"]
@@ -22,9 +22,10 @@ ambient_light_color = Color(0.796243, 0.796243, 0.796243, 1)
 
 [node name="ObliqueTileLevel" type="Node3D" unique_id=919855827]
 
-[node name="EnableStretchFilter" type="Node" parent="." unique_id=1659594320]
+[node name="LevelConfig" type="Node" parent="." unique_id=1818743714]
 script = ExtResource("1_bwg66")
-metadata/_custom_type_script = "uid://bc734u7brvf46"
+stretch_filter = true
+metadata/_custom_type_script = "uid://bu2q2x32c2nug"
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1232387666]
 environment = SubResource("Environment_vmmfd")

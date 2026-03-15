@@ -2,7 +2,7 @@ class_name GameState
 extends Node
 
 @onready var _save_state: SaveState = %SaveState
-@onready var _pause_menu_system: PauseMenuSystem = %PauseMenuSystem
+@onready var pause_menu_system: PauseMenuSystem = %PauseMenuSystem
 @onready var _replay_system: ReplaySystem = %ReplaySystem
 @onready var player_input: PlayerInput = %PlayerInput
 @onready var stretch_filter: CanvasLayer = %StretchFilter
@@ -18,7 +18,7 @@ func sync_object_state(key: StringName, obj: Object) -> void:
 
 func _ready() -> void:
 	assert(_save_state)
-	assert(_pause_menu_system)
+	assert(pause_menu_system)
 	assert(_replay_system)
 	assert(player_input)
 	assert(stretch_filter)
@@ -34,7 +34,7 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
-	if not _pause_menu_system.is_menu_open():
+	if not pause_menu_system.is_menu_open():
 		if Input.is_action_just_pressed("quick_save"):
 			_save_state.quicksave()
 		elif Input.is_action_just_pressed("quick_load"):
@@ -43,8 +43,8 @@ func _process(_delta: float) -> void:
 			if OS.has_feature("pc"):
 				_replay_system._save_replay_and_quit()
 			else:
-				_pause_menu_system.pause()
+				pause_menu_system.pause()
 		elif Input.is_action_just_pressed("ui_cancel"):
-			_pause_menu_system.pause()
+			pause_menu_system.pause()
 
 # Private Methods
