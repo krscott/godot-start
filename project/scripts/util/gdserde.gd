@@ -143,7 +143,8 @@ static func _create_obj_fields(obj: Object) -> Array[Field]:
 			assert(
 				field.spec.type == typeof(obj.get(field.name)),
 				str(
-					_field_str(obj, field), " ",
+					_field_str(obj, field),
+					" ",
 					_unexpected_type(field.spec.type, obj.get(field.name)),
 				),
 			)
