@@ -15,7 +15,7 @@ static func _unexpected_type(expected_type: Variant.Type, actual_value: Variant)
 		", got ",
 		type_string(typeof(actual_value)),
 		": ",
-		var_to_str(actual_value),
+		util.safe_var_to_str(actual_value),
 	)
 
 

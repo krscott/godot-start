@@ -31,6 +31,16 @@ static func get_or_default(obj: Object, name: StringName, default: Variant) -> V
 	return value
 
 
+## Fixes error "Failed to encode a path to a custom script for an array type."
+static func safe_var_to_str(variant: Variant) -> String:
+	match typeof(variant):
+		# Add more types as necessary
+		TYPE_ARRAY:
+			return str(variant)
+		_:
+			return var_to_str(variant)
+
+
 static func get_field_names(obj: Object) -> Array[String]:
 	var out: Array[String] = []
 	for prop: Dictionary in obj.get_property_list():
