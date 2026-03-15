@@ -138,3 +138,14 @@ static func print_saved_stack(stack: Array, start: int = 0) -> void:
 				frame.function,
 			],
 		)
+
+
+static func msg_unexpected_type(expected_type: Variant.Type, actual_value: Variant) -> String:
+	return str(
+		"expected ",
+		type_string(expected_type),
+		", got ",
+		type_string(typeof(actual_value)),
+		": ",
+		util.safe_var_to_str(actual_value),
+	)

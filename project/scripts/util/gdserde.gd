@@ -8,17 +8,6 @@ static var _field_list_cache := {
 }
 
 
-static func _unexpected_type(expected_type: Variant.Type, actual_value: Variant) -> String:
-	return str(
-		"expected ",
-		type_string(expected_type),
-		", got ",
-		type_string(typeof(actual_value)),
-		": ",
-		util.safe_var_to_str(actual_value),
-	)
-
-
 static func _field_str(obj: Object, field: Field) -> String:
 	return str(util.get_or_default(obj, &"gdserde_class", &"(?)"), ".", field.name)
 
@@ -145,7 +134,7 @@ static func _create_obj_fields(obj: Object) -> Array[Field]:
 				str(
 					_field_str(obj, field),
 					" ",
-					_unexpected_type(field.spec.type, obj.get(field.name)),
+					util.msg_unexpected_type(field.spec.type, obj.get(field.name)),
 				),
 			)
 
@@ -258,13 +247,13 @@ static func deserialize_spec(spec: Spec, variant: Variant) -> Result:
 		TYPE_OBJECT:
 			assert(spec.factory, "factory required")
 			if variant is not Dictionary:
-				return Result.fail(_unexpected_type(TYPE_DICTIONARY, variant))
+				return Result.fail(util.msg_unexpected_type(TYPE_DICTIONARY, variant))
 			var obj: Object = spec.factory.call()
 			return deserialize_object(obj, variant)
 		TYPE_ARRAY:
 			assert(spec.inner, "inner required")
 			if variant is not Array:
-				return Result.fail(_unexpected_type(TYPE_ARRAY, variant))
+				return Result.fail(util.msg_unexpected_type(TYPE_ARRAY, variant))
 			var arr: Array = variant
 			var out := []
 			for i in arr.size():
@@ -275,12 +264,12 @@ static func deserialize_spec(spec: Spec, variant: Variant) -> Result:
 			return Result.ok(out)
 		TYPE_DICTIONARY:
 			if variant is not Dictionary:
-				return Result.fail(_unexpected_type(TYPE_DICTIONARY, variant))
+				return Result.fail(util.msg_unexpected_type(TYPE_DICTIONARY, variant))
 			var dict: Dictionary = variant
 			var out := { }
 			for k: Variant in dict:
 				if typeof(k) != spec.key_type:
-					return Result.fail(_unexpected_type(spec.key_type, k))
+					return Result.fail(util.msg_unexpected_type(spec.key_type, k))
 				var res := deserialize_spec(spec.inner, dict[k])
 				if res.err:
 					return Result.fail("key=", var_to_str(k), " > ", res.err)
@@ -300,7 +289,7 @@ static func deserialize_spec(spec: Spec, variant: Variant) -> Result:
 				return Result.ok(out)
 
 			if spec.type != typeof(variant):
-				return Result.fail(_unexpected_type(spec.type, variant))
+				return Result.fail(util.msg_unexpected_type(spec.type, variant))
 
 			return Result.ok(variant)
 
@@ -310,7 +299,7 @@ static func deserialize_object(obj: Object, variant: Variant) -> Result:
 		return obj.call(&"gdserde_deserialize", variant)
 
 	if variant is not Dictionary:
-		return Result.fail(_unexpected_type(TYPE_DICTIONARY, variant))
+		return Result.fail(util.msg_unexpected_type(TYPE_DICTIONARY, variant))
 	var dict: Dictionary = variant
 
 	var fields := _get_obj_fields(obj)
@@ -324,7 +313,7 @@ static func deserialize_object(obj: Object, variant: Variant) -> Result:
 						"spec mismatch - ",
 						_field_str(obj, field),
 						" ",
-						_unexpected_type(field.spec.type, obj.get(field.name)),
+						util.msg_unexpected_type(field.spec.type, obj.get(field.name)),
 					),
 				)
 				assert(false, res.err)
