@@ -3,6 +3,7 @@
 		"start": {
 			"next": [
 				"alice_is_dead",
+				"reintro",
 				"intro"
 			]
 		},
@@ -11,6 +12,19 @@
 			"text": [
 				"Hi! My name is Alice!",
 				"Let's play rock paper scissors!"
+			],
+			"next": [
+				"start_game"
+			]
+		},
+		"reintro": {
+			"conds": [
+				"has_played_at_least_once"
+			],
+			"speaker": "Alice",
+			"text": [
+				"Ready for another round?",
+				"The score is currently me [color=#FF0000][b]${alice_score}[/b][/color] you [color=#00FF00][b]${player_score}[/b][/color]"
 			],
 			"next": [
 				"start_game"

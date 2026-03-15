@@ -43,7 +43,7 @@ func _interpolate(text: String) -> String:
 	var out := ""
 	var i := 0
 	while i < text.length():
-		if text[i] == "$" and text[i+1] == "{":
+		if text[i] == "$" and text[i + 1] == "{":
 			i += 2
 			while text[i] != "}":
 				match_var += text[i]
@@ -56,7 +56,7 @@ func _interpolate(text: String) -> String:
 		else:
 			out += text[i]
 		i += 1
-	
+
 	return out
 
 
