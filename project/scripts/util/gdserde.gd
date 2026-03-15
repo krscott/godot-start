@@ -133,6 +133,8 @@ static func _get_obj_fields(obj: Object) -> Array[Field]:
 	
 	else:
 		var obj_class := StringName(obj.get_class())
+		while obj_class and not _field_list_cache.has(obj_class):
+			obj_class = ClassDB.get_parent_class(obj_class)
 		if _field_list_cache.has(obj_class):
 			var arr: Array = _field_list_cache[obj_class]
 			fields.assign(arr)
@@ -183,6 +185,9 @@ static func deserialize_spec(spec: Spec, variant: Variant) -> Result:
 
 
 static func deserialize_object(obj: Object, variant: Variant) -> Result:
+	if obj.has_method(&"gdserde_deserialize"):
+		return obj.call(&"gdserde_deserialize", variant)
+
 	if variant is not Dictionary:
 		return Result.unexpected_type(TYPE_DICTIONARY, variant)
 	var dict: Dictionary = variant
@@ -231,6 +236,9 @@ static func serialize(value: Variant) -> Variant:
 
 
 static func serialize_object(obj: Object) -> Dictionary:
+	if obj.has_method(&"gdserde_serialize"):
+		return obj.call(&"gdserde_serialize")
+	
 	var dict := { }
 	for field: Field in _get_obj_fields(obj):
 		dict[field.name] = serialize(obj.get(field.name))
