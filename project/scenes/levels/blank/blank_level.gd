@@ -5,5 +5,5 @@ func _init() -> void:
 	gdserde
 
 
-func _ready() -> void:
+func _process(_delta: float) -> void:
 	get_tree().quit()

@@ -30,7 +30,8 @@ func _physics_process(_delta: float) -> void:
 
 
 func _replay_load_frame(frame: Dictionary) -> void:
-	util.aok(GdSerde.deserialize_object(player_input, frame))
+	var res := gdserde.deserialize_object(player_input, frame)
+	assert(not res.err, res.err)
 	if replay.is_active:
 		player_input.listening = false
 	else:
@@ -39,7 +40,7 @@ func _replay_load_frame(frame: Dictionary) -> void:
 
 
 func _replay_save_frame() -> void:
-	replay.add_frame(GdSerde.serialize_object(player_input))
+	replay.add_frame(gdserde.serialize_object(player_input))
 
 
 func _save_replay_and_quit() -> void:

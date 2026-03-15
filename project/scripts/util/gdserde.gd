@@ -1,207 +1,442 @@
-## Utilities for serializing/deserializng Godot Objects
-## NOTE: Technically, this is not full serializing/deserializing--it is just
-##       handling conversion to/from Variant, which can then be converted to
-##       JSON, etc.
-class_name GdSerde
+class_name gdserde
 
-static var _property_list_cache := { }
+static var _field_list_cache := {
+	&"Node3D": [
+		Field.native(&"transform", TYPE_TRANSFORM3D)
+	]
+	# TODO: Add more as needed
+}
+
+class Result:
+	var value: Variant
+	var err: String
 
 
-class GdSerdeProperty:
-	var name: StringName
+	func _init(value_: Variant, err_: String) -> void:
+		value = value_
+		err = err_
+
+
+	static func ok(value_: Variant) -> Result:
+		return Result.new(value_, "")
+
+
+	static func fail(...args: Array) -> Result:
+		var msg: String = str.callv(args)
+		return Result.new(null, msg)
+
+
+	static func unexpected_type(expected_type: Variant.Type, actual_value: Variant) -> Result:
+		var msg := str("expected ", type_string(expected_type), ", got ", type_string(typeof(actual_value)), ": ", actual_value)
+		return Result.new(null, msg)
+
+
+class Spec:
 	var type: Variant.Type
-	var optional: bool
-	## (original: Variant, value: Variant) -> [Variant, Error]
-	var deser_func: Callable
+	var factory: Callable
+	var inner: Spec
+	var key_type: Variant.Type
 
 
-	func _to_string() -> String:
-		return "GdSerdeProperty<%s: %s>" % [name, type_string(type)]
+	func _init(type_: Variant.Type) -> void:
+		type = type_
 
 
-static func _create_property_list(
-		obj: Object,
-		prop_filter: Variant,
-		prop_optionals: Array,
-) -> Array[GdSerdeProperty]:
-	var out: Array[GdSerdeProperty] = []
+	static func native(type_: Variant.Type) -> Spec:
+		return Spec.new(type_)
+
+
+	static func object(factory_: Callable) -> Spec:
+		var spec := Spec.new(TYPE_OBJECT)
+		spec.factory = factory_
+		return spec
+
+
+	static func array(inner_: Spec) -> Spec:
+		var spec := Spec.new(TYPE_ARRAY)
+		spec.inner = inner_
+		return spec
+
+
+	static func dict(key_type_: Variant.Type, inner_: Spec) -> Spec:
+		var spec := Spec.new(TYPE_DICTIONARY)
+		spec.inner = inner_
+		spec.key_type = key_type_
+		return spec
+
+
+class Field:
+	var name: StringName
+	var spec: Spec
+	var is_optional := false
+
+
+	func _init(name_: StringName, spec_: Spec) -> void:
+		name = name_
+		spec = spec_
+		
+	
+	func optional() -> Field:
+		is_optional = true
+		return self
+
+
+	static func native(name_: StringName, type: Variant.Type) -> Field:
+		return Field.new(name_, Spec.new(type))
+
+
+static func _create_obj_fields(obj: Object) -> Array[Field]:
+	var fields: Array[Field] = []
+	if obj.has_method(&"gdserde_fields"):
+		fields = obj.call(&"gdserde_fields")
+	elif util.has_member(obj, &"gdserde_props"):
+		for p: StringName in obj.get(&"gdserde_props"):
+			fields.push_back(Field.native(p, typeof(obj.get(p))))
+	elif obj.get_class() != "RefCounted":
+		assert(false, str("Object must define `static func gdserde_fields()`: ", obj))
+	
+	var arr: Array[Field] = []
 	for item in obj.get_property_list():
-		var deser_func := deserialize
-
-		if prop_filter is Array:
-			var pf_arr: Array = prop_filter
-			if not pf_arr.has(item.name):
-				continue
-		elif prop_filter is Dictionary:
-			var pf_dict: Dictionary = prop_filter
-			if not pf_dict.has(item.name):
-				continue
-			deser_func = pf_dict[item.name]
-
-		match item.name:
+		var name: String = item["name"]
+		match name:
 			"RefCounted", "script", "Script Variables", "__meta__", "Built-in script":
 				continue
 
-		var name: String = item.name
-		var type: Variant.Type = item.type
-		if not name.ends_with(".gd"):
-			var prop := GdSerdeProperty.new()
-			prop.name = name
-			prop.type = type
-			prop.deser_func = deser_func
-			prop.optional = prop_optionals.has(name)
-			out.push_back(prop)
-	return out
+		var type: Variant.Type = item["type"]
+		#var value: Variant = obj.get(name)
+
+		if fields:
+			for field: Field in fields:
+				if field.name == name:
+					arr.push_back(field)
+					break
+		else:
+			arr.push_back(Field.native(name, type))
+	return arr
 
 
-static func _get_obj_prop_list(obj: Object) -> Array[GdSerdeProperty]:
-	var gdserde_class := &""
-	## Array[StringName] | Dictionary[StringName, Callable]
-	var prop_filter: Variant
-	var prop_list: Array[GdSerdeProperty]
-	var prop_optionals: Array = []
-
+static func _get_obj_fields(obj: Object) -> Array[Field]:
+	var fields: Array[Field] = []
+	
 	if obj.get_script():
 		if util.has_member(obj, &"gdserde_class"):
-			gdserde_class = obj.get(&"gdserde_class")
-
-			if util.has_member(obj, &"gdserde_props"):
-				prop_filter = obj.get(&"gdserde_props")
-			elif obj.get_class() != "RefCounted":
-				assert(false, str("Object must define gdserde_props: ", obj))
+			var gdserde_class: StringName = obj.get(&"gdserde_class")
+			if _field_list_cache.has(gdserde_class):
+				var arr: Array = _field_list_cache[gdserde_class]
+				fields.assign(arr)
 			else:
-				prop_filter = null
-
-			if util.has_member(obj, &"gdserde_optional"):
-				prop_optionals = obj.get(&"gdserde_optional")
-
-	elif obj is Node3D:
-		gdserde_class = &"Node3D"
-		prop_filter = [&"transform"]
-
-	if gdserde_class:
-		if _property_list_cache.has(gdserde_class):
-			prop_list = _property_list_cache[gdserde_class]
+				fields = _create_obj_fields(obj)
+				_field_list_cache[gdserde_class] = fields
 		else:
-			prop_list = _create_property_list(obj, prop_filter, prop_optionals)
-			_property_list_cache[gdserde_class] = prop_list
-			#print_debug("GdSerde: cached ", gdserde_class, " props ", prop_list)
+			push_warning("Unoptimized class: ", obj)
+			fields = _create_obj_fields(obj)
+	
 	else:
-		assert(
-			false,
-			"Object %s not optimized for serialization, set gdserde_class" %
-			[str(obj)],
-		)
-		prop_list = _create_property_list(obj, [], [])
+		var obj_class := StringName(obj.get_class())
+		if _field_list_cache.has(obj_class):
+			var arr: Array = _field_list_cache[obj_class]
+			fields.assign(arr)
+		else:
+			assert(false, str("Unhandled class, add to gdserde._field_list_cache: ", obj_class))
+			fields = _create_obj_fields(obj)
+			
+	return fields
 
-	assert(prop_list)
-	return prop_list
+
+static func deserialize_spec(spec: Spec, variant: Variant) -> Result:
+	match spec.type:
+		TYPE_OBJECT:
+			assert(spec.factory, "factory required")
+			if variant is not Dictionary:
+				return Result.unexpected_type(TYPE_DICTIONARY, variant)
+			var obj: Object = spec.factory.call()
+			return deserialize_object(obj, variant)
+		TYPE_ARRAY:
+			assert(spec.inner, "inner required")
+			if variant is not Array:
+				return Result.unexpected_type(TYPE_ARRAY, variant)
+			var arr: Array = variant
+			var out := []
+			for i in arr.size():
+				var res := deserialize_spec(spec.inner, arr[i])
+				if res.err:
+					return Result.fail("index ", i, " ", res.err)
+				out.push_back(res.value)
+			return Result.ok(out)
+		TYPE_DICTIONARY:
+			if variant is not Dictionary:
+				return Result.unexpected_type(TYPE_DICTIONARY, variant)
+			var dict: Dictionary = variant
+			var out := { }
+			for k: Variant in dict:
+				if typeof(k) != spec.key_type:
+					return Result.unexpected_type(spec.key_type, k)
+				var res := deserialize_spec(spec.inner, dict[k])
+				if res.err:
+					return Result.fail("key ", k, " ", res.err)
+				out[k] = res.value
+			return Result.ok(out)
+		_:
+			if spec.type != typeof(variant):
+				return Result.unexpected_type(spec.type, variant)
+			return Result.ok(variant)
+
+
+static func deserialize_object(obj: Object, variant: Variant) -> Result:
+	if variant is not Dictionary:
+		return Result.unexpected_type(TYPE_DICTIONARY, variant)
+	var dict: Dictionary = variant
+
+	for field: Field in _get_obj_fields(obj):
+		if dict.has(field.name):
+			var res := deserialize_spec(field.spec, dict[field.name])
+			if res.err:
+				return Result.fail("field '", field.name, "' ", res.err)
+			assert(util.has_member(obj, field.name))
+			var target: Variant = obj.get(field.name)
+			if target is Array and res.value is Array:
+				var target_arr: Array = target
+				var res_arr: Array = res.value
+				target_arr.assign(res_arr)
+			else:
+				obj.set(field.name, res.value)
+
+			# This will fail if not exactly the same type
+			# e.g. Array != Array[int], even if both are array of ints
+			assert(obj.get(field.name) == res.value, str(obj.get(field.name), " ", res.value))
+		elif not field.is_optional:
+			return Result.fail("field '", field.name, "' missing from dict: ", dict)
+
+	return Result.ok(obj)
 
 
 static func serialize(value: Variant) -> Variant:
 	if value is Object:
 		var obj: Object = value
-		if obj.has_method(&"gdserde_serialize"):
-			return obj.call(&"gdserde_serialize")
+		return serialize_object(obj)
 
+	if value is Array:
+		var out := []
+		for x: Variant in value:
+			out.push_back(serialize(x))
+		return out
+
+	if value is Dictionary:
 		var out := { }
-		for prop in _get_obj_prop_list(obj):
-			out[prop.name] = serialize(obj.get(prop.name))
+		for k: Variant in value:
+			out[serialize(k)] = serialize(value[k])
 		return out
 
 	return value
 
 
 static func serialize_object(obj: Object) -> Dictionary:
-	var dict: Dictionary = serialize(obj)
+	var dict := { }
+	for field: Field in _get_obj_fields(obj):
+		dict[field.name] = serialize(obj.get(field.name))
 	return dict
 
-
-## returns [Variant, Error]
-static func deserialize(original: Variant, value: Variant) -> Array:
-	if original is Object:
-		var obj: Object = original
-		if value is not Dictionary:
-			return _err()
-		var dict: Dictionary = value
-
-		if obj.has_method(&"gdserde_deserialize"):
-			var err: Error = obj.call(&"gdserde_deserialize", dict)
-			return [obj, err]
-
-		for prop in _get_obj_prop_list(obj):
-			if dict.has(prop.name):
-				match prop.deser_func.call(obj.get(prop.name), dict[prop.name]):
-					[var x, OK]:
-						obj.set(prop.name, x)
-					[var x, var err]:
-						assert(err is Error)
-						return [x, err]
-			elif not prop.optional:
-				return _err()
-		return _ok(obj)
-
-	return _ok(value)
+#########
+# Tests #
+#########
 
 
-static func deserialize_object(obj: Object, value: Dictionary) -> Error:
-	match deserialize(obj, value):
-		[_, var err]:
-			return err
-	assert(false)
-	return ERR_BUG
+class _TestSimpleObj:
+	const gdserde_class := &"_TestSimpleObj"
+	var my_int: int
+	var my_str: String
 
 
-static func deserialize_object_array(
-		arr: Array,
-		value: Array,
-		factory: Callable,
-) -> Error:
-	var err := OK
-	arr.clear()
-	for data: Variant in value:
-		if data is not Dictionary:
-			err = ERR_PARSE_ERROR
-			continue
-		var dict: Dictionary = data
-
-		var obj: Object = factory.call()
-		var err2 := deserialize_object(obj, dict)
-		if err2:
-			err = err2
-		arr.push_back(obj)
-	return err
+static func _test_simple_obj_deser() -> void:
+	var variant: Variant = {
+		"my_int": 5,
+		"my_str": "foobar",
+	}
+	var obj := _TestSimpleObj.new()
+	var res := deserialize_object(obj, variant)
+	assert(not res.err, res.err)
+	assert(obj.my_int == 5)
+	assert(obj.my_str == "foobar")
 
 
-## Same as deserialize_object_array, but accepts Variant
-static func deserialize_object_array_var(
-		arr: Array,
-		value: Variant,
-		factory: Callable,
-) -> Array:
-	arr.clear()
-
-	if value is not Array:
-		return [arr, ERR_PARSE_ERROR]
-
-	var input_arr: Array = value
-	return [
-		arr,
-		GdSerde.deserialize_object_array(arr, input_arr, factory),
-	]
+static func _test_simple_obj_ser() -> void:
+	var obj := _TestSimpleObj.new()
+	obj.my_int = 99
+	obj.my_str = "hello"
+	var value := serialize_object(obj)
+	assert(value.my_int == 99)
+	assert(value.my_str == "hello")
 
 
-static func clone_object(to: Object, from: Object) -> Error:
-	var dict := serialize_object(from)
-	return deserialize_object(to, dict)
+class _TestArrayField:
+	const gdserde_class := &"_TestArrayField"
+	static func gdserde_fields() -> Array[Field]:
+		return [
+			Field.new(&"strings", Spec.array(Spec.native(TYPE_STRING))),
+			Field.new(&"objects", Spec.array(Spec.object(_TestSimpleObj.new))),
+		]
 
 
-## returns [null, Error]
-static func _err(err: Error = FAILED) -> Array:
-	assert(err != OK)
-	return [null, err]
+	var strings: Array[String]
+	var objects: Array[_TestSimpleObj]
 
 
-## returns [Variant, OK]
-static func _ok(value: Variant) -> Variant:
-	return [value, OK]
+static func _test_array_field_deser() -> void:
+	var variant: Variant = {
+		"strings": ["foo", "bar"],
+		"objects": [{ "my_int": 11, "my_str": "first" }, { "my_int": 22, "my_str": "second" }],
+	}
+
+	var obj := _TestArrayField.new()
+	var res := deserialize_object(obj, variant)
+	assert(not res.err, res.err)
+	assert(obj.strings[0] == "foo")
+	assert(obj.strings[1] == "bar")
+	assert(obj.strings.size() == 2)
+	var first: _TestSimpleObj = obj.objects[0]
+	assert(first.my_str == "first")
+	var second: _TestSimpleObj = obj.objects[1]
+	assert(second.my_str == "second")
+	assert(obj.objects.size() == 2)
+
+
+static func _test_array_field_ser() -> void:
+	var a := _TestSimpleObj.new()
+	a.my_int = 123
+	a.my_str = "oatmeal"
+	var b := _TestSimpleObj.new()
+	b.my_int = 123
+	b.my_str = "kirby"
+
+	var obj := _TestArrayField.new()
+	obj.strings = ["one", "two"]
+	obj.objects = [a, b]
+
+	var value := serialize_object(obj)
+	assert(value["strings"][0] == "one")
+	assert(value["strings"][1] == "two")
+	assert(len(value["strings"]) == 2)
+	assert(value["objects"][0]["my_str"] == "oatmeal")
+	assert(value["objects"][1]["my_str"] == "kirby")
+	assert(len(value["objects"]) == 2)
+	assert(typeof(value["objects"][1]) == TYPE_DICTIONARY)
+
+
+class _TestDictField:
+	const gdserde_class := &"_TestDictField"
+	static func gdserde_fields() -> Array[Field]:
+		return [
+			Field.new(&"integer_names", Spec.dict(TYPE_INT, Spec.native(TYPE_STRING))),
+			Field.new(&"simple_lookup", Spec.dict(TYPE_STRING, Spec.object(_TestSimpleObj.new))),
+		]
+
+
+	var integer_names: Dictionary
+	var simple_lookup: Dictionary
+
+
+static func _test_dict_field_deser() -> void:
+	var variant: Variant = {
+		"integer_names": {
+			42: "forty-two",
+			-10: "negative ten",
+		},
+		"simple_lookup": {
+			"alpha": { "my_int": 11, "my_str": "eleven" },
+			"beta": { "my_int": 22, "my_str": "twenty-two" },
+		},
+	}
+
+	var obj := _TestDictField.new()
+	var res := deserialize_object(obj, variant)
+	assert(not res.err, res.err)
+	assert(obj.integer_names[42] == "forty-two")
+	assert(obj.integer_names[-10] == "negative ten")
+	var a: _TestSimpleObj = obj.simple_lookup["alpha"]
+	assert(a.my_str == "eleven")
+	var b: _TestSimpleObj = obj.simple_lookup["beta"]
+	assert(b.my_str == "twenty-two")
+
+
+static func _test_dict_field_ser() -> void:
+	var a := _TestSimpleObj.new()
+	a.my_int = -99
+	a.my_str = "qux"
+	var b := _TestSimpleObj.new()
+	b.my_int = 99
+	b.my_str = "cruft"
+
+	var obj := _TestDictField.new()
+	obj.integer_names = {
+		0x11: "onety-one",
+		0xF5: "fleventy-five",
+	}
+	obj.simple_lookup = {
+		"quebec": a,
+		"charlie": b,
+	}
+
+	var value := serialize_object(obj)
+	assert(value["integer_names"][0xF5] == "fleventy-five")
+	assert(value["simple_lookup"]["charlie"]["my_int"] == 99)
+	assert(value["simple_lookup"]["charlie"] is Dictionary)
+
+
+
+class _TestOptionalField:
+	const gdserde_class := &"_TestOptionalField"
+	static func gdserde_fields() -> Array[Field]:
+		return [
+			Field.native(&"my_int", TYPE_INT).optional(),
+			Field.native(&"my_str", TYPE_STRING).optional(),
+		]
+		
+	var my_int: int = 10
+	var my_str: String = "nothing"
+
+
+static func _test_optional_deser() -> void:
+	if true:
+		var variant := {"my_int": 5}
+		var obj := _TestOptionalField.new()
+		var res := deserialize_object(obj, variant)
+		assert(not res.err, res.err)
+		assert(obj.my_int == 5)
+		assert(obj.my_str == "nothing")
+	
+	if true:
+		var variant := {"my_str": "something"}
+		var obj := _TestOptionalField.new()
+		var res := deserialize_object(obj, variant)
+		assert(not res.err, res.err)
+		assert(obj.my_int == 10)
+		assert(obj.my_str == "something")
+
+
+static func _test_node3d() -> void:
+	var node1 := Node3D.new()
+	node1.transform.origin = Vector3(1, 2, 3)
+	
+	var variant: Variant = serialize(node1)
+	
+	var node2 := Node3D.new()
+	var res := deserialize_object(node2, variant)
+	assert(not res.err, res.err)
+	assert(node2.transform.origin == Vector3(1, 2, 3))
+
+
+static func _static_init() -> void:
+	if OS.is_debug_build():
+		_tests()
+
+
+static func _tests() -> void:
+	_test_simple_obj_deser()
+	_test_simple_obj_ser()
+	_test_array_field_deser()
+	_test_array_field_ser()
+	_test_dict_field_deser()
+	_test_dict_field_ser()
+	_test_optional_deser()
+	_test_node3d()
+	print("gdserde tests PASSED")

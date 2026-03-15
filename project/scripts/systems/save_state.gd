@@ -18,13 +18,14 @@ var _quick_save_zero: PackedByteArray
 
 
 func save_object_state(key: StringName, obj: Object) -> void:
-	_savedata_state[key] = GdSerde.serialize_object(obj)
+	_savedata_state[key] = gdserde.serialize_object(obj)
 
 
 func load_object_state(key: StringName, obj: Object) -> void:
 	if _savedata_state.has(key):
 		var dict: Dictionary = _savedata_state[key]
-		util.aok(GdSerde.deserialize_object(obj, dict))
+		var res := gdserde.deserialize_object(obj, dict)
+		assert(not res.err, res.err)
 
 
 func sync_object_state(key: StringName, obj: Object) -> void:
@@ -33,8 +34,9 @@ func sync_object_state(key: StringName, obj: Object) -> void:
 	load_object_state(key, obj)
 	if OS.is_debug_build():
 		# Debug-only check for serde errors
-		var dict := GdSerde.serialize_object(obj)
-		util.aok(GdSerde.deserialize_object(obj, dict))
+		var dict := gdserde.serialize_object(obj)
+		var res := gdserde.deserialize_object(obj, dict)
+		assert(not res.err, res.err)
 
 	_savedata_refs[key] = obj
 
