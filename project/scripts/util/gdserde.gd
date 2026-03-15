@@ -121,12 +121,20 @@ static func _create_obj_fields(obj: Object) -> Array[Field]:
 	if OS.is_debug_build():
 		for field in fields:
 			assert(
-				util.has_member(obj, field.name),
+				util.has_member_nullable(obj, field.name),
 				str(
 					"Missing field '",
 					_field_str(obj, field),
 					"', actual fields: ",
 					util.get_field_names(obj),
+				),
+			)
+			assert(
+				obj.get(field.name) != null,
+				str(
+					"Field '",
+					_field_str(obj, field),
+					"', is null (even optionals cannot be null--add a default object)",
 				),
 			)
 			assert(

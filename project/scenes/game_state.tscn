@@ -96,6 +96,7 @@ grow_vertical = 2
 mouse_filter = 2
 
 [node name="DialogueLayer" parent="." unique_id=537659736 instance=ExtResource("11_b43q5")]
+unique_name_in_owner = true
 
 [node name="Menu" parent="." unique_id=1709348178 instance=ExtResource("5_vsnwl")]
 unique_name_in_owner = true
