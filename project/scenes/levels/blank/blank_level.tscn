@@ -8,4 +8,5 @@ script = ExtResource("1_ai87s")
 
 [node name="LevelConfig" type="Node" parent="." unique_id=783266909]
 script = ExtResource("2_23lry")
+skip_main_menu = true
 metadata/_custom_type_script = "uid://bu2q2x32c2nug"
