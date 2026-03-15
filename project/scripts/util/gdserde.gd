@@ -27,7 +27,7 @@ static func _create_property_list(
 	var out: Array[GdSerdeProperty] = []
 	for item in obj.get_property_list():
 		var deser_func := deserialize
-		
+
 		if prop_filter is Array:
 			var pf_arr: Array = prop_filter
 			if not pf_arr.has(item.name):
@@ -71,7 +71,7 @@ static func _get_obj_prop_list(obj: Object) -> Array[GdSerdeProperty]:
 				assert(false, str("Object must define gdserde_props: ", obj))
 			else:
 				prop_filter = null
-			
+
 			if util.has_member(obj, &"gdserde_optional"):
 				prop_optionals = obj.get(&"gdserde_optional")
 
@@ -153,7 +153,9 @@ static func deserialize_object(obj: Object, value: Dictionary) -> Error:
 
 
 static func deserialize_object_array(
-	arr: Array, value: Array, factory: Callable
+		arr: Array,
+		value: Array,
+		factory: Callable,
 ) -> Error:
 	var err := OK
 	arr.clear()
@@ -162,7 +164,7 @@ static func deserialize_object_array(
 			err = ERR_PARSE_ERROR
 			continue
 		var dict: Dictionary = data
-			
+
 		var obj: Object = factory.call()
 		var err2 := deserialize_object(obj, dict)
 		if err2:
@@ -170,20 +172,24 @@ static func deserialize_object_array(
 		arr.push_back(obj)
 	return err
 
+
 ## Same as deserialize_object_array, but accepts Variant
 static func deserialize_object_array_var(
-	arr: Array, value: Variant, factory: Callable
+		arr: Array,
+		value: Variant,
+		factory: Callable,
 ) -> Array:
 	arr.clear()
-	
+
 	if value is not Array:
 		return [arr, ERR_PARSE_ERROR]
 
 	var input_arr: Array = value
 	return [
-		arr, 
-		GdSerde.deserialize_object_array(arr, input_arr, factory)
+		arr,
+		GdSerde.deserialize_object_array(arr, input_arr, factory),
 	]
+
 
 static func clone_object(to: Object, from: Object) -> Error:
 	var dict := serialize_object(from)

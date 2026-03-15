@@ -17,7 +17,8 @@ class Result:
 	static func fail(...args: Array) -> Result:
 		var msg: String = str.callv(args)
 		return Result.new(null, msg)
-	
+
+
 	static func unexpected_type(expected_type: Variant.Type, actual_value: Variant) -> Result:
 		var msg := str("expected ", type_string(expected_type), ", got ", type_string(typeof(actual_value)), ": ", actual_value)
 		return Result.new(null, msg)
@@ -32,12 +33,12 @@ class Spec:
 
 	func _init(type_: Variant.Type) -> void:
 		type = type_
-	
-	
+
+
 	static func native(type_: Variant.Type) -> Spec:
 		return Spec.new(type_)
-	
-	
+
+
 	static func object(factory_: Callable) -> Spec:
 		var spec := Spec.new(TYPE_OBJECT)
 		spec.factory = factory_
@@ -48,7 +49,8 @@ class Spec:
 		var spec := Spec.new(TYPE_ARRAY)
 		spec.inner = inner_
 		return spec
-	
+
+
 	static func dict(key_type_: Variant.Type, inner_: Spec) -> Spec:
 		var spec := Spec.new(TYPE_DICTIONARY)
 		spec.inner = inner_
@@ -81,7 +83,7 @@ static func _create_obj_fields(obj: Object) -> Array[Field]:
 
 		var type: Variant.Type = item["type"]
 		#var value: Variant = obj.get(name)
-		
+
 		if obj.has_method(&"gdserde_fields"):
 			var fields: Array[Field] = obj.call(&"gdserde_fields")
 			for field: Field in fields:
@@ -122,7 +124,7 @@ static func deserialize_spec(spec: Spec, variant: Variant) -> Result:
 			if variant is not Dictionary:
 				return Result.unexpected_type(TYPE_DICTIONARY, variant)
 			var dict: Dictionary = variant
-			var out := {}
+			var out := { }
 			for k: Variant in dict:
 				if typeof(k) != spec.key_type:
 					return Result.unexpected_type(spec.key_type, k)
@@ -169,15 +171,15 @@ static func serialize(value: Variant) -> Variant:
 	if value is Object:
 		var obj: Object = value
 		return serialize_object(obj)
-	
+
 	if value is Array:
 		var out := []
 		for x: Variant in value:
 			out.push_back(serialize(x))
 		return out
-		
+
 	if value is Dictionary:
-		var out := {}
+		var out := { }
 		for k: Variant in value:
 			out[serialize(k)] = serialize(value[k])
 		return out
@@ -194,6 +196,7 @@ static func serialize_object(obj: Object) -> Dictionary:
 #########
 # Tests #
 #########
+
 
 class _TestSimpleObj:
 	var my_int: int
@@ -227,6 +230,8 @@ class _TestArrayField:
 			Field.new(&"strings", Spec.array(Spec.native(TYPE_STRING))),
 			Field.new(&"objects", Spec.array(Spec.object(_TestSimpleObj.new))),
 		]
+
+
 	var strings: Array[String]
 	var objects: Array[_TestSimpleObj]
 
@@ -236,7 +241,7 @@ static func _test_array_field_deser() -> void:
 		"strings": ["foo", "bar"],
 		"objects": [{ "my_int": 11, "my_str": "first" }, { "my_int": 22, "my_str": "second" }],
 	}
-	
+
 	var obj := _TestArrayField.new()
 	var res := deserialize_object(obj, variant)
 	assert(not res.err, res.err)
@@ -257,11 +262,11 @@ static func _test_array_field_ser() -> void:
 	var b := _TestSimpleObj.new()
 	b.my_int = 123
 	b.my_str = "kirby"
-	
+
 	var obj := _TestArrayField.new()
 	obj.strings = ["one", "two"]
 	obj.objects = [a, b]
-	
+
 	var value := serialize_object(obj)
 	assert(value["strings"][0] == "one")
 	assert(value["strings"][1] == "two")
@@ -270,14 +275,16 @@ static func _test_array_field_ser() -> void:
 	assert(value["objects"][1]["my_str"] == "kirby")
 	assert(len(value["objects"]) == 2)
 	assert(typeof(value["objects"][1]) == TYPE_DICTIONARY)
-	
-	
+
+
 class _TestDictField:
 	static func gdserde_fields() -> Array[Field]:
 		return [
 			Field.new(&"integer_names", Spec.dict(TYPE_INT, Spec.native(TYPE_STRING))),
 			Field.new(&"simple_lookup", Spec.dict(TYPE_STRING, Spec.object(_TestSimpleObj.new))),
 		]
+
+
 	var integer_names: Dictionary
 	var simple_lookup: Dictionary
 
@@ -291,9 +298,9 @@ static func _test_dict_field_deser() -> void:
 		"simple_lookup": {
 			"alpha": { "my_int": 11, "my_str": "eleven" },
 			"beta": { "my_int": 22, "my_str": "twenty-two" },
-		}
+		},
 	}
-	
+
 	var obj := _TestDictField.new()
 	var res := deserialize_object(obj, variant)
 	assert(not res.err, res.err)
@@ -312,7 +319,7 @@ static func _test_dict_field_ser() -> void:
 	var b := _TestSimpleObj.new()
 	b.my_int = 99
 	b.my_str = "cruft"
-	
+
 	var obj := _TestDictField.new()
 	obj.integer_names = {
 		0x11: "onety-one",
@@ -322,11 +329,12 @@ static func _test_dict_field_ser() -> void:
 		"quebec": a,
 		"charlie": b,
 	}
-	
+
 	var value := serialize_object(obj)
 	assert(value["integer_names"][0xF5] == "fleventy-five")
 	assert(value["simple_lookup"]["charlie"]["my_int"] == 99)
 	assert(value["simple_lookup"]["charlie"] is Dictionary)
+
 
 static func _static_init() -> void:
 	if OS.is_debug_build():

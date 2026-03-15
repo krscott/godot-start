@@ -1,6 +1,5 @@
 extends CanvasLayer
 
-
 @onready var _dialogue_label: RichTextLabel = %DialogueLabel
 @onready var _choices_container: Container = %Choices
 @onready var _button_template: Button = %ButtonTemplate
