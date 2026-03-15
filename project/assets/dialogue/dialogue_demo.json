@@ -8,8 +8,12 @@
 		},
 		"intro": {
 			"speaker": "Alice",
-			"text": "Hi! My name is Alice!",
-			"next": "start_game"
+			"text": [
+				"Hi! My name is Alice!"
+			],
+			"next": [
+				"start_game"
+			]
 		},
 		"start_game": {
 			"speaker": "Alice",
