@@ -9,7 +9,18 @@ static var _field_list_cache := {
 
 
 static func _unexpected_type(expected_type: Variant.Type, actual_value: Variant) -> String:
-	return str("expected ", type_string(expected_type), ", got ", type_string(typeof(actual_value)), ": ", actual_value)
+	return str(
+		"expected ",
+		type_string(expected_type),
+		", got ",
+		type_string(typeof(actual_value)),
+		": ",
+		var_to_str(actual_value),
+	)
+
+
+static func _field_str(obj: Object, field: Field) -> String:
+	return str(util.get_or_default(obj, &"gdserde_class", &"(?)"), ".", field.name)
 
 
 class Result:
@@ -24,7 +35,7 @@ class Result:
 			if _stack:
 				print("gdserde error: ", err)
 				util.print_saved_stack(_stack, 1)
-			assert(false, err)
+			assert(false, str(err, " (see console for full stack trace)"))
 
 
 	func _init(value_: Variant, err_: String) -> void:
@@ -119,15 +130,12 @@ static func _create_obj_fields(obj: Object) -> Array[Field]:
 
 	# Sanity check
 	if OS.is_debug_build():
-		var gdserde_class: StringName = util.get_or_default(obj, &"gdserde_class", &"(unknown)")
 		for field in fields:
 			assert(
 				util.has_member(obj, field.name),
 				str(
-					"Expected field '",
-					field.name,
-					"' in object '",
-					gdserde_class,
+					"Missing field '",
+					_field_str(obj, field),
 					"', actual fields: ",
 					util.get_field_names(obj),
 				),
@@ -135,9 +143,7 @@ static func _create_obj_fields(obj: Object) -> Array[Field]:
 			assert(
 				field.spec.type == typeof(obj.get(field.name)),
 				str(
-					"Field spec '",
-					field.name,
-					"' ",
+					_field_str(obj, field), " ",
 					_unexpected_type(field.spec.type, obj.get(field.name)),
 				),
 			)
@@ -276,7 +282,7 @@ static func deserialize_spec(spec: Spec, variant: Variant) -> Result:
 					return Result.fail(_unexpected_type(spec.key_type, k))
 				var res := deserialize_spec(spec.inner, dict[k])
 				if res.err:
-					return Result.fail("key '", k, "' ", res.err)
+					return Result.fail("key=", var_to_str(k), " > ", res.err)
 				out[k] = res.value
 			return Result.ok(out)
 		_:
@@ -314,9 +320,9 @@ static func deserialize_object(obj: Object, variant: Variant) -> Result:
 			if field.spec.type != typeof(obj.get(field.name)):
 				res = Result.fail(
 					str(
-						"spec mismatch - field '",
-						field.name,
-						"' ",
+						"spec mismatch - ",
+						_field_str(obj, field),
+						" ",
 						_unexpected_type(field.spec.type, obj.get(field.name)),
 					),
 				)
@@ -325,7 +331,7 @@ static func deserialize_object(obj: Object, variant: Variant) -> Result:
 
 			res = deserialize_spec(field.spec, dict[field.name])
 			if res.err:
-				return Result.fail("field '", field.name, "' ", res.err)
+				return Result.fail(_field_str(obj, field), " > ", res.err)
 
 			assert(util.has_member(obj, field.name))
 			var target: Variant = obj.get(field.name)
@@ -339,7 +345,7 @@ static func deserialize_object(obj: Object, variant: Variant) -> Result:
 				# e.g. Array != Array[int], even if both are array of ints
 				assert(obj.get(field.name) == res.value, str(obj.get(field.name), " ", res.value))
 		elif not field.is_optional:
-			return Result.fail("field '", field.name, "' missing from dict: ", dict)
+			return Result.fail(_field_str(obj, field), " field name missing from dict: ", dict)
 
 	return Result.ok(obj)
 
@@ -612,7 +618,7 @@ static func _test_node3d() -> void:
 	var res := deserialize_object(node2, variant)
 	assert(not res.err, res.err)
 	assert(node2.transform.origin == Vector3(1, 2, 3))
-	
+
 	node1.free()
 	node2.free()
 
