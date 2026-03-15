@@ -25,21 +25,16 @@ func _ready() -> void:
 	util.aok(replay.request_frame.connect(_replay_save_frame))
 
 
-func _physics_process(_delta: float) -> void:
-	player_input.listening = not replay.is_active
-
-
 func _replay_load_frame(frame: Dictionary) -> void:
-	util.aok(GdSerde.deserialize_object(player_input, frame))
-	if replay.is_active:
-		player_input.listening = false
-	else:
+	var res := gdserde.deserialize_object(player_input, frame)
+	assert(not res.err, res.err)
+	if not replay.is_active:
 		print("REPLAY DONE")
 		pause_menu_system.pause()
 
 
 func _replay_save_frame() -> void:
-	replay.add_frame(GdSerde.serialize_object(player_input))
+	replay.add_frame(gdserde.serialize_object(player_input))
 
 
 func _save_replay_and_quit() -> void:

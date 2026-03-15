@@ -57,9 +57,11 @@ metadata/_custom_type_script = "uid://bgvdp2xkv0yr3"
 script = ExtResource("3_rerck")
 metadata/_custom_type_script = "uid://mahcrqfjlyyq"
 
-[node name="PlayerInput" type="Node" parent="." unique_id=820497993]
+[node name="PlayerInput" type="Node" parent="." unique_id=820497993 node_paths=PackedStringArray("replay_system", "pause_menu_system")]
 unique_name_in_owner = true
 script = ExtResource("4_qn400")
+replay_system = NodePath("../ReplaySystem")
+pause_menu_system = NodePath("../PauseMenuSystem")
 metadata/_custom_type_script = "uid://skj8dxeivfvs"
 
 [node name="SystemDialog" type="Node" parent="." unique_id=887202933]

@@ -1,4 +1,4 @@
-class_name Rotate
+class_name DebugRotate
 extends Node
 
 @export var speed := 1.0

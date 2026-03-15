@@ -23,29 +23,33 @@ func gdserde_serialize() -> Variant:
 		var key := _keys[i]
 		var node := _nodes[i]
 		if is_instance_valid(node):
-			_output[key] = GdSerde.serialize(_nodes[i])
+			_output[key] = gdserde.serialize(_nodes[i])
 		else:
 			assert(false, str("Attempted to serialize invalid instance: ", key))
 	return _output
 
 
-func gdserde_deserialize(dict: Dictionary) -> Error:
+func gdserde_deserialize(variant: Variant) -> gdserde.Result:
+	if variant is not Dictionary:
+		return gdserde.Result.unexpected_type(TYPE_DICTIONARY, variant)
+	var dict: Dictionary = variant
+
 	assert(_keys.size() == _nodes.size())
-	var err := OK
 	for i in range(_keys.size()):
 		var key := _keys[i]
 		if key in dict:
 			var value: Dictionary = dict[key]
 			var node := _nodes[i]
 			if is_instance_valid(node):
-				var err2 := GdSerde.deserialize_object(node, value)
-				if err2 != OK:
-					printerr("Error deserializing ", key, ": ", error_string(err2))
-					err = err2
+				var res := gdserde.deserialize_object(node, value)
+				if res.err:
+					return gdserde.Result.fail("key '", key, "' ", res.err)
 			else:
-				assert(false, str("Attempted to deserialize invalid instance: ", key))
-				err = FAILED
-	return err
+				var msg := str("Attempted to deserialize invalid instance: ", key)
+				assert(false, msg)
+				return gdserde.Result.fail(msg)
+
+	return gdserde.Result.ok(self)
 
 
 func _ready() -> void:

@@ -3,6 +3,7 @@ extends Node
 
 # TODO: Move this to separate system
 @export var capture_mouse := true
+@export var show_on_start := true
 
 @export var menu: Menu
 @export var replay_system: ReplaySystem
@@ -50,7 +51,7 @@ func _ready() -> void:
 	process_mode = PROCESS_MODE_ALWAYS
 	util.aok(get_window().focus_exited.connect(pause))
 	call_deferred(&"_build_menu")
-	menu.call_deferred(&"show")
+	call_deferred(&"_show_startup")
 
 
 func _physics_process(_delta: float) -> void:
@@ -111,3 +112,8 @@ func _build_menu() -> void:
 			.desktop_only(),
 		],
 	)
+
+
+func _show_startup() -> void:
+	if show_on_start:
+		menu.show()
