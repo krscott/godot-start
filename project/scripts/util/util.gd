@@ -24,6 +24,24 @@ static func has_member(obj: Object, name: StringName) -> bool:
 	return obj.get(name) != null
 
 
+static func get_or_default(obj: Object, name: StringName, default: Variant) -> Variant:
+	var value: Variant = obj.get(name)
+	if value == null:
+		return default
+	return value
+
+
+static func get_field_names(obj: Object) -> Array[String]:
+	var out: Array[String] = []
+	for prop: Dictionary in obj.get_property_list():
+		var name: String = prop.name
+		match name:
+			"RefCounted", "script", "Script Variables", "__meta__", "Built-in script":
+				continue
+		out.push_back(name)
+	return out
+
+
 static func aok(err: Error, context := "") -> void:
 	if err:
 		var msg := error_string(err)
@@ -95,3 +113,18 @@ static func parse_json_file(path: String) -> Array:
 	if data == null:
 		return [null, ERR_PARSE_ERROR]
 	return [data, OK]
+
+
+## Print a stack previously captured with `get_stack()`
+static func print_saved_stack(stack: Array, start: int = 0) -> void:
+	for i in stack.size():
+		if i < start:
+			continue
+		var frame: Dictionary = stack[i]
+		print(
+			"  %s:%d - %s()" % [
+				frame.source,
+				frame.line,
+				frame.function,
+			],
+		)

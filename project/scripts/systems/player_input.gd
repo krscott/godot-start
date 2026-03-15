@@ -28,7 +28,7 @@ var jump := false
 func _is_listening() -> bool:
 	var replay_is_inactive := replay_system == null or not replay_system.replay.is_active
 	var menu_is_closed := pause_menu_system == null or not pause_menu_system.is_menu_open()
-	
+
 	return replay_is_inactive and menu_is_closed
 
 

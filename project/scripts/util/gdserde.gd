@@ -8,14 +8,30 @@ static var _field_list_cache := {
 }
 
 
+static func _unexpected_type(expected_type: Variant.Type, actual_value: Variant) -> String:
+	return str("expected ", type_string(expected_type), ", got ", type_string(typeof(actual_value)), ": ", actual_value)
+
+
 class Result:
 	var value: Variant
 	var err: String
+	var _stack: Array
+
+
+	func expect_ok() -> void:
+		if err:
+			push_error(err)
+			if _stack:
+				print("gdserde error: ", err)
+				util.print_saved_stack(_stack, 1)
+			assert(false, err)
 
 
 	func _init(value_: Variant, err_: String) -> void:
 		value = value_
 		err = err_
+		if err:
+			_stack = get_stack() # NOTE: Debug-only by default
 
 
 	static func ok(value_: Variant) -> Result:
@@ -24,11 +40,6 @@ class Result:
 
 	static func fail(...args: Array) -> Result:
 		var msg: String = str.callv(args)
-		return Result.new(null, msg)
-
-
-	static func unexpected_type(expected_type: Variant.Type, actual_value: Variant) -> Result:
-		var msg := str("expected ", type_string(expected_type), ", got ", type_string(typeof(actual_value)), ": ", actual_value)
 		return Result.new(null, msg)
 
 
@@ -96,24 +107,42 @@ static func _create_obj_fields(obj: Object) -> Array[Field]:
 	elif obj.get_class() != "RefCounted":
 		assert(false, str("Object must define `static func gdserde_fields()`: ", obj))
 
-	var arr: Array[Field] = []
-	for item in obj.get_property_list():
-		var name: String = item["name"]
-		match name:
-			"RefCounted", "script", "Script Variables", "__meta__", "Built-in script":
-				continue
+	if not fields:
+		for item in obj.get_property_list():
+			var name: String = item["name"]
+			match name:
+				"RefCounted", "script", "Script Variables", "__meta__", "Built-in script":
+					continue
 
-		var type: Variant.Type = item["type"]
-		#var value: Variant = obj.get(name)
+			var type: Variant.Type = item["type"]
+			fields.push_back(Field.native(name, type))
 
-		if fields:
-			for field: Field in fields:
-				if field.name == name:
-					arr.push_back(field)
-					break
-		else:
-			arr.push_back(Field.native(name, type))
-	return arr
+	# Sanity check
+	if OS.is_debug_build():
+		var gdserde_class: StringName = util.get_or_default(obj, &"gdserde_class", &"(unknown)")
+		for field in fields:
+			assert(
+				util.has_member(obj, field.name),
+				str(
+					"Expected field '",
+					field.name,
+					"' in object '",
+					gdserde_class,
+					"', actual fields: ",
+					util.get_field_names(obj),
+				),
+			)
+			assert(
+				field.spec.type == typeof(obj.get(field.name)),
+				str(
+					"Field spec '",
+					field.name,
+					"' ",
+					_unexpected_type(field.spec.type, obj.get(field.name)),
+				),
+			)
+
+	return fields
 
 
 static func _get_obj_fields(obj: Object) -> Array[Field]:
@@ -146,18 +175,89 @@ static func _get_obj_fields(obj: Object) -> Array[Field]:
 	return fields
 
 
+static func _is_packed_array_type(type: Variant.Type) -> bool:
+	match type:
+		TYPE_PACKED_BYTE_ARRAY, \
+		TYPE_PACKED_INT32_ARRAY, \
+		TYPE_PACKED_INT64_ARRAY, \
+		TYPE_PACKED_FLOAT32_ARRAY, \
+		TYPE_PACKED_FLOAT64_ARRAY, \
+		TYPE_PACKED_STRING_ARRAY, \
+		TYPE_PACKED_VECTOR2_ARRAY, \
+		TYPE_PACKED_VECTOR3_ARRAY, \
+		TYPE_PACKED_COLOR_ARRAY, \
+		TYPE_PACKED_VECTOR4_ARRAY:
+			return true
+		_:
+			return false
+
+
+static func _get_packed_inner_type(type: Variant.Type) -> Variant.Type:
+	match type:
+		TYPE_PACKED_BYTE_ARRAY:
+			return TYPE_INT
+		TYPE_PACKED_INT32_ARRAY:
+			return TYPE_INT
+		TYPE_PACKED_INT64_ARRAY:
+			return TYPE_INT
+		TYPE_PACKED_FLOAT32_ARRAY:
+			return TYPE_FLOAT
+		TYPE_PACKED_FLOAT64_ARRAY:
+			return TYPE_FLOAT
+		TYPE_PACKED_STRING_ARRAY:
+			return TYPE_STRING
+		TYPE_PACKED_VECTOR2_ARRAY:
+			return TYPE_VECTOR2
+		TYPE_PACKED_VECTOR3_ARRAY:
+			return TYPE_VECTOR3
+		TYPE_PACKED_COLOR_ARRAY:
+			return TYPE_COLOR
+		TYPE_PACKED_VECTOR4_ARRAY:
+			return TYPE_VECTOR4
+		_:
+			assert(false)
+			return TYPE_NIL
+
+
+static func _get_packed_array_by_type(type: Variant.Type) -> Variant:
+	match type:
+		TYPE_PACKED_BYTE_ARRAY:
+			return PackedByteArray()
+		TYPE_PACKED_INT32_ARRAY:
+			return PackedInt32Array()
+		TYPE_PACKED_INT64_ARRAY:
+			return PackedInt64Array()
+		TYPE_PACKED_FLOAT32_ARRAY:
+			return PackedFloat32Array()
+		TYPE_PACKED_FLOAT64_ARRAY:
+			return PackedFloat64Array()
+		TYPE_PACKED_STRING_ARRAY:
+			return PackedStringArray()
+		TYPE_PACKED_VECTOR2_ARRAY:
+			return PackedVector2Array()
+		TYPE_PACKED_VECTOR3_ARRAY:
+			return PackedVector3Array()
+		TYPE_PACKED_COLOR_ARRAY:
+			return PackedColorArray()
+		TYPE_PACKED_VECTOR4_ARRAY:
+			return PackedVector4Array()
+		_:
+			assert(false)
+			return null
+
+
 static func deserialize_spec(spec: Spec, variant: Variant) -> Result:
 	match spec.type:
 		TYPE_OBJECT:
 			assert(spec.factory, "factory required")
 			if variant is not Dictionary:
-				return Result.unexpected_type(TYPE_DICTIONARY, variant)
+				return Result.fail(_unexpected_type(TYPE_DICTIONARY, variant))
 			var obj: Object = spec.factory.call()
 			return deserialize_object(obj, variant)
 		TYPE_ARRAY:
 			assert(spec.inner, "inner required")
 			if variant is not Array:
-				return Result.unexpected_type(TYPE_ARRAY, variant)
+				return Result.fail(_unexpected_type(TYPE_ARRAY, variant))
 			var arr: Array = variant
 			var out := []
 			for i in arr.size():
@@ -168,20 +268,33 @@ static func deserialize_spec(spec: Spec, variant: Variant) -> Result:
 			return Result.ok(out)
 		TYPE_DICTIONARY:
 			if variant is not Dictionary:
-				return Result.unexpected_type(TYPE_DICTIONARY, variant)
+				return Result.fail(_unexpected_type(TYPE_DICTIONARY, variant))
 			var dict: Dictionary = variant
 			var out := { }
 			for k: Variant in dict:
 				if typeof(k) != spec.key_type:
-					return Result.unexpected_type(spec.key_type, k)
+					return Result.fail(_unexpected_type(spec.key_type, k))
 				var res := deserialize_spec(spec.inner, dict[k])
 				if res.err:
-					return Result.fail("key ", k, " ", res.err)
+					return Result.fail("key '", k, "' ", res.err)
 				out[k] = res.value
 			return Result.ok(out)
 		_:
+			if _is_packed_array_type(spec.type) and variant is Array:
+				var packed_inner := _get_packed_inner_type(spec.type)
+				var arr: Array = variant
+				var out: Variant = _get_packed_array_by_type(spec.type)
+				for i in arr.size():
+					var res := deserialize_spec(Spec.native(packed_inner), arr[i])
+					if res.err:
+						return Result.fail("index ", i, " ", res.err)
+					@warning_ignore("unsafe_method_access") # `out` is any PackedArray
+					out.push_back(res.value)
+				return Result.ok(out)
+
 			if spec.type != typeof(variant):
-				return Result.unexpected_type(spec.type, variant)
+				return Result.fail(_unexpected_type(spec.type, variant))
+
 			return Result.ok(variant)
 
 
@@ -190,14 +303,30 @@ static func deserialize_object(obj: Object, variant: Variant) -> Result:
 		return obj.call(&"gdserde_deserialize", variant)
 
 	if variant is not Dictionary:
-		return Result.unexpected_type(TYPE_DICTIONARY, variant)
+		return Result.fail(_unexpected_type(TYPE_DICTIONARY, variant))
 	var dict: Dictionary = variant
 
-	for field: Field in _get_obj_fields(obj):
+	var fields := _get_obj_fields(obj)
+	for field: Field in fields:
 		if dict.has(field.name):
-			var res := deserialize_spec(field.spec, dict[field.name])
+			var res: Result
+
+			if field.spec.type != typeof(obj.get(field.name)):
+				res = Result.fail(
+					str(
+						"spec mismatch - field '",
+						field.name,
+						"' ",
+						_unexpected_type(field.spec.type, obj.get(field.name)),
+					),
+				)
+				assert(false, res.err)
+				return res
+
+			res = deserialize_spec(field.spec, dict[field.name])
 			if res.err:
 				return Result.fail("field '", field.name, "' ", res.err)
+
 			assert(util.has_member(obj, field.name))
 			var target: Variant = obj.get(field.name)
 			if target is Array and res.value is Array:
@@ -206,10 +335,9 @@ static func deserialize_object(obj: Object, variant: Variant) -> Result:
 				target_arr.assign(res_arr)
 			else:
 				obj.set(field.name, res.value)
-
-			# This will fail if not exactly the same type
-			# e.g. Array != Array[int], even if both are array of ints
-			assert(obj.get(field.name) == res.value, str(obj.get(field.name), " ", res.value))
+				# This will fail if not exactly the same type
+				# e.g. Array != Array[int], even if both are array of ints
+				assert(obj.get(field.name) == res.value, str(obj.get(field.name), " ", res.value))
 		elif not field.is_optional:
 			return Result.fail("field '", field.name, "' missing from dict: ", dict)
 
@@ -428,16 +556,65 @@ static func _test_optional_deser() -> void:
 		assert(obj.my_str == "something")
 
 
+class _TestPackedArrayField:
+	const gdserde_class := &"_TestPackedArrayField"
+
+
+	static func gdserde_fields() -> Array[Field]:
+		return [
+			Field.native(&"vectors", TYPE_PACKED_VECTOR2_ARRAY),
+			Field.new(&"sentences", Spec.array(Spec.native(TYPE_PACKED_STRING_ARRAY))),
+		]
+
+
+	var vectors: PackedVector2Array
+	var sentences: Array[PackedStringArray]
+
+
+static func _test_packed_array_deser() -> void:
+	if true:
+		# JSON-compatible types
+		var variant := {
+			"vectors": [Vector2.UP, Vector2.DOWN, Vector2.LEFT, Vector2.RIGHT],
+			"sentences": [["Run", "and", "jump"], ["Duck", "and", "dodge"]],
+		}
+		var obj := _TestPackedArrayField.new()
+		var res := deserialize_object(obj, variant)
+		assert(not res.err, res.err)
+		assert(obj.vectors[3] == Vector2.RIGHT)
+		assert(obj.sentences[1][2] == "dodge")
+		assert(typeof(obj.sentences[1]) == TYPE_PACKED_STRING_ARRAY)
+
+	if true:
+		# native packed array types
+		var variant := {
+			"vectors": PackedVector2Array([Vector2.UP, Vector2.DOWN, Vector2.LEFT, Vector2.RIGHT]),
+			"sentences": [
+				PackedStringArray(["Run", "and", "jump"]),
+				PackedStringArray(["Duck", "and", "dodge"]),
+			],
+		}
+		var obj := _TestPackedArrayField.new()
+		var res := deserialize_object(obj, variant)
+		assert(not res.err, res.err)
+		assert(obj.vectors[3] == Vector2.RIGHT)
+		assert(obj.sentences[1][2] == "dodge")
+		assert(typeof(obj.sentences[1]) == TYPE_PACKED_STRING_ARRAY)
+
+
 static func _test_node3d() -> void:
-	var node1 := Node3D.new()
+	var node1 := Marker3D.new() # Subclass of Node3D
 	node1.transform.origin = Vector3(1, 2, 3)
 
 	var variant: Variant = serialize(node1)
 
-	var node2 := Node3D.new()
+	var node2 := Marker3D.new()
 	var res := deserialize_object(node2, variant)
 	assert(not res.err, res.err)
 	assert(node2.transform.origin == Vector3(1, 2, 3))
+	
+	node1.free()
+	node2.free()
 
 
 static func _static_init() -> void:
@@ -453,5 +630,6 @@ static func _tests() -> void:
 	_test_dict_field_deser()
 	_test_dict_field_ser()
 	_test_optional_deser()
+	_test_packed_array_deser()
 	_test_node3d()
 	print("gdserde tests PASSED")
