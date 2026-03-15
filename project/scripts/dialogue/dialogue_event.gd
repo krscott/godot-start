@@ -1,5 +1,7 @@
 class_name DialogueEvent
 const gdserde_class = &"DialogueEvent"
+
+
 static func gdserde_fields() -> Array[gdserde.Field]:
 	return [
 		gdserde.Field.native(&"conds", TYPE_PACKED_STRING_ARRAY).optional(),

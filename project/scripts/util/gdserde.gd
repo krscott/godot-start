@@ -2,10 +2,11 @@ class_name gdserde
 
 static var _field_list_cache := {
 	&"Node3D": [
-		Field.native(&"transform", TYPE_TRANSFORM3D)
-	]
+		Field.native(&"transform", TYPE_TRANSFORM3D),
+	],
 	# TODO: Add more as needed
 }
+
 
 class Result:
 	var value: Variant
@@ -74,8 +75,8 @@ class Field:
 	func _init(name_: StringName, spec_: Spec) -> void:
 		name = name_
 		spec = spec_
-		
-	
+
+
 	func optional() -> Field:
 		is_optional = true
 		return self
@@ -94,7 +95,7 @@ static func _create_obj_fields(obj: Object) -> Array[Field]:
 			fields.push_back(Field.native(p, typeof(obj.get(p))))
 	elif obj.get_class() != "RefCounted":
 		assert(false, str("Object must define `static func gdserde_fields()`: ", obj))
-	
+
 	var arr: Array[Field] = []
 	for item in obj.get_property_list():
 		var name: String = item["name"]
@@ -117,7 +118,7 @@ static func _create_obj_fields(obj: Object) -> Array[Field]:
 
 static func _get_obj_fields(obj: Object) -> Array[Field]:
 	var fields: Array[Field] = []
-	
+
 	if obj.get_script():
 		if util.has_member(obj, &"gdserde_class"):
 			var gdserde_class: StringName = obj.get(&"gdserde_class")
@@ -130,7 +131,7 @@ static func _get_obj_fields(obj: Object) -> Array[Field]:
 		else:
 			push_warning("Unoptimized class: ", obj)
 			fields = _create_obj_fields(obj)
-	
+
 	else:
 		var obj_class := StringName(obj.get_class())
 		while obj_class and not _field_list_cache.has(obj_class):
@@ -141,7 +142,7 @@ static func _get_obj_fields(obj: Object) -> Array[Field]:
 		else:
 			assert(false, str("Unhandled class, add to gdserde._field_list_cache: ", obj_class))
 			fields = _create_obj_fields(obj)
-			
+
 	return fields
 
 
@@ -238,7 +239,7 @@ static func serialize(value: Variant) -> Variant:
 static func serialize_object(obj: Object) -> Dictionary:
 	if obj.has_method(&"gdserde_serialize"):
 		return obj.call(&"gdserde_serialize")
-	
+
 	var dict := { }
 	for field: Field in _get_obj_fields(obj):
 		dict[field.name] = serialize(obj.get(field.name))
@@ -278,6 +279,8 @@ static func _test_simple_obj_ser() -> void:
 
 class _TestArrayField:
 	const gdserde_class := &"_TestArrayField"
+
+
 	static func gdserde_fields() -> Array[Field]:
 		return [
 			Field.new(&"strings", Spec.array(Spec.native(TYPE_STRING))),
@@ -332,6 +335,8 @@ static func _test_array_field_ser() -> void:
 
 class _TestDictField:
 	const gdserde_class := &"_TestDictField"
+
+
 	static func gdserde_fields() -> Array[Field]:
 		return [
 			Field.new(&"integer_names", Spec.dict(TYPE_INT, Spec.native(TYPE_STRING))),
@@ -390,30 +395,32 @@ static func _test_dict_field_ser() -> void:
 	assert(value["simple_lookup"]["charlie"] is Dictionary)
 
 
-
 class _TestOptionalField:
 	const gdserde_class := &"_TestOptionalField"
+
+
 	static func gdserde_fields() -> Array[Field]:
 		return [
 			Field.native(&"my_int", TYPE_INT).optional(),
 			Field.native(&"my_str", TYPE_STRING).optional(),
 		]
-		
+
+
 	var my_int: int = 10
 	var my_str: String = "nothing"
 
 
 static func _test_optional_deser() -> void:
 	if true:
-		var variant := {"my_int": 5}
+		var variant := { "my_int": 5 }
 		var obj := _TestOptionalField.new()
 		var res := deserialize_object(obj, variant)
 		assert(not res.err, res.err)
 		assert(obj.my_int == 5)
 		assert(obj.my_str == "nothing")
-	
+
 	if true:
-		var variant := {"my_str": "something"}
+		var variant := { "my_str": "something" }
 		var obj := _TestOptionalField.new()
 		var res := deserialize_object(obj, variant)
 		assert(not res.err, res.err)
@@ -424,9 +431,9 @@ static func _test_optional_deser() -> void:
 static func _test_node3d() -> void:
 	var node1 := Node3D.new()
 	node1.transform.origin = Vector3(1, 2, 3)
-	
+
 	var variant: Variant = serialize(node1)
-	
+
 	var node2 := Node3D.new()
 	var res := deserialize_object(node2, variant)
 	assert(not res.err, res.err)

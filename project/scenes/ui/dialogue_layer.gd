@@ -11,7 +11,7 @@ func _ready() -> void:
 	assert(_choices_container)
 	assert(_button_template)
 	assert(_advance_hint_label)
-	
+
 	visible = false
 
 
