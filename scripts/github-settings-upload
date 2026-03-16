@@ -1,0 +1,156 @@
+#!/usr/bin/env bash
+set -euo pipefail
+shopt -s failglob
+
+usage() {
+    cat <<EOF
+Usage: $(basename "$0") [options]
+
+Upload GitHub repository settings from JSON files created by github-settings-download.
+
+Options:
+    -r, --repo REPO      Repository in OWNER/REPO form (default: current gh repo)
+    -i, --input DIR      Input directory (default: .github-settings)
+    -h, --help           Display this help message
+    -v, --verbose        Enable debug messages
+EOF
+}
+
+OPTIONS="r:i:hv"
+LONGOPTS="repo:,input:,help,verbose"
+
+if command -v getopt &>/dev/null; then
+    PARSED=$(getopt -o "$OPTIONS" -l "$LONGOPTS" -n "$0" -- "$@") || {
+        usage >&2
+        exit 2
+    }
+    eval set -- "$PARSED"
+fi
+
+die() {
+    echo "$*" >&2
+    echo >&2
+    usage >&2
+    exit 2
+}
+
+log() {
+    local c="$1"
+    shift
+    [[ $c ]] && echo -ne "\033[${c}m" >&2
+    echo -e "$@" >&2
+    [[ $c ]] && echo -ne '\033[0m' >&2
+    return 0
+}
+debug() {
+    [[ ${verbose:-} ]] && log "" "$@"
+    return 0
+}
+warn() { log "0;33" "$@"; }
+
+require_cmd() {
+    command -v "$1" >/dev/null || die "Missing required command: $1"
+}
+
+repo=
+input=.github-settings
+verbose=
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+    -r | --repo)
+        [[ ${2:-} ]] || die "--repo requires an argument"
+        repo="$2"
+        shift
+        ;;
+    -i | --input)
+        [[ ${2:-} ]] || die "--input requires an argument"
+        input="$2"
+        shift
+        ;;
+    -h | --help)
+        usage
+        exit 0
+        ;;
+    -v | --verbose) verbose=1 ;;
+    --)
+        shift
+        break
+        ;;
+    *)
+        die "Unknown argument: $1"
+        ;;
+    esac
+    shift
+done
+
+[[ $# -eq 0 ]] || die "Unexpected positional arguments"
+
+require_cmd gh
+require_cmd jq
+
+[[ -d $input ]] || die "Input directory not found: $input"
+
+if [[ -z $repo ]]; then
+    repo=$(gh repo view --json nameWithOwner --jq .nameWithOwner)
+fi
+
+[[ $verbose ]] && set -x
+
+repo_api="repos/$repo"
+
+api_json() {
+    local method="$1"
+    local path="$2"
+    local file="$3"
+    debug "$method $path"
+    gh api --method "$method" "$path" --input "$file" >/dev/null
+}
+
+repo_json="$input/repository.json"
+rulesets_json="$input/rulesets.json"
+environments_json="$input/environments.json"
+
+[[ -f $repo_json ]] && api_json PATCH "$repo_api" "$repo_json"
+
+if [[ -f $rulesets_json ]]; then
+    current_rulesets=$(gh api "$repo_api/rulesets")
+    while IFS= read -r ruleset; do
+        [[ $ruleset ]] || continue
+        name=$(jq -r '.name' <<<"$ruleset")
+        target=$(jq -r '.target' <<<"$ruleset")
+        id=$(jq -r --arg name "$name" --arg target "$target" '.[] | select(.name == $name and .target == $target) | .id' <<<"$current_rulesets" | head -n1)
+        jq '{name, target, enforcement, bypass_actors, conditions, rules}' <<<"$ruleset" >/tmp/github-settings-ruleset.json
+        if [[ $id ]]; then
+            api_json PUT "$repo_api/rulesets/$id" /tmp/github-settings-ruleset.json
+        else
+            api_json POST "$repo_api/rulesets" /tmp/github-settings-ruleset.json
+        fi
+    done < <(jq -c '.[]' "$rulesets_json")
+    rm -f /tmp/github-settings-ruleset.json
+fi
+
+if [[ -f $environments_json ]]; then
+    while IFS= read -r env_item; do
+        [[ $env_item ]] || continue
+        env_name=$(jq -r '.name' <<<"$env_item")
+        env_uri=$(jq -nr --arg v "$env_name" '$v|@uri')
+        jq '.settings' <<<"$env_item" >/tmp/github-settings-environment.json
+        api_json PUT "$repo_api/environments/$env_uri" /tmp/github-settings-environment.json
+
+        current_branch_policies=$(gh api "$repo_api/environments/$env_uri/deployment-branch-policies" 2>/dev/null | jq -c '.branch_policies // []' || jq -c '[]')
+        while IFS= read -r policy; do
+            [[ $policy ]] || continue
+            name=$(jq -r '.name' <<<"$policy")
+            type=$(jq -r '.type' <<<"$policy")
+            existing_id=$(jq -r --arg name "$name" --arg type "$type" '.[] | select(.name == $name and .type == $type) | .id' <<<"$current_branch_policies" | head -n1)
+            if [[ -n $existing_id ]]; then
+                continue
+            fi
+            jq '{name, type}' <<<"$policy" >/tmp/github-settings-environment-branch.json
+            api_json POST "$repo_api/environments/$env_uri/deployment-branch-policies" /tmp/github-settings-environment-branch.json
+        done < <(jq -c '.deployment_branch_policies[]?' <<<"$env_item")
+    done < <(jq -c '.[]' "$environments_json")
+    rm -f /tmp/github-settings-environment.json /tmp/github-settings-environment-branch.json
+fi
+
+warn "Uploaded settings into $repo from $input"

@@ -49,8 +49,13 @@ See
 ```
 ./scripts/bld --help
 ./scripts/format --help
+./scripts/github-settings-download --help
+./scripts/github-settings-upload --help
 ./scripts/test-headless --help
 ```
+
+`github-settings-download` and `github-settings-upload` manage a small set of repo
+merge/PR settings, repository rulesets, and environments.
 
 ### Git Hooks
 
@@ -64,6 +69,7 @@ Add recommended git hooks with:
 To enable butler uploads in CI:
 
 1. [Login to butler and get your API key](https://itch.io/docs/butler/login.html)
+  - `butler login`
 2. Create a "butler" [environment](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets)
    and add your API key and TARGET. e.g.
   - secret: BUTLER_API_KEY=...

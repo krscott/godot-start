@@ -1,0 +1,176 @@
+#!/usr/bin/env bash
+set -euo pipefail
+shopt -s failglob
+
+usage() {
+    cat <<EOF
+Usage: $(basename "$0") [options]
+
+Download GitHub repository settings into JSON files.
+
+Options:
+    -r, --repo REPO      Repository in OWNER/REPO form (default: current gh repo)
+    -o, --output DIR     Output directory (default: .github-settings)
+    -h, --help           Display this help message
+    -v, --verbose        Enable debug messages
+EOF
+}
+
+OPTIONS="r:o:hv"
+LONGOPTS="repo:,output:,help,verbose"
+
+if command -v getopt &>/dev/null; then
+    PARSED=$(getopt -o "$OPTIONS" -l "$LONGOPTS" -n "$0" -- "$@") || {
+        usage >&2
+        exit 2
+    }
+    eval set -- "$PARSED"
+fi
+
+die() {
+    echo "$*" >&2
+    echo >&2
+    usage >&2
+    exit 2
+}
+
+log() {
+    local c="$1"
+    shift
+    [[ $c ]] && echo -ne "\033[${c}m" >&2
+    echo -e "$@" >&2
+    [[ $c ]] && echo -ne '\033[0m' >&2
+    return 0
+}
+debug() {
+    [[ ${verbose:-} ]] && log "" "$@"
+    return 0
+}
+warn() { log "0;33" "$@"; }
+
+require_cmd() {
+    command -v "$1" >/dev/null || die "Missing required command: $1"
+}
+
+repo=
+output=.github-settings
+verbose=
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+    -r | --repo)
+        [[ ${2:-} ]] || die "--repo requires an argument"
+        repo="$2"
+        shift
+        ;;
+    -o | --output)
+        [[ ${2:-} ]] || die "--output requires an argument"
+        output="$2"
+        shift
+        ;;
+    -h | --help)
+        usage
+        exit 0
+        ;;
+    -v | --verbose) verbose=1 ;;
+    --)
+        shift
+        break
+        ;;
+    *)
+        die "Unknown argument: $1"
+        ;;
+    esac
+    shift
+done
+
+[[ $# -eq 0 ]] || die "Unexpected positional arguments"
+
+require_cmd gh
+require_cmd jq
+
+if [[ -z $repo ]]; then
+    repo=$(gh repo view --json nameWithOwner --jq .nameWithOwner)
+fi
+
+[[ $verbose ]] && set -x
+
+mkdir -p "$output"
+
+repo_api="repos/$repo"
+
+debug "Writing $output/repository.json"
+gh api "$repo_api" | jq '
+{
+  allow_auto_merge,
+  delete_branch_on_merge,
+  allow_update_branch,
+  squash_merge_commit_title,
+  squash_merge_commit_message,
+  merge_commit_title,
+  merge_commit_message
+}' >"$output/repository.json"
+debug "Fetching rulesets"
+rulesets=$(gh api --paginate "$repo_api/rulesets?per_page=100")
+jq -n '[]' >"$output/rulesets.json"
+while IFS= read -r ruleset_id; do
+    [[ $ruleset_id ]] || continue
+    gh api "$repo_api/rulesets/$ruleset_id" | jq '
+    {
+      name,
+      target,
+      enforcement,
+      bypass_actors,
+      conditions,
+      rules
+    }' >/tmp/github-settings-ruleset.json
+
+    jq --slurpfile item /tmp/github-settings-ruleset.json '. + $item' \
+        "$output/rulesets.json" >"$output/rulesets.json.tmp"
+    mv "$output/rulesets.json.tmp" "$output/rulesets.json"
+done < <(jq -r '.[].id' <<<"$rulesets")
+rm -f /tmp/github-settings-ruleset.json
+
+debug "Fetching environments"
+envs=$(gh api "$repo_api/environments" | jq -r '.environments[].name?')
+jq -n '[]' >"$output/environments.json"
+while IFS= read -r env_name; do
+    [[ $env_name ]] || continue
+    env_uri=$(jq -nr --arg v "$env_name" '$v|@uri')
+    gh api "$repo_api/environments/$env_uri" >"/tmp/github-settings-environment.json"
+    if gh api "$repo_api/environments/$env_uri/deployment-branch-policies" >"/tmp/github-settings-environment-branches.json" 2>/dev/null; then
+        :
+    else
+        jq -n '{branch_policies: []}' >"/tmp/github-settings-environment-branches.json"
+    fi
+
+    jq --arg name "$env_name" '
+    {
+      name: $name,
+      settings: {
+        wait_timer: ([.protection_rules[]? | select(.type == "wait_timer") | .wait_timer] | first // 0),
+        reviewers: ([.protection_rules[]? | select(.type == "required_reviewers") | .reviewers[]? | {
+          type,
+          id: (.reviewer.id // .id)
+        }] // []),
+        deployment_branch_policy: .deployment_branch_policy,
+        prevent_self_review: (.prevent_self_review // false)
+      },
+      deployment_branch_policies: ($branches[0].branch_policies // [] | map({name, type}))
+    }' \
+        --slurpfile branches /tmp/github-settings-environment-branches.json \
+        /tmp/github-settings-environment.json >"/tmp/github-settings-environment-normalized.json"
+
+    jq --slurpfile item /tmp/github-settings-environment-normalized.json '. + $item' \
+        "$output/environments.json" >"$output/environments.json.tmp"
+    mv "$output/environments.json.tmp" "$output/environments.json"
+done <<<"$envs"
+rm -f /tmp/github-settings-environment.json /tmp/github-settings-environment-branches.json /tmp/github-settings-environment-normalized.json
+
+cat >"$output/manifest.json" <<EOF
+{
+  "repo": $(jq -Rn --arg repo "$repo" '$repo'),
+  "generated_at": $(jq -Rn --arg now "$(date -u +%FT%TZ)" '$now')
+}
+EOF
+
+warn "Downloaded settings for $repo into $output"

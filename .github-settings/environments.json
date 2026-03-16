@@ -1,0 +1,24 @@
+[
+  {
+    "name": "butler",
+    "settings": {
+      "wait_timer": 0,
+      "reviewers": [],
+      "deployment_branch_policy": {
+        "protected_branches": false,
+        "custom_branch_policies": true
+      },
+      "prevent_self_review": false
+    },
+    "deployment_branch_policies": [
+      {
+        "name": "main",
+        "type": "branch"
+      },
+      {
+        "name": "*",
+        "type": "tag"
+      }
+    ]
+  }
+]
