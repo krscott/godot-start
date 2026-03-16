@@ -86,8 +86,8 @@
         '';
 
         test-headless = pkgs.writeShellScriptBin "test-headless" ''
-          ./scripts/test-headless --binary "${godot-start-debug}/bin/godot-start-bin" -- "$@"
-          ./scripts/test-headless --binary "${pkgs.godot-start}/bin/godot-start-bin" -- "$@"
+          ./scripts/test-headless --binary "${godot-start-debug}/bin/godot-start" -- "$@"
+          ./scripts/test-headless --binary "${pkgs.godot-start}/bin/godot-start" -- "$@"
         '';
       in
       {
