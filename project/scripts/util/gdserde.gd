@@ -58,9 +58,11 @@ class Spec:
 		return Spec.new(type_)
 
 
-	static func object(factory_: Callable) -> Spec:
+	static func object(class_ref: Variant) -> Spec:
 		var spec := Spec.new(TYPE_OBJECT)
-		spec.factory = factory_
+		spec.factory = func() -> Variant:
+			@warning_ignore("unsafe_method_access")
+			return class_ref.new()
 		return spec
 
 
@@ -416,7 +418,7 @@ class _TestArrayField:
 	static func gdserde_fields() -> Array[Field]:
 		return [
 			Field.new(&"strings", Spec.array(Spec.native(TYPE_STRING))),
-			Field.new(&"objects", Spec.array(Spec.object(_TestSimpleObj.new))),
+			Field.new(&"objects", Spec.array(Spec.object(_TestSimpleObj))),
 		]
 
 
@@ -472,7 +474,7 @@ class _TestDictField:
 	static func gdserde_fields() -> Array[Field]:
 		return [
 			Field.new(&"integer_names", Spec.dict(TYPE_INT, Spec.native(TYPE_STRING))),
-			Field.new(&"simple_lookup", Spec.dict(TYPE_STRING, Spec.object(_TestSimpleObj.new))),
+			Field.new(&"simple_lookup", Spec.dict(TYPE_STRING, Spec.object(_TestSimpleObj))),
 		]
 
 
