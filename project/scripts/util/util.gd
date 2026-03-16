@@ -20,8 +20,14 @@ static func is_mouse_captured() -> bool:
 	return Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED
 
 
+## WARNING: False negative if obj has member but set to null
 static func has_member(obj: Object, name: StringName) -> bool:
 	return obj.get(name) != null
+
+
+## NOTE: This method is slow. Prefer `has_member` for non-nullable fields
+static func has_member_nullable(obj: Object, name: StringName) -> bool:
+	return name in util.get_field_names(obj)
 
 
 static func get_or_default(obj: Object, name: StringName, default: Variant) -> Variant:
@@ -138,3 +144,14 @@ static func print_saved_stack(stack: Array, start: int = 0) -> void:
 				frame.function,
 			],
 		)
+
+
+static func msg_unexpected_type(expected_type: Variant.Type, actual_value: Variant) -> String:
+	return str(
+		"expected ",
+		type_string(expected_type),
+		", got ",
+		type_string(typeof(actual_value)),
+		": ",
+		util.safe_var_to_str(actual_value),
+	)

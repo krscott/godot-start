@@ -6,6 +6,7 @@ extends Node
 @onready var _replay_system: ReplaySystem = %ReplaySystem
 @onready var player_input: PlayerInput = %PlayerInput
 @onready var stretch_filter: CanvasLayer = %StretchFilter
+@onready var dialogue_layer: DialogueLayer = %DialogueLayer
 
 # Public Methods
 
@@ -22,6 +23,7 @@ func _ready() -> void:
 	assert(_replay_system)
 	assert(player_input)
 	assert(stretch_filter)
+	assert(dialogue_layer)
 
 	util.printdbg("DEBUG BUILD")
 

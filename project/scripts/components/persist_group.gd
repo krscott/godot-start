@@ -31,7 +31,7 @@ func gdserde_serialize() -> Variant:
 
 func gdserde_deserialize(variant: Variant) -> gdserde.Result:
 	if variant is not Dictionary:
-		return gdserde.Result.unexpected_type(TYPE_DICTIONARY, variant)
+		return gdserde.Result.fail(util.msg_unexpected_type(TYPE_DICTIONARY, variant))
 	var dict: Dictionary = variant
 
 	assert(_keys.size() == _nodes.size())
