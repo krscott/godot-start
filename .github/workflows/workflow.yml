@@ -27,7 +27,8 @@ jobs:
 
     - name: Build
       run: nix build '.?submodules=1#debug'
+      run: nix build '.?submodules=1#'
 
     - name: Test
-      # Reuses cached debug build from previous step
+      # Reuses cached builds from previous step
       run: nix run '.?submodules=1#test-headless'
