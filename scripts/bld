@@ -63,6 +63,11 @@ debug() {
 warn() { log "0;33" "$@"; }
 error() { log "0;31" "$@"; }
 
+print_first_match_block() {
+    local pattern="$1"
+    printf '%s\n' "$output" | grep -m1 -A1 --no-group-separator "$pattern" >&2 || true
+}
+
 require_cmd() {
     command -v "$1" >/dev/null || fatal "Missing required command: $1"
 }
@@ -144,6 +149,21 @@ python -m http.server
 EOS
 }
 
+run_godot() {
+    output=$(run godot --headless "$@" 2>&1 | tee /dev/stderr)
+    if printf '%s\n' "$output" | grep -q '^SCRIPT ERROR:'; then
+        error "Failed: Script error"
+        print_first_match_block '^SCRIPT ERROR:'
+        exit 1
+    fi
+    # Catches engine-internal false positives
+    # if printf '%s\n' "$output" | grep -q '^ERROR:'; then
+    #     error "Failed: Error"
+    #     print_first_match_block '^ERROR:'
+    #     exit 1
+    # fi
+}
+
 require_cmd godot
 
 mkdir -p "$BUILD_DIR"
@@ -156,7 +176,7 @@ fi
 
 if [[ $preset = "Web" ]]; then
     mkdir -p "$BUILD_DIR/$PNAME-$preset"
-    run godot --headless --export-"$export_type" "$preset" "$BUILD_DIR/$PNAME-$preset/index.html"
+    run_godot --export-"$export_type" "$preset" "$BUILD_DIR/$PNAME-$preset/index.html"
 
     if [[ $wrapped ]]; then
         mkWebRunnerScript >"$BUILD_DIR/$PNAME-$preset/$PNAME"
@@ -168,16 +188,16 @@ if [[ $preset = "Web" ]]; then
         (cd "$BUILD_DIR/$PNAME-$preset" && run zip -r ../"$PNAME-$preset.zip" ./*)
     fi
 elif [[ $zip ]]; then
-    run godot --headless --export-"$export_type" "$preset" "$BUILD_DIR/$PNAME-$preset.zip"
+    run_godot --export-"$export_type" "$preset" "$BUILD_DIR/$PNAME-$preset.zip"
 elif [[ $wrapped ]]; then
     mkdir -p "$BUILD_DIR/$PNAME-$preset"
-    run godot --headless --export-"$export_type" "$preset" "$BUILD_DIR/$PNAME-$preset/$PNAME-bin"
+    run_godot --export-"$export_type" "$preset" "$BUILD_DIR/$PNAME-$preset/$PNAME-bin"
     mkWrapperScript >"$BUILD_DIR/$PNAME-$preset/$PNAME"
     chmod +x "$BUILD_DIR/$PNAME-$preset/$PNAME"
 elif [[ $preset = "Windows" ]]; then
     mkdir -p "$BUILD_DIR/$PNAME-$preset"
-    run godot --headless --export-"$export_type" "$preset" "$BUILD_DIR/$PNAME-$preset/$PNAME.exe"
+    run_godot --export-"$export_type" "$preset" "$BUILD_DIR/$PNAME-$preset/$PNAME.exe"
 else
     mkdir -p "$BUILD_DIR/$PNAME-$preset"
-    run godot --headless --export-"$export_type" "$preset" "$BUILD_DIR/$PNAME-$preset/$PNAME"
+    run_godot --export-"$export_type" "$preset" "$BUILD_DIR/$PNAME-$preset/$PNAME"
 fi

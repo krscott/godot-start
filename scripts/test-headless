@@ -65,6 +65,11 @@ debug() {
 warn() { log "0;33" "$@"; }
 error() { log "0;31" "$@"; }
 
+print_first_match_block() {
+    local pattern="$1"
+    printf '%s\n' "$output" | grep -m1 -A1 --no-group-separator "$pattern" >&2 || true
+}
+
 require_cmd() {
     command -v "$1" >/dev/null || fatal "Missing required command: $1"
 }
@@ -124,11 +129,13 @@ echo ""
 echo "$output"
 echo ""
 
-if echo "$output" | grep -q "^SCRIPT ERROR:"; then
+if printf '%s\n' "$output" | grep -q '^SCRIPT ERROR:'; then
+    print_first_match_block '^SCRIPT ERROR:'
     error "Failed: Script error"
     exit 1
 fi
-if echo "$output" | grep -q "^ERROR:"; then
+if printf '%s\n' "$output" | grep -q '^ERROR:'; then
+    print_first_match_block '^ERROR:'
     error "Failed: Error"
     exit 1
 fi
