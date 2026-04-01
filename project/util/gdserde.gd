@@ -12,37 +12,6 @@ static func _field_str(obj: Object, field: Field) -> String:
 	return str(util.get_or_default(obj, &"gdserde_class", &"(?)"), ".", field.name)
 
 
-class Result:
-	var value: Variant
-	var err: String
-	var _stack: Array
-
-
-	func expect_ok() -> void:
-		if err:
-			push_error(err)
-			if _stack:
-				print("gdserde error: ", err)
-				util.print_saved_stack(_stack, 1)
-			assert(false, str(err, " (see console for full stack trace)"))
-
-
-	func _init(value_: Variant, err_: String) -> void:
-		value = value_
-		err = err_
-		if err:
-			_stack = get_stack() # NOTE: Debug-only by default
-
-
-	static func ok(value_: Variant) -> Result:
-		return Result.new(value_, "")
-
-
-	static func fail(...args: Array) -> Result:
-		var msg: String = str.callv(args)
-		return Result.new(null, msg)
-
-
 class Spec:
 	var type: Variant.Type
 	var object_class: GDScript
@@ -267,7 +236,7 @@ static func deserialize_spec(spec: Spec, variant: Variant) -> Result:
 			for i in arr.size():
 				var res := deserialize_spec(spec.inner, arr[i])
 				if res.err:
-					return Result.fail("index ", i, " ", res.err)
+					return res.context("index ", i)
 				out.push_back(res.value)
 			return Result.ok(out)
 		TYPE_DICTIONARY:
@@ -280,7 +249,7 @@ static func deserialize_spec(spec: Spec, variant: Variant) -> Result:
 					return Result.fail(util.msg_unexpected_type(spec.key_type, k))
 				var res := deserialize_spec(spec.inner, dict[k])
 				if res.err:
-					return Result.fail("key=", var_to_str(k), " > ", res.err)
+					return res.context("key=", var_to_str(k), " >")
 				out[k] = res.value
 			return Result.ok(out)
 		_:
@@ -291,7 +260,7 @@ static func deserialize_spec(spec: Spec, variant: Variant) -> Result:
 				for i in arr.size():
 					var res := deserialize_spec(Spec.native(packed_inner), arr[i])
 					if res.err:
-						return Result.fail("index ", i, " ", res.err)
+						return res.context("index ", i)
 					@warning_ignore("unsafe_method_access") # `out` is any PackedArray
 					out.push_back(res.value)
 				return Result.ok(out)
@@ -329,7 +298,7 @@ static func deserialize_object(obj: Object, variant: Variant) -> Result:
 
 			res = deserialize_spec(field.spec, dict[field.name])
 			if res.err:
-				return Result.fail(_field_str(obj, field), " > ", res.err)
+				return res.context(_field_str(obj, field), " >")
 
 			assert(util.has_member(obj, field.name))
 			var target: Variant = obj.get(field.name)
