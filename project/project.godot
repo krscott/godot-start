@@ -18,8 +18,10 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-gamestate="*res://scenes/game_state.tscn"
+constants="*uid://kyebjiac1qqb"
 signalbus="*uid://b2mmgrdlgnuf7"
+overlay="*res://autoload/overlay/overlay.tscn"
+gamestate="*uid://cp8fyt7psjvop"
 
 [debug]
 
