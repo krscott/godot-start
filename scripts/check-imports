@@ -4,27 +4,34 @@ set -eu
 echo ""
 echo "Validating .import files..."
 
-# Search for all .png.import files and check for compress/mode=0
-files=$(find . -not -path '*/.git/*' -name "*.png.import" -type f)
+find_files() {
+    find . -not -path '*/.git/*' -name "$1" -type f
+}
 
-if [ -z "$files" ]; then
-    echo "No .png.import files found"
-    exit 0
-fi
+check_png_import() {
+    # Search for all .png.import files and check for compress/mode=0
+    files=$(find_files "*.png.import")
 
-found_any=
-
-# NOTE: Remove this if not doing a pixel-art game
-for file in $files; do
-    if ! grep -q "compress/mode=0" "$file"; then
-        echo "$file does not contain 'compress/mode=0'"
-        found_any=1
+    if [ -z "$files" ]; then
+        return 0
     fi
-done
 
-if [ -n "$found_any" ]; then
-    echo "FAILED: Re-import these files with Compress Mode 'Lossless'"
-    exit 1
-else
-    echo "PASS"
-fi
+    found_any=
+
+    for file in $files; do
+        if ! grep -q "compress/mode=0" "$file"; then
+            echo "$file does not contain 'compress/mode=0'"
+            found_any=1
+        fi
+    done
+
+    if [ -n "$found_any" ]; then
+        echo "FAILED: Re-import these files with Compress Mode 'Lossless'"
+        return 1
+    fi
+}
+
+# NOTE: Skip this if not doing a pixel-art game
+check_png_import
+
+echo "PASS"
