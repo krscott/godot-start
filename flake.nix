@@ -85,6 +85,11 @@
           ./scripts/format "$@"
         '';
 
+        lint = writeScript [ pkgs.gdscript-formatter ] "lint" ''
+          ./scripts/format lint -v
+          ./scripts/check-imports
+        '';
+
         test-headless = pkgs.writeShellScriptBin "test-headless" ''
           ./scripts/test-headless --binary "${godot-start-debug}/bin/godot-start" -- "$@"
           ./scripts/test-headless --binary "${pkgs.godot-start}/bin/godot-start" -- "$@"
@@ -105,7 +110,12 @@
           windows-archive = mkArchive "Windows";
           web-archive = mkArchive "Web";
 
-          inherit publish format test-headless;
+          inherit
+            publish
+            format
+            lint
+            test-headless
+            ;
         };
 
         devShells = {
