@@ -2,7 +2,8 @@
 set -euo pipefail
 shopt -s failglob
 
-cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")"/../project
+SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
+cd "$SCRIPT_DIR/../project"
 
 usage() {
     # NOTE: Don't forget to update OPTIONS/LONGOPTS below!
@@ -35,11 +36,16 @@ if command -v getopt &>/dev/null; then
     eval set -- "$PARSED"
 fi
 
-die() {
+fatal_usage() {
     echo "$*" >&2
     echo
     usage >&2
     exit 2
+}
+
+fatal() {
+    echo "$*" >&2
+    exit 1
 }
 
 log() {
@@ -51,11 +57,25 @@ log() {
     return 0
 }
 debug() {
-    [[ $verbose ]] && log "" "$@"
+    [[ -n ${verbose:-} ]] && log "" "$@"
     return 0
 }
 warn() { log "0;33" "$@"; }
 error() { log "0;31" "$@"; }
+
+require_cmd() {
+    command -v "$1" >/dev/null || fatal "Missing required command: $1"
+}
+
+run() {
+    if [[ -n ${verbose:-} ]]; then
+        printf '+ ' >&2
+        printf '%q ' "$@" >&2
+        printf '\n' >&2
+    fi
+
+    "$@"
+}
 
 zip=
 export_type="release"
@@ -82,7 +102,7 @@ while [[ $# -gt 0 ]]; do
         break
         ;;
     -*)
-        die "Unknown option: $1"
+        fatal_usage "Unknown option: $1"
         ;;
     *)
         # Non-option argument, stop parsing
@@ -93,7 +113,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 preset="${1:-Linux}"
-(($# > 1)) && die "Too many arguments"
+(($# > 1)) && fatal_usage "Too many arguments"
 
 PNAME=godot-start
 BUILD_DIR=../build
@@ -124,19 +144,19 @@ python -m http.server
 EOS
 }
 
-[[ $verbose ]] && set -x
+require_cmd godot
 
 mkdir -p "$BUILD_DIR"
 
 [[ -d "$BUILD_DIR/$PNAME-$preset" ]] && rm -rf "$BUILD_DIR/$PNAME-$preset"
 
 if command -v install-export-templates >/dev/null; then
-    install-export-templates
+    run install-export-templates
 fi
 
 if [[ $preset = "Web" ]]; then
     mkdir -p "$BUILD_DIR/$PNAME-$preset"
-    godot --headless --export-$export_type "$preset" "$BUILD_DIR/$PNAME-$preset/index.html"
+    run godot --headless --export-"$export_type" "$preset" "$BUILD_DIR/$PNAME-$preset/index.html"
 
     if [[ $wrapped ]]; then
         mkWebRunnerScript >"$BUILD_DIR/$PNAME-$preset/$PNAME"
@@ -144,19 +164,20 @@ if [[ $preset = "Web" ]]; then
     fi
 
     if [[ $zip ]]; then
-        (cd "$BUILD_DIR/$PNAME-$preset" && zip -r ../"$PNAME-$preset.zip" ./*)
+        require_cmd zip
+        (cd "$BUILD_DIR/$PNAME-$preset" && run zip -r ../"$PNAME-$preset.zip" ./*)
     fi
 elif [[ $zip ]]; then
-    godot --headless --export-$export_type "$preset" "$BUILD_DIR/$PNAME-$preset.zip"
+    run godot --headless --export-"$export_type" "$preset" "$BUILD_DIR/$PNAME-$preset.zip"
 elif [[ $wrapped ]]; then
     mkdir -p "$BUILD_DIR/$PNAME-$preset"
-    godot --headless --export-$export_type "$preset" "$BUILD_DIR/$PNAME-$preset/$PNAME-bin"
+    run godot --headless --export-"$export_type" "$preset" "$BUILD_DIR/$PNAME-$preset/$PNAME-bin"
     mkWrapperScript >"$BUILD_DIR/$PNAME-$preset/$PNAME"
     chmod +x "$BUILD_DIR/$PNAME-$preset/$PNAME"
 elif [[ $preset = "Windows" ]]; then
     mkdir -p "$BUILD_DIR/$PNAME-$preset"
-    godot --headless --export-$export_type "$preset" "$BUILD_DIR/$PNAME-$preset/$PNAME.exe"
+    run godot --headless --export-"$export_type" "$preset" "$BUILD_DIR/$PNAME-$preset/$PNAME.exe"
 else
     mkdir -p "$BUILD_DIR/$PNAME-$preset"
-    godot --headless --export-$export_type "$preset" "$BUILD_DIR/$PNAME-$preset/$PNAME"
+    run godot --headless --export-"$export_type" "$preset" "$BUILD_DIR/$PNAME-$preset/$PNAME"
 fi

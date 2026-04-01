@@ -34,11 +34,16 @@ if command -v getopt &>/dev/null; then
     eval set -- "$PARSED"
 fi
 
-die() {
+fatal_usage() {
     echo "$*" >&2
     echo
     usage >&2
     exit 2
+}
+
+fatal() {
+    echo "$*" >&2
+    exit 1
 }
 
 log() {
@@ -50,11 +55,25 @@ log() {
     return 0
 }
 debug() {
-    [[ $verbose ]] && log "" "$@"
+    [[ -n ${verbose:-} ]] && log "" "$@"
     return 0
 }
 warn() { log "0;33" "$@"; }
 error() { log "0;31" "$@"; }
+
+require_cmd() {
+    command -v "$1" >/dev/null || fatal "Missing required command: $1"
+}
+
+run() {
+    if [[ -n ${verbose:-} ]]; then
+        printf '+ ' >&2
+        printf '%q ' "$@" >&2
+        printf '\n' >&2
+    fi
+
+    "$@"
+}
 
 args_nix=
 args_gd=
@@ -71,7 +90,7 @@ while [[ $# -gt 0 ]]; do
         exit 0
         ;;
     -f | --file)
-        [[ ${2:-} ]] || die "--file requires an argument"
+        [[ ${2:-} ]] || fatal_usage "--file requires an argument"
         file="$2"
         shift
         ;;
@@ -81,7 +100,7 @@ while [[ $# -gt 0 ]]; do
         break
         ;;
     -*)
-        die "Unknown option: $1"
+        fatal_usage "Unknown option: $1"
         ;;
     *)
         # Non-option argument, stop parsing
@@ -91,7 +110,7 @@ while [[ $# -gt 0 ]]; do
     shift
 done
 
-(($# > 1)) && die "Too many arguments"
+(($# > 1)) && fatal_usage "Too many arguments"
 
 iscmd() {
     command -v "$1" >/dev/null
@@ -104,55 +123,41 @@ anyfiles() {
 case "${1:-format}" in
 lint)
     if [[ -n $file ]]; then
-        [[ -f $file ]] || die "File not found: $file"
-        [[ $file == *.gd ]] || die "--file for lint must be a .gd file"
+        [[ -f $file ]] || fatal "File not found: $file"
+        [[ $file == *.gd ]] || fatal "--file for lint must be a .gd file"
+        require_cmd gdscript-formatter
 
-        (
-            [[ -n $verbose ]] && set -x
-            gdscript-formatter lint \
-                --disable constant-name,private-access,class-name \
-                "$file"
-        )
+        run gdscript-formatter lint \
+            --disable constant-name,private-access,class-name \
+            "$file"
     else
-        (
-            [[ -n $verbose ]] && set -x
-            gdscript-formatter lint \
-                --disable constant-name,private-access,class-name \
-                ./**/*.gd
-        )
+        require_cmd gdscript-formatter
+        run gdscript-formatter lint \
+            --disable constant-name,private-access,class-name \
+            ./**/*.gd
     fi
     ;;
 format)
     if [[ -n $file ]]; then
-        [[ -f $file ]] || die "File not found: $file"
+        [[ -f $file ]] || fatal "File not found: $file"
 
         if [[ $file == *.gd ]]; then
-            (
-                [[ -n $verbose ]] && set -x
-                gdscript-formatter $args_gd "$file"
-            )
+            require_cmd gdscript-formatter
+            run gdscript-formatter $args_gd "$file"
         elif [[ $file == *.nix ]]; then
-            iscmd nix || die "nix is required to format .nix files"
-            (
-                [[ -n $verbose ]] && set -x
-                nix fmt "$file" -- $args_nix
-            )
+            require_cmd nix
+            run nix fmt "$file" -- $args_nix
         else
-            die "--file must be a .gd or .nix file"
+            fatal "--file must be a .gd or .nix file"
         fi
     else
         if anyfiles "gd"; then
-            (
-                [[ -n $verbose ]] && set -x
-                gdscript-formatter $args_gd ./**/*.gd
-            )
+            require_cmd gdscript-formatter
+            run gdscript-formatter $args_gd ./**/*.gd
         fi
 
         if iscmd nix && anyfiles "nix"; then
-            (
-                [[ -n $verbose ]] && set -x
-                nix fmt ./**/*.nix -- $args_nix
-            )
+            run nix fmt ./**/*.nix -- $args_nix
         fi
     fi
     ;;
