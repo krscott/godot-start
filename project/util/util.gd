@@ -155,3 +155,19 @@ static func msg_unexpected_type(expected_type: Variant.Type, actual_value: Varia
 		": ",
 		util.safe_var_to_str(actual_value),
 	)
+
+
+static func transform_3d(
+		position: Vector3 = Vector3.ZERO,
+		rotation: Vector3 = Vector3.ZERO,
+		scale: Vector3 = Vector3.ONE,
+) -> Transform3D:
+	var base := Basis.from_euler(rotation)
+	base.x *= scale.x
+	base.y *= scale.y
+	base.z *= scale.z
+	return Transform3D(base, position)
+
+
+static func rand_index(arr: Array) -> int:
+	return randi_range(0, arr.size() - 1)
