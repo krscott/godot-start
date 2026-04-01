@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://lmp14m6v5wf4"]
 
-[ext_resource type="MeshLibrary" uid="uid://q2vjmi8n4ipj" path="res://resources/meshlibrary/test.meshlib" id="1_7367b"]
+[ext_resource type="MeshLibrary" uid="uid://q2vjmi8n4ipj" path="res://levels/obliquetile/resources/test.meshlib" id="1_7367b"]
 [ext_resource type="Script" uid="uid://bu2q2x32c2nug" path="res://common/components/level_config.gd" id="1_bwg66"]
 [ext_resource type="Script" uid="uid://dgpbhxs8ofy5g" path="res://common/components/remove_on_game_start.gd" id="2_bwg66"]
 [ext_resource type="PackedScene" uid="uid://bwcxyj2dueo8r" path="res://levels/obliquetile/oblique_player.tscn" id="2_ycx6c"]

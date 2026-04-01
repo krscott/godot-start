@@ -19,7 +19,7 @@ var generate_tiles_action := _generate
 
 func _generate() -> void:
 	assert(meshlib_name)
-	var filepath := str("res://resources/meshlibrary/", meshlib_name, ".meshlib")
+	var filepath := str("res://levels/obliquetile/resources/", meshlib_name, ".meshlib")
 	print("Generating MeshLibrary: ", filepath)
 
 	for child in parent.get_children():

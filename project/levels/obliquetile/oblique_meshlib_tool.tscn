@@ -1,7 +1,7 @@
 [gd_scene format=4 uid="uid://cag8ibjci0305"]
 
 [ext_resource type="Script" uid="uid://0lvv7uanxm8t" path="res://levels/obliquetile/tile_mesh_generator_tool.gd" id="1_6uswi"]
-[ext_resource type="Material" uid="uid://c6bwwg6bxdiaw" path="res://levels/obliquetile/test_material.tres" id="2_337sx"]
+[ext_resource type="Material" uid="uid://c6bwwg6bxdiaw" path="res://levels/obliquetile/resources/test_material.tres" id="2_337sx"]
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_j7gwk"]
 _surfaces = [{
