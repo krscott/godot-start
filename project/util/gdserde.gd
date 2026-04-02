@@ -1,153 +1,5 @@
 class_name gdserde
 
-static var _field_list_cache := {
-	&"Node3D": [
-		Field.native(&"transform", TYPE_TRANSFORM3D),
-	],
-	# TODO: Add more as needed
-}
-
-
-static func _field_str(obj: Object, field: Field) -> String:
-	return str(util.get_or_default(obj, &"gdserde_class", &"(?)"), ".", field.name)
-
-
-class Spec:
-	var type: Variant.Type
-	var object_class: GDScript
-	var inner: Spec
-	var key_type: Variant.Type
-
-
-	func _init(type_: Variant.Type) -> void:
-		type = type_
-
-
-	static func native(type_: Variant.Type) -> Spec:
-		return Spec.new(type_)
-
-
-	static func object(object_class_: GDScript) -> Spec:
-		var spec := Spec.new(TYPE_OBJECT)
-		spec.object_class = object_class_
-		return spec
-
-
-	static func array(inner_: Spec) -> Spec:
-		var spec := Spec.new(TYPE_ARRAY)
-		spec.inner = inner_
-		return spec
-
-
-	static func dict(key_type_: Variant.Type, inner_: Spec) -> Spec:
-		var spec := Spec.new(TYPE_DICTIONARY)
-		spec.inner = inner_
-		spec.key_type = key_type_
-		return spec
-
-
-class Field:
-	var name: StringName
-	var spec: Spec
-	var is_optional := false
-
-
-	func _init(name_: StringName, spec_: Spec) -> void:
-		name = name_
-		spec = spec_
-
-
-	func optional() -> Field:
-		is_optional = true
-		return self
-
-
-	static func native(name_: StringName, type: Variant.Type) -> Field:
-		return Field.new(name_, Spec.new(type))
-
-
-static func _create_obj_fields(obj: Object) -> Array[Field]:
-	var fields: Array[Field] = []
-	if obj.has_method(&"gdserde_fields"):
-		fields = obj.call(&"gdserde_fields")
-	elif util.has_member(obj, &"gdserde_props"):
-		for p: StringName in obj.get(&"gdserde_props"):
-			fields.push_back(Field.native(p, typeof(obj.get(p))))
-	elif obj.get_class() != "RefCounted":
-		assert(false, str("Object must define `static func gdserde_fields()`: ", obj))
-
-	if not fields:
-		for item in obj.get_property_list():
-			var name: String = item["name"]
-			match name:
-				"RefCounted", "script", "Script Variables", "__meta__", "Built-in script":
-					continue
-
-			var type: Variant.Type = item["type"]
-			fields.push_back(Field.native(name, type))
-
-	# Sanity check
-	if OS.is_debug_build():
-		for field in fields:
-			assert(
-				util.has_member_nullable(obj, field.name),
-				str(
-					"Missing field '",
-					_field_str(obj, field),
-					"', actual fields: ",
-					util.get_field_names(obj),
-				),
-			)
-			assert(
-				obj.get(field.name) != null,
-				str(
-					"Field '",
-					_field_str(obj, field),
-					"', is null (even optionals cannot be null--add a default object)",
-				),
-			)
-			assert(
-				field.spec.type == typeof(obj.get(field.name)),
-				str(
-					_field_str(obj, field),
-					" ",
-					util.msg_unexpected_type(field.spec.type, obj.get(field.name)),
-				),
-			)
-
-	return fields
-
-
-static func _get_obj_fields(obj: Object) -> Array[Field]:
-	var fields: Array[Field] = []
-
-	if obj.get_script():
-		if util.has_member(obj, &"gdserde_class"):
-			var gdserde_class: StringName = obj.get(&"gdserde_class")
-			if _field_list_cache.has(gdserde_class):
-				var arr: Array = _field_list_cache[gdserde_class]
-				fields.assign(arr)
-			else:
-				fields = _create_obj_fields(obj)
-				_field_list_cache[gdserde_class] = fields
-		else:
-			push_warning("Unoptimized class: ", obj)
-			fields = _create_obj_fields(obj)
-
-	else:
-		var obj_class := StringName(obj.get_class())
-		while obj_class and not _field_list_cache.has(obj_class):
-			obj_class = ClassDB.get_parent_class(obj_class)
-		if _field_list_cache.has(obj_class):
-			var arr: Array = _field_list_cache[obj_class]
-			fields.assign(arr)
-		else:
-			assert(false, str("Unhandled class, add to gdserde._field_list_cache: ", obj_class))
-			fields = _create_obj_fields(obj)
-
-	return fields
-
-
 static func _is_packed_array_type(type: Variant.Type) -> bool:
 	match type:
 		TYPE_PACKED_BYTE_ARRAY, \
@@ -165,7 +17,7 @@ static func _is_packed_array_type(type: Variant.Type) -> bool:
 			return false
 
 
-static func _get_packed_inner_type(type: Variant.Type) -> Variant.Type:
+static func _get_packed_element_type(type: Variant.Type) -> Variant.Type:
 	match type:
 		TYPE_PACKED_BYTE_ARRAY:
 			return TYPE_INT
@@ -219,8 +71,8 @@ static func _get_packed_array_by_type(type: Variant.Type) -> Variant:
 			return null
 
 
-static func deserialize_spec(spec: Spec, variant: Variant) -> Result:
-	match spec.type:
+static func deserialize_spec(spec: Type, variant: Variant) -> Result:
+	match spec.native_type:
 		TYPE_OBJECT:
 			assert(spec.object_class, "object_class required")
 			if variant is not Dictionary:
@@ -228,13 +80,13 @@ static func deserialize_spec(spec: Spec, variant: Variant) -> Result:
 			var obj: Object = spec.object_class.new()
 			return deserialize_object(obj, variant)
 		TYPE_ARRAY:
-			assert(spec.inner, "inner required")
+			assert(spec.element_type, "element_type required")
 			if variant is not Array:
 				return Result.fail(util.msg_unexpected_type(TYPE_ARRAY, variant))
 			var arr: Array = variant
 			var out := []
 			for i in arr.size():
-				var res := deserialize_spec(spec.inner, arr[i])
+				var res := deserialize_spec(spec.element_type, arr[i])
 				if res.err:
 					return res.context("index ", i)
 				out.push_back(res.value)
@@ -247,26 +99,26 @@ static func deserialize_spec(spec: Spec, variant: Variant) -> Result:
 			for k: Variant in dict:
 				if typeof(k) != spec.key_type:
 					return Result.fail(util.msg_unexpected_type(spec.key_type, k))
-				var res := deserialize_spec(spec.inner, dict[k])
+				var res := deserialize_spec(spec.element_type, dict[k])
 				if res.err:
 					return res.context("key=", var_to_str(k), " >")
 				out[k] = res.value
 			return Result.ok(out)
 		_:
-			if _is_packed_array_type(spec.type) and variant is Array:
-				var packed_inner := _get_packed_inner_type(spec.type)
+			if _is_packed_array_type(spec.native_type) and variant is Array:
+				var packed_element_type := _get_packed_element_type(spec.native_type)
 				var arr: Array = variant
-				var out: Variant = _get_packed_array_by_type(spec.type)
+				var out: Variant = _get_packed_array_by_type(spec.native_type)
 				for i in arr.size():
-					var res := deserialize_spec(Spec.native(packed_inner), arr[i])
+					var res := deserialize_spec(Type.native(packed_element_type), arr[i])
 					if res.err:
 						return res.context("index ", i)
 					@warning_ignore("unsafe_method_access") # `out` is any PackedArray
 					out.push_back(res.value)
 				return Result.ok(out)
 
-			if spec.type != typeof(variant):
-				return Result.fail(util.msg_unexpected_type(spec.type, variant))
+			if spec.native_type != typeof(variant):
+				return Result.fail(util.msg_unexpected_type(spec.native_type, variant))
 
 			return Result.ok(variant)
 
@@ -279,26 +131,12 @@ static func deserialize_object(obj: Object, variant: Variant) -> Result:
 		return Result.fail(util.msg_unexpected_type(TYPE_DICTIONARY, variant))
 	var dict: Dictionary = variant
 
-	var fields := _get_obj_fields(obj)
-	for field: Field in fields:
+	var fields := Type.get_fields(obj)
+	for field: Type.Field in fields:
 		if dict.has(field.name):
-			var res: Result
-
-			if field.spec.type != typeof(obj.get(field.name)):
-				res = Result.fail(
-					str(
-						"spec mismatch - ",
-						_field_str(obj, field),
-						" ",
-						util.msg_unexpected_type(field.spec.type, obj.get(field.name)),
-					),
-				)
-				assert(false, res.msg)
-				return res
-
-			res = deserialize_spec(field.spec, dict[field.name])
+			var res := deserialize_spec(field.type, dict[field.name])
 			if res.err:
-				return res.context(_field_str(obj, field), " >")
+				return res.context(field.pretty_str(obj), " >")
 
 			assert(util.has_member(obj, field.name))
 			var target: Variant = obj.get(field.name)
@@ -311,8 +149,8 @@ static func deserialize_object(obj: Object, variant: Variant) -> Result:
 				# This will fail if not exactly the same type
 				# e.g. Array != Array[int], even if both are array of ints
 				assert(obj.get(field.name) == res.value, str(obj.get(field.name), " ", res.value))
-		elif not field.is_optional:
-			return Result.fail(_field_str(obj, field), " field name missing from dict: ", dict)
+		elif not field.type.is_optional:
+			return Result.fail(field.pretty_str(obj), " field name missing from dict: ", dict)
 
 	return Result.ok(obj)
 
@@ -342,7 +180,7 @@ static func serialize_object(obj: Object) -> Dictionary:
 		return obj.call(&"gdserde_serialize")
 
 	var dict := { }
-	for field: Field in _get_obj_fields(obj):
+	for field in Type.get_fields(obj):
 		dict[field.name] = serialize(obj.get(field.name))
 	return dict
 
@@ -352,7 +190,7 @@ static func serialize_object(obj: Object) -> Dictionary:
 
 
 class _TestSimpleObj:
-	const gdserde_class := &"_TestSimpleObj"
+	const type_name := &"_TestSimpleObj"
 	var my_int: int
 	var my_str: String
 
@@ -379,15 +217,12 @@ static func _test_simple_obj_ser() -> void:
 
 
 class _TestArrayField:
-	const gdserde_class := &"_TestArrayField"
-
-
-	static func gdserde_fields() -> Array[Field]:
-		return [
-			Field.new(&"strings", Spec.array(Spec.native(TYPE_STRING))),
-			Field.new(&"objects", Spec.array(Spec.object(_TestSimpleObj))),
-		]
-
+	const type_name := &"_TestArrayField"
+	# TODO: Convert type_def to static func
+	static var type_def := {
+		"strings": Type.array(Type.native(TYPE_STRING)),
+		"objects": Type.array(Type.object(_TestSimpleObj)),
+	}
 
 	var strings: Array[String]
 	var objects: Array[_TestSimpleObj]
@@ -435,15 +270,11 @@ static func _test_array_field_ser() -> void:
 
 
 class _TestDictField:
-	const gdserde_class := &"_TestDictField"
-
-
-	static func gdserde_fields() -> Array[Field]:
-		return [
-			Field.new(&"integer_names", Spec.dict(TYPE_INT, Spec.native(TYPE_STRING))),
-			Field.new(&"simple_lookup", Spec.dict(TYPE_STRING, Spec.object(_TestSimpleObj))),
-		]
-
+	const type_name := &"_TestDictField"
+	static var type_def := {
+		&"integer_names": Type.dict(TYPE_INT, Type.native(TYPE_STRING)),
+		&"simple_lookup": Type.dict(TYPE_STRING, Type.object(_TestSimpleObj)),
+	}
 
 	var integer_names: Dictionary
 	var simple_lookup: Dictionary
@@ -497,15 +328,11 @@ static func _test_dict_field_ser() -> void:
 
 
 class _TestOptionalField:
-	const gdserde_class := &"_TestOptionalField"
-
-
-	static func gdserde_fields() -> Array[Field]:
-		return [
-			Field.native(&"my_int", TYPE_INT).optional(),
-			Field.native(&"my_str", TYPE_STRING).optional(),
-		]
-
+	const type_name := &"_TestOptionalField"
+	static var type_def := {
+		&"my_int": Type.implicit(),
+		&"my_str": Type.implicit(),
+	}
 
 	var my_int: int = 10
 	var my_str: String = "nothing"
@@ -530,15 +357,11 @@ static func _test_optional_deser() -> void:
 
 
 class _TestPackedArrayField:
-	const gdserde_class := &"_TestPackedArrayField"
-
-
-	static func gdserde_fields() -> Array[Field]:
-		return [
-			Field.native(&"vectors", TYPE_PACKED_VECTOR2_ARRAY),
-			Field.new(&"sentences", Spec.array(Spec.native(TYPE_PACKED_STRING_ARRAY))),
-		]
-
+	const type_name := &"_TestPackedArrayField"
+	static var type_def := {
+		&"vectors": Type.implicit(),
+		&"sentences": Type.array(Type.native(TYPE_PACKED_STRING_ARRAY)),
+	}
 
 	var vectors: PackedVector2Array
 	var sentences: Array[PackedStringArray]
