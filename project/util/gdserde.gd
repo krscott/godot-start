@@ -293,7 +293,7 @@ static func deserialize_object(obj: Object, variant: Variant) -> Result:
 						util.msg_unexpected_type(field.spec.type, obj.get(field.name)),
 					),
 				)
-				assert(false, res.err)
+				assert(false, res.msg)
 				return res
 
 			res = deserialize_spec(field.spec, dict[field.name])
@@ -364,7 +364,7 @@ static func _test_simple_obj_deser() -> void:
 	}
 	var obj := _TestSimpleObj.new()
 	var res := deserialize_object(obj, variant)
-	assert(not res.err, res.err)
+	assert(not res.err, res.msg)
 	assert(obj.my_int == 5)
 	assert(obj.my_str == "foobar")
 
@@ -401,7 +401,7 @@ static func _test_array_field_deser() -> void:
 
 	var obj := _TestArrayField.new()
 	var res := deserialize_object(obj, variant)
-	assert(not res.err, res.err)
+	assert(not res.err, res.msg)
 	assert(obj.strings[0] == "foo")
 	assert(obj.strings[1] == "bar")
 	assert(obj.strings.size() == 2)
@@ -463,7 +463,7 @@ static func _test_dict_field_deser() -> void:
 
 	var obj := _TestDictField.new()
 	var res := deserialize_object(obj, variant)
-	assert(not res.err, res.err)
+	assert(not res.err, res.msg)
 	assert(obj.integer_names[42] == "forty-two")
 	assert(obj.integer_names[-10] == "negative ten")
 	var a: _TestSimpleObj = obj.simple_lookup["alpha"]
@@ -516,7 +516,7 @@ static func _test_optional_deser() -> void:
 		var variant := { "my_int": 5 }
 		var obj := _TestOptionalField.new()
 		var res := deserialize_object(obj, variant)
-		assert(not res.err, res.err)
+		assert(not res.err, res.msg)
 		assert(obj.my_int == 5)
 		assert(obj.my_str == "nothing")
 
@@ -524,7 +524,7 @@ static func _test_optional_deser() -> void:
 		var variant := { "my_str": "something" }
 		var obj := _TestOptionalField.new()
 		var res := deserialize_object(obj, variant)
-		assert(not res.err, res.err)
+		assert(not res.err, res.msg)
 		assert(obj.my_int == 10)
 		assert(obj.my_str == "something")
 
@@ -553,7 +553,7 @@ static func _test_packed_array_deser() -> void:
 		}
 		var obj := _TestPackedArrayField.new()
 		var res := deserialize_object(obj, variant)
-		assert(not res.err, res.err)
+		assert(not res.err, res.msg)
 		assert(obj.vectors[3] == Vector2.RIGHT)
 		assert(obj.sentences[1][2] == "dodge")
 		assert(typeof(obj.sentences[1]) == TYPE_PACKED_STRING_ARRAY)
@@ -569,7 +569,7 @@ static func _test_packed_array_deser() -> void:
 		}
 		var obj := _TestPackedArrayField.new()
 		var res := deserialize_object(obj, variant)
-		assert(not res.err, res.err)
+		assert(not res.err, res.msg)
 		assert(obj.vectors[3] == Vector2.RIGHT)
 		assert(obj.sentences[1][2] == "dodge")
 		assert(typeof(obj.sentences[1]) == TYPE_PACKED_STRING_ARRAY)
@@ -583,7 +583,7 @@ static func _test_node3d() -> void:
 
 	var node2 := Marker3D.new()
 	var res := deserialize_object(node2, variant)
-	assert(not res.err, res.err)
+	assert(not res.err, res.msg)
 	assert(node2.transform.origin == Vector3(1, 2, 3))
 
 	node1.free()

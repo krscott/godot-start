@@ -27,7 +27,7 @@ func _ready() -> void:
 
 func _replay_load_frame(frame: Dictionary) -> void:
 	var res := gdserde.deserialize_object(player_input, frame)
-	assert(not res.err, res.err)
+	assert(not res.err, res.msg)
 	if not replay.is_active:
 		print("REPLAY DONE")
 		pause_menu_system.pause()

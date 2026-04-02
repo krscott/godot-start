@@ -120,15 +120,14 @@ static func as_err(x: Variant) -> Error:
 	return ERR_BUG
 
 
-## returns [Variant, Error]
-static func parse_json_file(path: String) -> Array:
+static func parse_json_file(path: String) -> Result:
 	var text := FileAccess.get_file_as_string(path)
 	if text == "":
-		return [null, FileAccess.get_open_error()]
+		return Result.error(FileAccess.get_open_error())
 	var data: Variant = JSON.parse_string(text)
 	if data == null:
-		return [null, ERR_PARSE_ERROR]
-	return [data, OK]
+		return Result.error(ERR_PARSE_ERROR)
+	return Result.ok(data)
 
 
 ## Print a stack previously captured with `get_stack()`

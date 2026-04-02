@@ -1,23 +1,29 @@
 class_name Result
 
 var value: Variant
-var err: String
+var err: Error
+var msg: String
 var _stack: Array
 
 
 static func ok(value_: Variant) -> Result:
-	return Result.new(value_, "")
+	return Result.new(value_, OK)
 
 
 static func fail(...args: Array) -> Result:
-	var msg: String = str.callv(args)
-	return Result.new(null, msg)
+	return Result.new(null, FAILED).context.callv(args)
 
 
-func _init(value_: Variant, err_: String) -> void:
+static func error(err_: Error) -> Result:
+	assert(err_)
+	return Result.new(null, err_)
+
+
+func _init(value_: Variant, err_: Error) -> void:
 	value = value_
 	err = err_
 	if err:
+		msg = error_string(err_)
 		_stack = get_stack() # NOTE: Debug-only by default
 
 

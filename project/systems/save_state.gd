@@ -25,7 +25,7 @@ func load_object_state(key: StringName, obj: Object) -> void:
 	if _savedata_state.has(key):
 		var dict: Dictionary = _savedata_state[key]
 		var res := gdserde.deserialize_object(obj, dict)
-		assert(not res.err, res.err)
+		assert(not res.err, res.msg)
 
 
 func sync_object_state(key: StringName, obj: Object) -> void:
@@ -36,7 +36,7 @@ func sync_object_state(key: StringName, obj: Object) -> void:
 		# Debug-only check for serde errors
 		var dict := gdserde.serialize_object(obj)
 		var res := gdserde.deserialize_object(obj, dict)
-		assert(not res.err, res.err)
+		assert(not res.err, res.msg)
 
 	_savedata_refs[key] = obj
 

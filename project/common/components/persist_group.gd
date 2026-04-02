@@ -43,7 +43,7 @@ func gdserde_deserialize(variant: Variant) -> Result:
 			if is_instance_valid(node):
 				var res := gdserde.deserialize_object(node, value)
 				if res.err:
-					return Result.fail("key '", key, "' ", res.err)
+					return res.context("key '", key, "'")
 			else:
 				var msg := str("Attempted to deserialize invalid instance: ", key)
 				assert(false, msg)
