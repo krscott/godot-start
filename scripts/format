@@ -15,6 +15,7 @@ Commands:
 Options:
     -c, --check         Check formatting without editing
     -f, --file FILE     Only run on a single file
+    --jam               Disable less important lints
     -h, --help          Display this help message
     -v, --verbose       Enable debug messages
 EOF
@@ -22,7 +23,7 @@ EOF
 
 # NOTE: Use ':' suffix to specify opt has an arg
 OPTIONS="cf:hv"
-LONGOPTS="check,file:,help,verbose"
+LONGOPTS="check,file:,help,jam,verbose"
 
 # NOTE: getopt comes from 'util-linux' package
 # Check if getopt is available, fallback to simple parsing if not
@@ -78,6 +79,7 @@ run() {
 args_nix=
 args_gd=
 file=
+jam=
 verbose=
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -94,6 +96,7 @@ while [[ $# -gt 0 ]]; do
         file="$2"
         shift
         ;;
+    --jam) jam=1 ;;
     -v | --verbose) verbose=1 ;;
     --)
         shift
@@ -112,6 +115,11 @@ done
 
 (($# > 1)) && fatal_usage "Too many arguments"
 
+lint_disable="constant-name,private-access,class-name"
+if [[ -n $jam ]]; then
+    lint_disable+=",max-line-length"
+fi
+
 iscmd() {
     command -v "$1" >/dev/null
 }
@@ -128,12 +136,12 @@ lint)
         require_cmd gdscript-formatter
 
         run gdscript-formatter lint \
-            --disable constant-name,private-access,class-name \
+            --disable "$lint_disable" \
             "$file"
     else
         require_cmd gdscript-formatter
         run gdscript-formatter lint \
-            --disable constant-name,private-access,class-name \
+            --disable "$lint_disable" \
             ./**/*.gd
     fi
     ;;
