@@ -111,7 +111,7 @@ func _deserialize_savedata(packed_data: PackedByteArray) -> Error:
 			var obj: Object = _savedata_refs[k]
 			load_object_state(k, obj)
 		else:
-			util.expect_true(_savedata_refs.erase(k))
+			util.a_true(_savedata_refs.erase(k))
 
 	if OS.is_debug_build():
 		util.printdbg("Loaded savedata: ", JSON.stringify(_savedata_state))
@@ -127,7 +127,7 @@ func _serialize_savedata() -> PackedByteArray:
 			var obj: Object = _savedata_refs[k]
 			save_object_state(k, obj)
 		else:
-			util.expect_true(_savedata_refs.erase(k))
+			util.a_true(_savedata_refs.erase(k))
 
 	if OS.is_debug_build():
 		util.printdbg("Saved savedata: ", JSON.stringify(_savedata_state))

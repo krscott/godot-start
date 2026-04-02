@@ -31,8 +31,8 @@ func _toggle_flip_frame(animation_: StringName, frame_: int) -> void:
 			flip_frames.remove_at(i)
 			flip_animations.remove_at(i)
 	if not found:
-		util.expect_false(flip_frames.push_back(frame_), str(frame_))
-		util.expect_false(flip_animations.push_back(animation_), animation_)
+		util.a_false(flip_frames.push_back(frame_), str(frame_))
+		util.a_false(flip_animations.push_back(animation_), animation_)
 
 	print("Flipped Frames:")
 	for i in flip_frames.size():

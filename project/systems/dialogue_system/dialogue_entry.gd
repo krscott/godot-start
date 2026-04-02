@@ -83,7 +83,7 @@ func _start_next_event() -> void:
 	for choice in event.choices:
 		if _dialogue_data.check_condition(state, choice.next):
 			_current_choices.push_back(choice)
-			util.expect_false(choice_texts.push_back(choice.text))
+			util.a_false(choice_texts.push_back(choice.text))
 
 	overlay.dialogue_layer.render(speaker, text, choice_texts)
 

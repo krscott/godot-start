@@ -71,11 +71,11 @@ static func expect_ok(err: Error, context := "") -> void:
 	a_ok(err, context)
 
 
-static func expect_true(x: bool, context := "") -> void:
+static func a_true(x: bool, context := "") -> void:
 	assert(x, context)
 
 
-static func expect_false(x: bool, context := "") -> void:
+static func a_false(x: bool, context := "") -> void:
 	assert(not x, context)
 
 
