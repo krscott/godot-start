@@ -1,7 +1,7 @@
 class_name Type
 
 const _TYPE_NAME_VARNAME := &"type_name"
-const _TYPE_DEF_VARNAME := &"type_def"
+const _TYPE_DEF_FUNCNAME := &"type_def"
 
 static var _field_list_cache := {
 	&"Node3D": [Field.implicit(&"transform")],
@@ -79,11 +79,10 @@ class Field:
 
 
 static func _create_obj_fields(obj: Object) -> Array[Field]:
-	var type_def: Variant = obj.get(_TYPE_DEF_VARNAME)
 	var fields: Array[Field] = []
 
-	if type_def:
-		var fields_dict: Dictionary = type_def
+	if obj.has_method(_TYPE_DEF_FUNCNAME):
+		var fields_dict: Dictionary = obj.call(_TYPE_DEF_FUNCNAME)
 		for name: String in fields_dict:
 			var type: Type = fields_dict[name]
 			if not type.native_type:
@@ -96,8 +95,8 @@ static func _create_obj_fields(obj: Object) -> Array[Field]:
 				"RefCounted", "script", "Script Variables", "__meta__", "Built-in script":
 					continue
 
-			var native_type: Variant.Type = item["type"]
-			fields.push_back(Field.native(name, native_type))
+			var native_type_: Variant.Type = item["type"]
+			fields.push_back(Field.native(name, native_type_))
 
 	# Sanity check
 	if OS.is_debug_build():

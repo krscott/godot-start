@@ -30,8 +30,8 @@ func _init(value_: Variant, err_: Error) -> void:
 func context(...args: Array) -> Result:
 	if err:
 		args.push_back(" ")
-		args.push_back(err)
-		err = str.callv(args)
+		args.push_back(msg)
+		msg = str.callv(args)
 	return self
 
 
@@ -42,3 +42,10 @@ func expect_ok() -> void:
 			print("gdserde error: ", err)
 			util.print_saved_stack(_stack, 1)
 		assert(false, str(err, " (see console for full stack trace)"))
+
+
+func error_message() -> String:
+	if msg:
+		return str(error_string(err), ": ", msg)
+	else:
+		return error_string(err)
