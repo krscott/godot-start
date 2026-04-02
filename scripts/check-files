@@ -1,0 +1,129 @@
+#!/usr/bin/env bash
+set -euo pipefail
+shopt -s nullglob
+shopt -s globstar
+
+SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
+cd "$SCRIPT_DIR/.."
+
+usage() {
+    cat <<EOF
+Usage: $(basename "$0") [options]
+
+Options:
+    --jam              Skip less important checks
+    -h, --help         Display this help message
+    -v, --verbose      Enable debug messages
+EOF
+}
+
+OPTIONS="hv"
+LONGOPTS="help,jam,verbose"
+
+if command -v getopt &>/dev/null; then
+    PARSED=$(getopt -o "$OPTIONS" -l "$LONGOPTS" -n "$0" -- "$@") || {
+        usage >&2
+        exit 2
+    }
+    eval set -- "$PARSED"
+fi
+
+fatal_usage() {
+    echo "$*" >&2
+    echo >&2
+    usage >&2
+    exit 2
+}
+
+fatal() {
+    echo "$*" >&2
+    exit 1
+}
+
+log() {
+    local c="$1"
+    shift
+    [[ $c ]] && echo -ne "\033[${c}m" >&2
+    echo -e "$@" >&2
+    [[ $c ]] && echo -ne '\033[0m' >&2
+    return 0
+}
+
+debug() {
+    [[ -n ${verbose:-} ]] && log "" "$@"
+    return 0
+}
+
+warn() { log "0;33" "$@"; }
+error() { log "0;31" "$@"; }
+
+jam=
+verbose=
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+    --jam) jam=1 ;;
+    -h | --help)
+        usage
+        exit 0
+        ;;
+    -v | --verbose) verbose=1 ;;
+    --)
+        shift
+        break
+        ;;
+    -*)
+        fatal_usage "Unknown option: $1"
+        ;;
+    *)
+        fatal_usage "Unexpected argument: $1"
+        ;;
+    esac
+    shift
+done
+
+[[ $# -eq 0 ]] || fatal_usage "Unexpected extra arguments"
+
+check_png_imports() {
+    local files=(**/*.png.import)
+    local found_any=
+
+    debug "Validating .png.import files"
+
+    for file in "${files[@]}"; do
+        [[ -f $file ]] || continue
+
+        if ! grep -q "compress/mode=0" "$file"; then
+            error "$file does not contain 'compress/mode=0'"
+            found_any=1
+        fi
+    done
+
+    if [[ -n $found_any ]]; then
+        error "FAILED: Re-import these files with Compress Mode 'Lossless'"
+        return 1
+    fi
+}
+
+check_tmp_files() {
+    local files=(**/*.tmp)
+
+    debug "Checking for stray .tmp files"
+
+    if [[ ${#files[@]} -eq 0 ]]; then
+        return 0
+    fi
+
+    error "FAILED: Remove stray .tmp files"
+    printf '%s\n' "${files[@]}"
+    return 1
+}
+
+check_png_imports
+
+if [[ -z $jam ]]; then
+    check_tmp_files
+else
+    debug "Skipping some checks (--jam)"
+fi
+
+debug "PASS"

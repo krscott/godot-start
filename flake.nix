@@ -87,7 +87,7 @@
 
         lint = writeScript [ pkgs.gdscript-formatter ] "lint" ''
           ./scripts/format lint -v
-          ./scripts/check-imports
+          ./scripts/check-files
         '';
 
         test-headless = pkgs.writeShellScriptBin "test-headless" ''
