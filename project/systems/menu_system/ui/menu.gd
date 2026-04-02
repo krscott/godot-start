@@ -103,7 +103,7 @@ func _ready() -> void:
 	for k: SpecKind in _templates:
 		_get_template(k).hide()
 
-	util.aok(visibility_changed.connect(_on_visibility_changed))
+	util.a_ok(visibility_changed.connect(_on_visibility_changed))
 
 
 func _process(_delta: float) -> void:
@@ -155,13 +155,13 @@ func build(spec: Array[Spec]) -> void:
 			SpecKind.BUTTON:
 				var button_ := _create_item(x) as Button
 				button_.text = x._text
-				util.aok(button_.pressed.connect(x._callback))
+				util.a_ok(button_.pressed.connect(x._callback))
 			SpecKind.CHECKBOX:
 				var checkbox_ := _create_item(x) as Button
 				checkbox_.text = x._text
 				checkbox_.toggle_mode = true
 				checkbox_.button_pressed = x._button_pressed
-				util.aok(checkbox_.toggled.connect(x._callback))
+				util.a_ok(checkbox_.toggled.connect(x._callback))
 			SpecKind.LABEL:
 				var label_ := _create_item(x) as Label
 				label_.text = x._text

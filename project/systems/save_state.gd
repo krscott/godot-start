@@ -46,11 +46,11 @@ func quicksave() -> void:
 
 
 func quickload() -> void:
-	util.aok(_deserialize_savedata(_quick_save))
+	util.a_ok(_deserialize_savedata(_quick_save))
 
 
 func reset() -> void:
-	util.aok(_deserialize_savedata(_quick_save_zero))
+	util.a_ok(_deserialize_savedata(_quick_save_zero))
 
 
 func save_to_file(filename: String) -> Error:

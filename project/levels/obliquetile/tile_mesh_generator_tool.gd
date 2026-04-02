@@ -43,7 +43,7 @@ func _generate() -> void:
 	for i in meshes.size():
 		_add_lib_mesh(ml, Vector3.RIGHT * i, meshes[i])
 
-	util.aok(ResourceSaver.save(ml, filepath))
+	util.a_ok(ResourceSaver.save(ml, filepath))
 
 
 class MeshBuilder:

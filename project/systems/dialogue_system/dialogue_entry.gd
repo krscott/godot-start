@@ -19,7 +19,7 @@ func _ready() -> void:
 			gdserde.deserialize_object(_dialogue_data, data).expect_ok()
 			#print(gdserde.serialize_object(_dialogue_data))
 		[_, var err]:
-			util.aok(util.as_err(err))
+			util.a_ok(util.as_err(err))
 
 	if auto_start:
 		call_deferred(&"start")
@@ -30,7 +30,7 @@ func start() -> void:
 		stop()
 
 	_current_event_key = entry_name
-	util.aok(overlay.dialogue_layer.advanced.connect(_on_advance))
+	util.a_ok(overlay.dialogue_layer.advanced.connect(_on_advance))
 	_start_next_event()
 
 

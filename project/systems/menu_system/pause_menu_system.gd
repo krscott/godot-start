@@ -49,7 +49,7 @@ func _ready() -> void:
 	assert(palette_filter)
 
 	process_mode = PROCESS_MODE_ALWAYS
-	util.aok(get_window().focus_exited.connect(pause))
+	util.a_ok(get_window().focus_exited.connect(pause))
 	call_deferred(&"_build_menu")
 	call_deferred(&"_show_startup")
 
@@ -70,7 +70,7 @@ func _notification(what: int) -> void:
 func _save_game_dialog() -> void:
 	var filename := await system_dialog.file_save_dialog("*.sav", "Save File")
 	if filename:
-		util.aok(save_state.save_to_file(filename))
+		util.a_ok(save_state.save_to_file(filename))
 
 
 func _load_game_dialog() -> void:

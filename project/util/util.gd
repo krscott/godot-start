@@ -58,7 +58,7 @@ static func get_field_names(obj: Object) -> Array[String]:
 	return out
 
 
-static func aok(err: Error, context := "") -> void:
+static func a_ok(err: Error, context := "") -> void:
 	if err:
 		var msg := error_string(err)
 		if context:
@@ -68,7 +68,7 @@ static func aok(err: Error, context := "") -> void:
 
 
 static func expect_ok(err: Error, context := "") -> void:
-	aok(err, context)
+	a_ok(err, context)
 
 
 static func expect_true(x: bool, context := "") -> void:
