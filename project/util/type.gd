@@ -4,7 +4,7 @@ const _TYPE_NAME_VARNAME := &"type_name"
 const _TYPE_DEF_FUNCNAME := &"type_def"
 
 static var _field_list_cache := {
-	&"Node3D": [Field.implicit(&"transform")],
+	&"Node3D": [Field.native(&"transform", TYPE_TRANSFORM3D)],
 }
 
 var native_type: Variant.Type
@@ -56,6 +56,10 @@ func optional() -> Type:
 	return self
 
 
+func is_implicitly_defined() -> bool:
+	return native_type == TYPE_NIL
+
+
 class Field:
 	var name: StringName
 	var type: Type
@@ -66,16 +70,13 @@ class Field:
 		type = type_
 
 
-	static func implicit(name_: StringName) -> Field:
-		return Field.new(name_, Type.implicit())
-
-
 	static func native(name_: StringName, native_type: Variant.Type) -> Field:
 		return Field.new(name_, Type.native(native_type))
 
 
 	func pretty_str(obj: Object) -> String:
-		return str(util.get_or_default(obj, _TYPE_NAME_VARNAME, &"??"), ".", name)
+		return str(
+			util.get_or_default(obj, _TYPE_NAME_VARNAME, obj.get_class()), ".", name)
 
 
 static func _create_obj_fields(obj: Object) -> Array[Field]:
@@ -98,37 +99,48 @@ static func _create_obj_fields(obj: Object) -> Array[Field]:
 			var native_type_: Variant.Type = item["type"]
 			fields.push_back(Field.native(name, native_type_))
 
-	# Sanity check
-	if OS.is_debug_build():
-		for field in fields:
-			var name := field.name
-			var type := field.type
-			var default_value: Variant = obj.get(name)
-			assert(
-				util.has_member_nullable(obj, name),
-				str(
-					"Missing field '",
-					field.pretty_str(obj),
-					"', actual fields: ",
-					util.get_field_names(obj),
-				),
-			)
-			assert(
-				default_value != null,
-				str(
-					"Field '",
-					field.pretty_str(obj),
-					"', is null (even optionals cannot be null--add a default object)",
-				),
-			)
-			assert(
-				type.native_type == typeof(default_value),
-				str(
-					field.pretty_str(obj),
-					" ",
-					util.msg_unexpected_type(type.native_type, default_value),
-				),
-			)
+	for field in fields:
+		var name := field.name
+		var type := field.type
+		var default_value: Variant = obj.get(name)
+		
+		if field.type.is_implicitly_defined():
+			type.native_type = typeof(default_value) as Variant.Type
+		
+		assert(
+			not type.is_implicitly_defined(),
+			str(
+				"Could not determine type of implicitly typed field '",
+				field.pretty_str(obj),
+				"'",
+			),
+		)
+		
+		assert(
+			util.has_member_nullable(obj, name),
+			str(
+				"Missing field '",
+				field.pretty_str(obj),
+				"', actual fields: ",
+				util.get_field_names(obj),
+			),
+		)
+		assert(
+			default_value != null,
+			str(
+				"Field '",
+				field.pretty_str(obj),
+				"', is null (even optionals must have a default object)",
+			),
+		)
+		assert(
+			type.native_type == typeof(default_value),
+			str(
+				field.pretty_str(obj),
+				" ",
+				util.msg_unexpected_type(type.native_type, default_value),
+			),
+		)
 
 	return fields
 
@@ -138,17 +150,18 @@ static func get_fields(obj: Object) -> Array[Field]:
 	var fields: Array[Field] = []
 
 	if obj.get_script():
-		var type_name: StringName = obj.get(_TYPE_NAME_VARNAME)
-		if type_name:
-			if _field_list_cache.has(type_name):
-				var arr: Array = _field_list_cache[type_name]
-				fields.assign(arr)
-			else:
+		match obj.get(_TYPE_NAME_VARNAME):
+			null:
+				push_warning("Unoptimized class: ", obj)
 				fields = _create_obj_fields(obj)
-				_field_list_cache[type_name] = fields
-		else:
-			push_warning("Unoptimized class: ", obj)
-			fields = _create_obj_fields(obj)
+			var x:
+				var type_name: StringName = x
+				if _field_list_cache.has(type_name):
+					var arr: Array = _field_list_cache[type_name]
+					fields.assign(arr)
+				else:
+					fields = _create_obj_fields(obj)
+					_field_list_cache[type_name] = fields
 
 	else:
 		var obj_class := StringName(obj.get_class())

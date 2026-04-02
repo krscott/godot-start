@@ -37,9 +37,8 @@ func context(...args: Array) -> Result:
 
 func expect_ok() -> void:
 	if err:
-		push_error(err)
+		push_error(error_message())
 		if _stack:
-			print("gdserde error: ", err)
 			util.print_saved_stack(_stack, 1)
 		assert(false, str(err, " (see console for full stack trace)"))
 

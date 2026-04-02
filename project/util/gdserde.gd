@@ -131,8 +131,8 @@ static func deserialize_object(obj: Object, variant: Variant) -> Result:
 		return Result.fail(util.msg_unexpected_type(TYPE_DICTIONARY, variant))
 	var dict: Dictionary = variant
 
-	var fields := Type.get_fields(obj)
-	for field: Type.Field in fields:
+
+	for field in Type.get_fields(obj):
 		if dict.has(field.name):
 			var res := deserialize_spec(field.type, dict[field.name])
 			if res.err:
