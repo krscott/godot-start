@@ -2,17 +2,14 @@ class_name DialogueEvent
 const gdserde_class = &"DialogueEvent"
 
 
-static func gdserde_fields() -> Array[gdserde.Field]:
-	return [
-		gdserde.Field.native(&"conds", TYPE_PACKED_STRING_ARRAY).optional(),
-		gdserde.Field.native(&"speaker", TYPE_STRING).optional(),
-		gdserde.Field.native(&"text", TYPE_PACKED_STRING_ARRAY).optional(),
-		gdserde.Field.native(&"next", TYPE_PACKED_STRING_ARRAY).optional(),
-		gdserde.Field.new(
-			&"choices",
-			gdserde.Spec.array(gdserde.Spec.object(DialogueChoice)),
-		).optional(),
-	]
+static func type_def() -> Dictionary:
+	return {
+		&"conds": Type.implicit().optional(),
+		&"speaker": Type.implicit().optional(),
+		&"text": Type.implicit().optional(),
+		&"next": Type.implicit().optional(),
+		&"choices": Type.array(Type.object(DialogueChoice)).optional(),
+	}
 
 
 var conds: PackedStringArray
@@ -26,11 +23,11 @@ class DialogueCallback:
 	const gdserde_class = &"DialogueCallback"
 
 
-	static func gdserde_fields() -> Array[gdserde.Field]:
-		return [
-			gdserde.Field.native(&"name", TYPE_STRING),
-			gdserde.Field.native(&"args", TYPE_PACKED_STRING_ARRAY).optional(),
-		]
+	static func type_def() -> Dictionary:
+		return {
+			&"name": Type.implicit(),
+			&"args": Type.implicit().optional(),
+		}
 
 
 	var name: String
@@ -41,12 +38,12 @@ class DialogueChoice:
 	const gdserde_class = &"DialogueChoice"
 
 
-	static func gdserde_fields() -> Array[gdserde.Field]:
-		return [
-			gdserde.Field.native(&"text", TYPE_STRING),
-			gdserde.Field.native(&"next", TYPE_STRING),
-			gdserde.Field.new(&"callback", gdserde.Spec.object(DialogueCallback)).optional(),
-		]
+	static func type_def() -> Dictionary:
+		return {
+			&"text": Type.implicit(),
+			&"next": Type.implicit(),
+			&"callback": Type.object(DialogueCallback).optional(),
+		}
 
 
 	var text: String

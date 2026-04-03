@@ -14,12 +14,10 @@ var _current_choices: Array[DialogueEvent.DialogueChoice] = []
 
 
 func _ready() -> void:
-	match util.parse_json_file(json_path):
-		[var data, OK]:
-			gdserde.deserialize_object(_dialogue_data, data).expect_ok()
-			#print(gdserde.serialize_object(_dialogue_data))
-		[_, var err]:
-			util.a_ok(util.as_err(err))
+	util.parse_json_file(json_path).and_then(
+		func(x: Dictionary) -> Result:
+			return gdserde.deserialize_object(_dialogue_data, x)
+	).expect_ok()
 
 	if auto_start:
 		call_deferred(&"start")

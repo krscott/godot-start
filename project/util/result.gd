@@ -46,5 +46,10 @@ func expect_ok() -> void:
 func error_message() -> String:
 	if msg:
 		return str(error_string(err), ": ", msg)
-	else:
-		return error_string(err)
+	return error_string(err)
+
+
+func and_then(callback: Callable) -> Result:
+	if err:
+		return self
+	return callback.call(self.value)
