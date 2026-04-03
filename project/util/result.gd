@@ -35,12 +35,18 @@ func context(...args: Array) -> Result:
 	return self
 
 
-func expect_ok() -> void:
+func assert_ok() -> void:
 	if err:
 		push_error(error_message())
 		if _stack:
 			util.print_saved_stack(_stack, 1)
 		assert(false, str(err, " (see console for full stack trace)"))
+
+
+func unwrap() -> Variant:
+	if err:
+		assert_ok()
+	return self.value
 
 
 func error_message() -> String:

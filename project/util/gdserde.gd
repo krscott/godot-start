@@ -123,6 +123,7 @@ static func deserialize_spec(spec: Type, variant: Variant) -> Result:
 			return Result.ok(variant)
 
 
+## (T, any) -> Result<T>
 static func deserialize_object(obj: Object, variant: Variant) -> Result:
 	if obj.has_method(&"gdserde_deserialize"):
 		return obj.call(&"gdserde_deserialize", variant)
@@ -130,7 +131,6 @@ static func deserialize_object(obj: Object, variant: Variant) -> Result:
 	if variant is not Dictionary:
 		return Result.fail(util.msg_unexpected_type(TYPE_DICTIONARY, variant))
 	var dict: Dictionary = variant
-
 
 	for field in Type.get_fields(obj):
 		if dict.has(field.name):
