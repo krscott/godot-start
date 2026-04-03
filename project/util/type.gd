@@ -17,9 +17,13 @@ var key_type: Variant.Type
 var is_optional := false
 
 
-static func implicit() -> Type:
+func _copy() -> Type:
 	var t := Type.new()
-	t.native_type = TYPE_NIL
+	t.native_type = native_type
+	t.object_class = object_class
+	t.element_type = element_type
+	t.key_type = key_type
+	t.is_optional = is_optional
 	return t
 
 
@@ -51,9 +55,13 @@ static func dict(key_type_: Variant.Type, element_type_: Type) -> Type:
 	return t
 
 
-func optional() -> Type:
-	is_optional = true
-	return self
+static func optional(type_: Type = null) -> Type:
+	if not type_:
+		type_ = Type.new()
+	else:
+		type_ = type_._copy()
+	type_.is_optional = true
+	return type_
 
 
 func is_implicitly_defined() -> bool:
@@ -121,6 +129,8 @@ static func _create_obj_fields(obj: Object) -> Array[Field]:
 		var fields_dict: Dictionary = obj.call(_TYPE_DEF_FUNCNAME)
 		for name: String in fields_dict:
 			var type: Type = fields_dict[name]
+			if not type:
+				type = Type.new()
 			if not type.native_type:
 				type.native_type = typeof(obj.get(name)) as Variant.Type
 			fields.push_back(Field.new(name, type))

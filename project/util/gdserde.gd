@@ -341,8 +341,8 @@ class _TestOptionalField:
 
 	static func type_def() -> Dictionary:
 		return {
-			&"my_int": Type.implicit().optional(),
-			&"my_str": Type.implicit().optional(),
+			&"my_int": Type.optional(),
+			&"my_str": Type.optional(),
 		}
 
 
@@ -374,7 +374,7 @@ class _TestPackedArrayField:
 
 	static func type_def() -> Dictionary:
 		return {
-			&"vectors": Type.implicit(),
+			&"vectors": null,
 			&"sentences": Type.array(Type.native(TYPE_PACKED_STRING_ARRAY)),
 		}
 

@@ -4,11 +4,11 @@ const gdserde_class = &"DialogueEvent"
 
 static func type_def() -> Dictionary:
 	return {
-		&"conds": Type.implicit().optional(),
-		&"speaker": Type.implicit().optional(),
-		&"text": Type.implicit().optional(),
-		&"next": Type.implicit().optional(),
-		&"choices": Type.array(Type.object(DialogueChoice)).optional(),
+		&"conds": Type.optional(),
+		&"speaker": Type.optional(),
+		&"text": Type.optional(),
+		&"next": Type.optional(),
+		&"choices": Type.optional(Type.array(Type.object(DialogueChoice))),
 	}
 
 
@@ -25,8 +25,8 @@ class DialogueCallback:
 
 	static func type_def() -> Dictionary:
 		return {
-			&"name": Type.implicit(),
-			&"args": Type.implicit().optional(),
+			&"name": null,
+			&"args": Type.optional(),
 		}
 
 
@@ -40,9 +40,9 @@ class DialogueChoice:
 
 	static func type_def() -> Dictionary:
 		return {
-			&"text": Type.implicit(),
-			&"next": Type.implicit(),
-			&"callback": Type.object(DialogueCallback).optional(),
+			&"text": null,
+			&"next": null,
+			&"callback": Type.optional(Type.object(DialogueCallback)),
 		}
 
 
