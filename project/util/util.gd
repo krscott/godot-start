@@ -41,7 +41,7 @@ static func get_or_default(obj: Object, name: StringName, default: Variant) -> V
 static func safe_var_to_str(variant: Variant) -> String:
 	match typeof(variant):
 		# Add more types as necessary
-		TYPE_ARRAY:
+		TYPE_ARRAY, TYPE_OBJECT:
 			return str(variant)
 		_:
 			return var_to_str(variant)

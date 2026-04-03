@@ -76,7 +76,42 @@ class Field:
 
 	func pretty_str(obj: Object) -> String:
 		return str(
-			util.get_or_default(obj, _TYPE_NAME_VARNAME, obj.get_class()), ".", name)
+			util.get_or_default(obj, _TYPE_NAME_VARNAME, obj.get_class()),
+			".",
+			name,
+		)
+
+
+const _REFCOUNTED_BLACKLIST: Array[String] = [
+	"RefCounted",
+	"script",
+	"Script Variables",
+	"__meta__",
+	"Built-in script",
+]
+const _NODE_BLACKLIST: Array[String] = [
+	"Node",
+	"name",
+	"unique_name_in_owner",
+	"scene_file_path",
+	"owner",
+	"multiplayer",
+	"Process",
+	"process_mode",
+	"process_priority",
+	"process_physics_priority",
+	"Thread Group",
+	"process_thread_group",
+	"process_thread_group_order",
+	"process_thread_messages",
+	"Physics Interpolation",
+	"physics_interpolation_mode",
+	"Auto Translate",
+	"auto_translate_mode",
+	"Editor Description",
+	"editor_description",
+	"script",
+]
 
 
 static func _create_obj_fields(obj: Object) -> Array[Field]:
@@ -90,23 +125,38 @@ static func _create_obj_fields(obj: Object) -> Array[Field]:
 				type.native_type = typeof(obj.get(name)) as Variant.Type
 			fields.push_back(Field.new(name, type))
 	else:
-		for item in obj.get_property_list():
-			var name: String = item["name"]
-			match name:
-				"RefCounted", "script", "Script Variables", "__meta__", "Built-in script":
-					continue
+		var blacklist: Array[String]
+		if obj is RefCounted:
+			blacklist = _REFCOUNTED_BLACKLIST
+		elif obj is Node:
+			blacklist = _NODE_BLACKLIST
+		else:
+			blacklist = []
+			for item in obj.get_property_list():
+				blacklist.push_back(item.name)
+			push_error(blacklist)
+			assert(false, str("Add ", obj, " blacklist"))
 
-			var native_type_: Variant.Type = item["type"]
+		for item in obj.get_property_list():
+			var name := StringName(str(item.name))
+			if name in blacklist:
+				continue
+			if name.contains("."):
+				continue
+			if obj.get(name) is Node:
+				continue
+
+			var native_type_: Variant.Type = item.type
 			fields.push_back(Field.native(name, native_type_))
 
 	for field in fields:
 		var name := field.name
 		var type := field.type
 		var default_value: Variant = obj.get(name)
-		
+
 		if field.type.is_implicitly_defined():
 			type.native_type = typeof(default_value) as Variant.Type
-		
+
 		assert(
 			not type.is_implicitly_defined(),
 			str(
@@ -115,7 +165,7 @@ static func _create_obj_fields(obj: Object) -> Array[Field]:
 				"'",
 			),
 		)
-		
+
 		assert(
 			util.has_member_nullable(obj, name),
 			str(
