@@ -10,7 +10,7 @@ func type_def() -> Dictionary:
 
 @export var take_control_on_ready := false
 
-@export var maybe_input: PlayerInput
+#@export var maybe_input: PlayerInput
 
 @export var base_speed := 5.0
 @export var sprint_speed := 20.0
@@ -18,9 +18,9 @@ func type_def() -> Dictionary:
 var look_origin := Vector2.ZERO
 
 
-func give_control(player_input: PlayerInput) -> void:
+func give_control() -> void:
 	look_origin = Vector2(rotation_degrees.x, rotation_degrees.y) - player_input.look
-	maybe_input = player_input
+	#maybe_input = player_input
 
 
 func _ready() -> void:

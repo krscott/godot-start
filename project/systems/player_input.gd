@@ -38,7 +38,7 @@ func _is_listening() -> bool:
 
 func _ready() -> void:
 	# Missing system asserts for debugging, but not actually required for logic
-	assert(replay_system)
+	#assert(replay_system)
 	assert(pause_menu_system)
 
 

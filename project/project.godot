@@ -22,6 +22,7 @@ constants="*uid://kyebjiac1qqb"
 signalbus="*uid://b2mmgrdlgnuf7"
 overlay="*res://autoload/overlay/overlay.tscn"
 gamestate="*uid://cp8fyt7psjvop"
+reinput="*uid://cckj6in5i8to3"
 
 [debug]
 
