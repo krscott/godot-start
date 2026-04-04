@@ -20,16 +20,6 @@ var key_type: Variant.Type
 var is_optional := false
 
 
-func _copy() -> Type:
-	var t := Type.new()
-	t.native_type = native_type
-	t.object_class = object_class
-	t.element_type = element_type
-	t.key_type = key_type
-	t.is_optional = is_optional
-	return t
-
-
 static func native(native_type_: Variant.Type) -> Type:
 	var t := Type.new()
 	t.native_type = native_type_
@@ -69,6 +59,16 @@ static func optional(type_: Type = null) -> Type:
 
 func is_implicitly_defined() -> bool:
 	return native_type == TYPE_NIL
+
+
+func _copy() -> Type:
+	var t := Type.new()
+	t.native_type = native_type
+	t.object_class = object_class
+	t.element_type = element_type
+	t.key_type = key_type
+	t.is_optional = is_optional
+	return t
 
 
 class Field:
