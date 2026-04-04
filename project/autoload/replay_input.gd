@@ -8,6 +8,7 @@ var _current_frame := { }
 var _seen_event_ids: Array[int] = []
 var _rng := RandomNumberGenerator.new()
 var _used_rng_this_frame := false
+var _registered_nodes := { }
 var _is_replaying := false
 
 
@@ -53,6 +54,9 @@ func _physics_process(_delta: float) -> void:
 		if _current_frame.has(&"events"):
 			for ev_data: Dictionary in _current_frame[&"events"]:
 				_fire_event(ev_data)
+		if _current_frame.has(&"signals"):
+			for sig_args: Array in _current_frame[&"signals"]:
+				_emit_signal.callv(sig_args)
 	else:
 		if _current_frame.is_empty():
 			print(null)
@@ -151,3 +155,23 @@ func rng() -> RandomNumberGenerator:
 			_current_frame[&"rng_state"] = _rng.state
 
 	return _rng
+
+
+func _emit_signal(node_name: StringName, ...emit_signal_args: Array) -> void:
+	var node: Node = _registered_nodes[node_name]
+	var err: Error = node.emit_signal.callv(emit_signal_args)
+	util.a_ok(err)
+
+
+func _on_signal(...emit_signal_args: Array) -> void:
+	print("============== ", emit_signal_args)
+	if not _is_replaying:
+		util.dict_get_or_add_array(_current_frame, &"signals").push_back(emit_signal_args)
+
+
+func connect_signal(node: Node, signal_name: StringName) -> void:
+	if _registered_nodes.has(node.name):
+		push_warning("Re-registering node: ", node)
+	_registered_nodes[node.name] = node
+
+	util.a_ok(node.connect(signal_name, _on_signal.bind(node.name, signal_name)))

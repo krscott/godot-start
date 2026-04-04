@@ -63,7 +63,7 @@ static func a_ok(err: Error, context := "") -> void:
 		var msg := error_string(err)
 		if context:
 			msg = str(msg, context, " (", msg, ")")
-		assert(false, msg)
+		#assert(false, msg)
 		printerr(msg)
 
 

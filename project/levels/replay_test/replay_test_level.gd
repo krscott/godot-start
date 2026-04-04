@@ -3,12 +3,17 @@ extends Node2D
 @onready var replay_status_label: Label = %ReplayStatus
 @onready var replay_size_label: Label = %ReplaySize
 @onready var rng_label: Label = %RngLabel
+@onready var buttons_container: Control = %ButtonsContainer
 
 
 func _ready() -> void:
 	assert(replay_status_label)
 	assert(replay_size_label)
 	assert(rng_label)
+	assert(buttons_container)
+
+	for btn: Button in buttons_container.get_children():
+		reinput.connect_signal(btn, &"pressed")
 
 
 func _physics_process(_delta: float) -> void:
