@@ -4,6 +4,7 @@ var _counter := 0
 
 
 func _ready() -> void:
+	reinput.connect_signal(self, &"pressed")
 	util.a_ok(pressed.connect(_on_click))
 
 
