@@ -43,7 +43,7 @@ func _generate() -> void:
 	for i in meshes.size():
 		_add_lib_mesh(ml, Vector3.RIGHT * i, meshes[i])
 
-	util.aok(ResourceSaver.save(ml, filepath))
+	util.a_ok(ResourceSaver.save(ml, filepath))
 
 
 class MeshBuilder:
@@ -55,9 +55,9 @@ class MeshBuilder:
 
 
 	func _add_point(vert: Vector3, normal: Vector3, uv: Vector2) -> void:
-		util.expect_false(verts.push_back(vert))
-		util.expect_false(normals.push_back(normal))
-		util.expect_false(uvs.push_back(uv))
+		util.a_false(verts.push_back(vert))
+		util.a_false(normals.push_back(normal))
+		util.a_false(uvs.push_back(uv))
 		size += 1
 
 
@@ -83,12 +83,12 @@ class MeshBuilder:
 		_add_point(p2, normal, uv2)
 		_add_point(p0 + dp1 + dp2, normal, uv0 + duv1 + duv2)
 
-		util.expect_false(indices.push_back(i + 0))
-		util.expect_false(indices.push_back(i + 1))
-		util.expect_false(indices.push_back(i + 2))
-		util.expect_false(indices.push_back(i + 2))
-		util.expect_false(indices.push_back(i + 1))
-		util.expect_false(indices.push_back(i + 3))
+		util.a_false(indices.push_back(i + 0))
+		util.a_false(indices.push_back(i + 1))
+		util.a_false(indices.push_back(i + 2))
+		util.a_false(indices.push_back(i + 2))
+		util.a_false(indices.push_back(i + 1))
+		util.a_false(indices.push_back(i + 3))
 
 
 	func add_tri(
@@ -110,9 +110,9 @@ class MeshBuilder:
 		_add_point(p1, normal, uv1)
 		_add_point(p2, normal, uv2)
 
-		util.expect_false(indices.push_back(i + 0))
-		util.expect_false(indices.push_back(i + 1))
-		util.expect_false(indices.push_back(i + 2))
+		util.a_false(indices.push_back(i + 0))
+		util.a_false(indices.push_back(i + 1))
+		util.a_false(indices.push_back(i + 2))
 
 
 	func build() -> ArrayMesh:

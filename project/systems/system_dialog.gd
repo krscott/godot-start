@@ -26,8 +26,8 @@ func file_dialog(
 		fd.add_filter(filter, description)
 	fd.popup_centered()
 
-	util.aok(fd.file_selected.connect(_on_completed))
-	util.aok(fd.canceled.connect(_on_completed))
+	util.a_ok(fd.file_selected.connect(_on_completed))
+	util.a_ok(fd.canceled.connect(_on_completed))
 
 	var filename: String = await completed
 

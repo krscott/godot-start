@@ -4,7 +4,7 @@
 class_name PersistGroup
 extends Node
 
-const gdserde_class := &"PersistGroup"
+const type_name := &"PersistGroup"
 
 @export var unique_state_key: String
 @export var group_name := &"persist"
@@ -29,9 +29,9 @@ func gdserde_serialize() -> Variant:
 	return _output
 
 
-func gdserde_deserialize(variant: Variant) -> gdserde.Result:
+func gdserde_deserialize(variant: Variant) -> Result:
 	if variant is not Dictionary:
-		return gdserde.Result.fail(util.msg_unexpected_type(TYPE_DICTIONARY, variant))
+		return Result.fail(util.msg_unexpected_type(TYPE_DICTIONARY, variant))
 	var dict: Dictionary = variant
 
 	assert(_keys.size() == _nodes.size())
@@ -43,13 +43,13 @@ func gdserde_deserialize(variant: Variant) -> gdserde.Result:
 			if is_instance_valid(node):
 				var res := gdserde.deserialize_object(node, value)
 				if res.err:
-					return gdserde.Result.fail("key '", key, "' ", res.err)
+					return res.context("key '", key, "'")
 			else:
 				var msg := str("Attempted to deserialize invalid instance: ", key)
 				assert(false, msg)
-				return gdserde.Result.fail(msg)
+				return Result.fail(msg)
 
-	return gdserde.Result.ok(self)
+	return Result.ok(self)
 
 
 func _ready() -> void:

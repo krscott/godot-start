@@ -45,5 +45,5 @@ func _ready() -> void:
 	assert(start_dialogue_button)
 	assert(dialogue_entry)
 
-	util.aok(start_dialogue_button.pressed.connect(dialogue_entry.start))
+	util.a_ok(start_dialogue_button.pressed.connect(dialogue_entry.start))
 	start_dialogue_button.grab_focus()

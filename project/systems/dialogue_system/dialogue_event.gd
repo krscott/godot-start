@@ -1,18 +1,15 @@
 class_name DialogueEvent
-const gdserde_class = &"DialogueEvent"
+const type_name = &"DialogueEvent"
 
 
-static func gdserde_fields() -> Array[gdserde.Field]:
-	return [
-		gdserde.Field.native(&"conds", TYPE_PACKED_STRING_ARRAY).optional(),
-		gdserde.Field.native(&"speaker", TYPE_STRING).optional(),
-		gdserde.Field.native(&"text", TYPE_PACKED_STRING_ARRAY).optional(),
-		gdserde.Field.native(&"next", TYPE_PACKED_STRING_ARRAY).optional(),
-		gdserde.Field.new(
-			&"choices",
-			gdserde.Spec.array(gdserde.Spec.object(DialogueChoice)),
-		).optional(),
-	]
+static func type_def() -> Dictionary:
+	return {
+		&"conds": Type.optional(),
+		&"speaker": Type.optional(),
+		&"text": Type.optional(),
+		&"next": Type.optional(),
+		&"choices": Type.optional(Type.array(Type.object(DialogueChoice))),
+	}
 
 
 var conds: PackedStringArray
@@ -23,14 +20,14 @@ var choices: Array[DialogueChoice]
 
 
 class DialogueCallback:
-	const gdserde_class = &"DialogueCallback"
+	const type_name = &"DialogueCallback"
 
 
-	static func gdserde_fields() -> Array[gdserde.Field]:
-		return [
-			gdserde.Field.native(&"name", TYPE_STRING),
-			gdserde.Field.native(&"args", TYPE_PACKED_STRING_ARRAY).optional(),
-		]
+	static func type_def() -> Dictionary:
+		return {
+			&"name": null,
+			&"args": Type.optional(),
+		}
 
 
 	var name: String
@@ -38,15 +35,15 @@ class DialogueCallback:
 
 
 class DialogueChoice:
-	const gdserde_class = &"DialogueChoice"
+	const type_name = &"DialogueChoice"
 
 
-	static func gdserde_fields() -> Array[gdserde.Field]:
-		return [
-			gdserde.Field.native(&"text", TYPE_STRING),
-			gdserde.Field.native(&"next", TYPE_STRING),
-			gdserde.Field.new(&"callback", gdserde.Spec.object(DialogueCallback)).optional(),
-		]
+	static func type_def() -> Dictionary:
+		return {
+			&"text": null,
+			&"next": null,
+			&"callback": Type.optional(Type.object(DialogueCallback)),
+		}
 
 
 	var text: String

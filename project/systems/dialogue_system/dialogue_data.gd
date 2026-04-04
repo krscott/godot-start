@@ -1,14 +1,11 @@
 class_name DialogueData
-const gdserde_class = &"DialogueData"
+const type_name = &"DialogueData"
 
 
-static func gdserde_fields() -> Array[gdserde.Field]:
-	return [
-		gdserde.Field.new(
-			&"events",
-			gdserde.Spec.dict(TYPE_STRING, gdserde.Spec.object(DialogueEvent)),
-		),
-	]
+static func type_def() -> Dictionary:
+	return {
+		&"events": Type.dict(TYPE_STRING, Type.object(DialogueEvent)),
+	}
 
 ## Dictionary[String, DialogueEvent]
 var events: Dictionary

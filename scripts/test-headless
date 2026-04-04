@@ -38,11 +38,16 @@ if command -v getopt &>/dev/null; then
     eval set -- "$PARSED"
 fi
 
-die() {
+fatal_usage() {
     echo "$*" >&2
     echo
     usage >&2
     exit 2
+}
+
+fatal() {
+    echo "$*" >&2
+    exit 1
 }
 
 log() {
@@ -54,11 +59,27 @@ log() {
     return 0
 }
 debug() {
-    [[ $verbose ]] && log "" "$@"
+    [[ -n ${verbose:-} ]] && log "" "$@"
     return 0
 }
 warn() { log "0;33" "$@"; }
 error() { log "0;31" "$@"; }
+
+print_match_blocks() {
+    local pattern="$1"
+    printf '%s\n' "$output" | awk -v pattern="$pattern" '
+        $0 ~ pattern {
+            print
+            if (getline > 0) {
+                print
+            }
+        }
+    ' >&2
+}
+
+require_cmd() {
+    command -v "$1" >/dev/null || fatal "Missing required command: $1"
+}
 
 verbose=
 timeout=1
@@ -70,12 +91,12 @@ while [[ $# -gt 0 ]]; do
         exit 0
         ;;
     -b | --binary)
-        [[ $# -lt 2 ]] && die "Option $1 requires an argument"
+        [[ $# -lt 2 ]] && fatal_usage "Option $1 requires an argument"
         binary="$2"
         shift
         ;;
     -t | --timeout)
-        [[ $# -lt 2 ]] && die "Option $1 requires an argument"
+        [[ $# -lt 2 ]] && fatal_usage "Option $1 requires an argument"
         timeout="$2"
         shift
         ;;
@@ -85,7 +106,7 @@ while [[ $# -gt 0 ]]; do
         break
         ;;
     -*)
-        die "Unknown option: $1"
+        fatal_usage "Unknown option: $1"
         ;;
     *)
         # Non-option argument, stop parsing
@@ -94,6 +115,8 @@ while [[ $# -gt 0 ]]; do
     esac
     shift
 done
+
+require_cmd timeout
 
 if [[ -z $binary ]]; then
     if ! bld --debug; then
@@ -104,22 +127,22 @@ if [[ -z $binary ]]; then
     binary="./build/godot-start-Linux/godot-start"
 fi
 
-[[ $verbose ]] && set -x
+debug "Running binary: $binary"
 
 # original stdout -> /dev/null, stderr -> new stdout
 output=$(timeout "$timeout" "$binary" --headless "$@" 2>&1 >/dev/null)
-
-set +x
 
 echo ""
 echo "$output"
 echo ""
 
-if echo "$output" | grep -q "^SCRIPT ERROR:"; then
+if printf '%s\n' "$output" | grep -q '^SCRIPT ERROR:'; then
+    print_match_blocks '^SCRIPT ERROR:'
     error "Failed: Script error"
     exit 1
 fi
-if echo "$output" | grep -q "^ERROR:"; then
+if printf '%s\n' "$output" | grep -q '^ERROR:'; then
+    print_match_blocks '^ERROR:'
     error "Failed: Error"
     exit 1
 fi

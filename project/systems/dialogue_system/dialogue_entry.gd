@@ -14,13 +14,8 @@ var _current_choices: Array[DialogueEvent.DialogueChoice] = []
 
 
 func _ready() -> void:
-	match util.parse_json_file(json_path):
-		[var data, OK]:
-			var res := gdserde.deserialize_object(_dialogue_data, data)
-			res.expect_ok()
-			#print(gdserde.serialize_object(_dialogue_data))
-		[_, var err]:
-			util.aok(util.as_err(err))
+	var data: Dictionary = util.parse_json_file(json_path).unwrap()
+	gdserde.deserialize_object(_dialogue_data, data).assert_ok()
 
 	if auto_start:
 		call_deferred(&"start")
@@ -31,7 +26,7 @@ func start() -> void:
 		stop()
 
 	_current_event_key = entry_name
-	util.aok(overlay.dialogue_layer.advanced.connect(_on_advance))
+	util.a_ok(overlay.dialogue_layer.advanced.connect(_on_advance))
 	_start_next_event()
 
 
@@ -84,7 +79,7 @@ func _start_next_event() -> void:
 	for choice in event.choices:
 		if _dialogue_data.check_condition(state, choice.next):
 			_current_choices.push_back(choice)
-			util.expect_false(choice_texts.push_back(choice.text))
+			util.a_false(choice_texts.push_back(choice.text))
 
 	overlay.dialogue_layer.render(speaker, text, choice_texts)
 

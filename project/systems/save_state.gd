@@ -25,7 +25,7 @@ func load_object_state(key: StringName, obj: Object) -> void:
 	if _savedata_state.has(key):
 		var dict: Dictionary = _savedata_state[key]
 		var res := gdserde.deserialize_object(obj, dict)
-		assert(not res.err, res.err)
+		assert(not res.err, res.msg)
 
 
 func sync_object_state(key: StringName, obj: Object) -> void:
@@ -36,7 +36,7 @@ func sync_object_state(key: StringName, obj: Object) -> void:
 		# Debug-only check for serde errors
 		var dict := gdserde.serialize_object(obj)
 		var res := gdserde.deserialize_object(obj, dict)
-		assert(not res.err, res.err)
+		assert(not res.err, res.msg)
 
 	_savedata_refs[key] = obj
 
@@ -46,11 +46,11 @@ func quicksave() -> void:
 
 
 func quickload() -> void:
-	util.aok(_deserialize_savedata(_quick_save))
+	util.a_ok(_deserialize_savedata(_quick_save))
 
 
 func reset() -> void:
-	util.aok(_deserialize_savedata(_quick_save_zero))
+	util.a_ok(_deserialize_savedata(_quick_save_zero))
 
 
 func save_to_file(filename: String) -> Error:
@@ -111,7 +111,7 @@ func _deserialize_savedata(packed_data: PackedByteArray) -> Error:
 			var obj: Object = _savedata_refs[k]
 			load_object_state(k, obj)
 		else:
-			util.expect_true(_savedata_refs.erase(k))
+			util.a_true(_savedata_refs.erase(k))
 
 	if OS.is_debug_build():
 		util.printdbg("Loaded savedata: ", JSON.stringify(_savedata_state))
@@ -127,7 +127,7 @@ func _serialize_savedata() -> PackedByteArray:
 			var obj: Object = _savedata_refs[k]
 			save_object_state(k, obj)
 		else:
-			util.expect_true(_savedata_refs.erase(k))
+			util.a_true(_savedata_refs.erase(k))
 
 	if OS.is_debug_build():
 		util.printdbg("Saved savedata: ", JSON.stringify(_savedata_state))

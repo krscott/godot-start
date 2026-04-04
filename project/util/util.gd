@@ -41,7 +41,7 @@ static func get_or_default(obj: Object, name: StringName, default: Variant) -> V
 static func safe_var_to_str(variant: Variant) -> String:
 	match typeof(variant):
 		# Add more types as necessary
-		TYPE_ARRAY:
+		TYPE_ARRAY, TYPE_OBJECT:
 			return str(variant)
 		_:
 			return var_to_str(variant)
@@ -58,7 +58,7 @@ static func get_field_names(obj: Object) -> Array[String]:
 	return out
 
 
-static func aok(err: Error, context := "") -> void:
+static func a_ok(err: Error, context := "") -> void:
 	if err:
 		var msg := error_string(err)
 		if context:
@@ -68,14 +68,14 @@ static func aok(err: Error, context := "") -> void:
 
 
 static func expect_ok(err: Error, context := "") -> void:
-	aok(err, context)
+	a_ok(err, context)
 
 
-static func expect_true(x: bool, context := "") -> void:
+static func a_true(x: bool, context := "") -> void:
 	assert(x, context)
 
 
-static func expect_false(x: bool, context := "") -> void:
+static func a_false(x: bool, context := "") -> void:
 	assert(not x, context)
 
 
@@ -120,15 +120,14 @@ static func as_err(x: Variant) -> Error:
 	return ERR_BUG
 
 
-## returns [Variant, Error]
-static func parse_json_file(path: String) -> Array:
+static func parse_json_file(path: String) -> Result:
 	var text := FileAccess.get_file_as_string(path)
 	if text == "":
-		return [null, FileAccess.get_open_error()]
+		return Result.error(FileAccess.get_open_error())
 	var data: Variant = JSON.parse_string(text)
 	if data == null:
-		return [null, ERR_PARSE_ERROR]
-	return [data, OK]
+		return Result.error(ERR_PARSE_ERROR)
+	return Result.ok(data)
 
 
 ## Print a stack previously captured with `get_stack()`
@@ -155,3 +154,19 @@ static func msg_unexpected_type(expected_type: Variant.Type, actual_value: Varia
 		": ",
 		util.safe_var_to_str(actual_value),
 	)
+
+
+static func transform_3d(
+		position: Vector3 = Vector3.ZERO,
+		rotation: Vector3 = Vector3.ZERO,
+		scale: Vector3 = Vector3.ONE,
+) -> Transform3D:
+	var base := Basis.from_euler(rotation)
+	base.x *= scale.x
+	base.y *= scale.y
+	base.z *= scale.z
+	return Transform3D(base, position)
+
+
+static func rand_index(arr: Array) -> int:
+	return randi_range(0, arr.size() - 1)

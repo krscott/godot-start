@@ -2,6 +2,7 @@
   archive ? false,
   debug ? false,
   preset ? "Linux",
+  disableWrapper ? false,
 
   callPackage,
   lib,
@@ -19,7 +20,7 @@ let
   strIf = b: flag: if b then flag else "";
 
   # NixOS and Web builds require wrapper
-  wrapper = (preset == "Linux" || preset == "Web") && !archive;
+  wrapper = !disableWrapper && (preset == "Linux" || preset == "Web") && !archive;
 
   archiveBuildInputs = [
     zip

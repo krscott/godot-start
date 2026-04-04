@@ -1,14 +1,18 @@
 class_name PlayerInput
 extends Node
 
-const gdserde_class := &"PlayerInput"
-const gdserde_props := [
-	&"look",
-	&"move",
-	&"sprint",
-	&"crouch",
-	&"jump",
-]
+const type_name := &"PlayerInput"
+
+
+func type_def() -> Dictionary:
+	return {
+		&"look": null,
+		&"move": null,
+		&"sprint": null,
+		&"crouch": null,
+		&"jump": null,
+	}
+
 
 @export var replay_system: ReplaySystem
 @export var pause_menu_system: PauseMenuSystem

@@ -19,7 +19,7 @@ func _ready() -> void:
 	assert(_speaker_label)
 	assert(_speaker_container)
 
-	util.aok(_advance_button.pressed.connect(_on_choice_selected.bind(0)))
+	util.a_ok(_advance_button.pressed.connect(_on_choice_selected.bind(0)))
 
 	_button_template.hide()
 	hide()
@@ -56,7 +56,7 @@ func render(speaker: String, text: Array[String], choices: Array[String]) -> voi
 			var choice := choices[i]
 			var btn: Button = _button_template.duplicate()
 			btn.text = choice
-			util.aok(btn.pressed.connect(_on_choice_selected.bind(i)))
+			util.a_ok(btn.pressed.connect(_on_choice_selected.bind(i)))
 			btn.show()
 			_choices_container.add_child(btn)
 			if i == 0:

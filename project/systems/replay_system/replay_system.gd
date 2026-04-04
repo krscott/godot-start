@@ -21,13 +21,13 @@ func _ready() -> void:
 	assert(system_dialog)
 	assert(replay)
 
-	util.aok(replay.load_frame.connect(_replay_load_frame))
-	util.aok(replay.request_frame.connect(_replay_save_frame))
+	util.a_ok(replay.load_frame.connect(_replay_load_frame))
+	util.a_ok(replay.request_frame.connect(_replay_save_frame))
 
 
 func _replay_load_frame(frame: Dictionary) -> void:
 	var res := gdserde.deserialize_object(player_input, frame)
-	assert(not res.err, res.err)
+	assert(not res.err, res.msg)
 	if not replay.is_active:
 		print("REPLAY DONE")
 		pause_menu_system.pause()
@@ -39,7 +39,7 @@ func _replay_save_frame() -> void:
 
 func _save_replay_and_quit() -> void:
 	if replay.enabled:
-		util.aok(replay.save_to_file("replay.dat"))
+		util.a_ok(replay.save_to_file("replay.dat"))
 
 	await get_tree().process_frame
 	get_tree().quit()
