@@ -117,6 +117,10 @@ static func _create_obj_fields(obj: Object) -> Array[Field]:
 		var props := obj.get_property_list()
 		var i := 0
 
+		# Skip all props through "script" (unless whitelisted)
+		# Would not be surprised if this breaks. Editor and non-editor builds have different props.
+		# https://xkcd.com/1172/
+
 		while i < props.size():
 			var name: String = props[i].name
 
