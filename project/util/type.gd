@@ -93,6 +93,14 @@ class Field:
 		)
 
 
+static func _is_valid_field_name(name: String) -> bool:
+	# e.g.
+	# "metadata/..."
+	# "Built-in script"
+	# "my_script.gd"
+	return not name.contains("/") and not name.contains("-") and not name.contains(".")
+
+
 static func _create_obj_fields(obj: Object) -> Array[Field]:
 	var fields: Array[Field] = []
 
@@ -123,12 +131,10 @@ static func _create_obj_fields(obj: Object) -> Array[Field]:
 
 			i += 1
 
-		i += 1 # Skip name of script
-
 		while i < props.size():
 			var name: String = props[i].name
 
-			if not name.contains("/") and obj.get(name) is not Node:
+			if _is_valid_field_name(name) and obj.get(name) is not Node:
 				var native_type_: Variant.Type = props[i].type
 				print("field: ", name)
 				fields.push_back(Field.native(name, native_type_))
