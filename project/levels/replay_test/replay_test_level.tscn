@@ -1,0 +1,82 @@
+[gd_scene format=3 uid="uid://syvehu8gn224"]
+
+[ext_resource type="Script" uid="uid://bhex23gtl0ryh" path="res://levels/replay_test/replay_test_level.gd" id="1_70cen"]
+[ext_resource type="Texture2D" uid="uid://co7fg4r4c84ai" path="res://icon.svg" id="2_cspc0"]
+[ext_resource type="Script" uid="uid://bu2q2x32c2nug" path="res://common/components/level_config.gd" id="2_oaplw"]
+[ext_resource type="Script" uid="uid://bf766n1a1nbyj" path="res://levels/replay_test/replay_test_player.gd" id="3_ovmws"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ovmws"]
+size = Vector2(116, 124)
+
+[sub_resource type="QuadMesh" id="QuadMesh_f475t"]
+size = Vector2(2000, 64)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_f475t"]
+size = Vector2(2000, 64)
+
+[sub_resource type="SphereMesh" id="SphereMesh_f475t"]
+radius = 32.0
+height = 64.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_majdy"]
+radius = 32.0
+
+[node name="ReplayTestLevel" type="Node2D" unique_id=557359395]
+script = ExtResource("1_70cen")
+
+[node name="LevelConfig" type="Node" parent="." unique_id=783266909]
+script = ExtResource("2_oaplw")
+skip_main_menu = true
+metadata/_custom_type_script = "uid://bu2q2x32c2nug"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=583752489]
+offset_right = 40.0
+offset_bottom = 94.0
+
+[node name="ReplayStatus" type="Label" parent="VBoxContainer" unique_id=960114536]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+
+[node name="ReplaySize" type="Label" parent="VBoxContainer" unique_id=16295502]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+
+[node name="Player" type="CharacterBody2D" parent="." unique_id=341099890]
+position = Vector2(590, 314)
+script = ExtResource("3_ovmws")
+
+[node name="Sprite2D" type="Sprite2D" parent="Player" unique_id=1694710613]
+texture = ExtResource("2_cspc0")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Player" unique_id=780895399]
+shape = SubResource("RectangleShape2D_ovmws")
+
+[node name="Floor" type="StaticBody2D" parent="." unique_id=1227404350]
+position = Vector2(608, 640)
+
+[node name="MeshInstance2D" type="MeshInstance2D" parent="Floor" unique_id=1417266184]
+position = Vector2(2, -4.172325e-06)
+mesh = SubResource("QuadMesh_f475t")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor" unique_id=406175458]
+shape = SubResource("RectangleShape2D_f475t")
+
+[node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=540451937]
+position = Vector2(896, 568)
+
+[node name="MeshInstance2D" type="MeshInstance2D" parent="StaticBody2D" unique_id=1653475214]
+mesh = SubResource("SphereMesh_f475t")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D" unique_id=1426704918]
+shape = SubResource("CircleShape2D_majdy")
+
+[node name="StaticBody2D2" type="StaticBody2D" parent="." unique_id=591942034]
+position = Vector2(704, 608)
+
+[node name="MeshInstance2D" type="MeshInstance2D" parent="StaticBody2D2" unique_id=756433808]
+mesh = SubResource("SphereMesh_f475t")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D2" unique_id=1786714707]
+shape = SubResource("CircleShape2D_majdy")

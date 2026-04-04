@@ -170,3 +170,24 @@ static func transform_3d(
 
 static func rand_index(arr: Array) -> int:
 	return randi_range(0, arr.size() - 1)
+
+
+## Get a sub-dictionary from a dictionary, or add a new one if it doesn't exist.
+## Preferred over `Dictionary.get_or_add` to save a temp object
+static func dict_get_or_add_dict(dict: Dictionary, key: Variant) -> Dictionary:
+	if dict.has(key):
+		return dict[key]
+
+	var out := { }
+	dict[key] = out
+	return out
+
+
+static func human_readable_byte_count(count: float) -> String:
+	if count < 1024:
+		return str(count, " B")
+	for s: String in ["KiB", "MiB", "GiB"]:
+		count /= 1024
+		if count < 1024:
+			return "%.1f %s" % [count, s]
+	return "%.1f TiB" % [count]

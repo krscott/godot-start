@@ -1,58 +1,86 @@
 extends Node
 
-## bit -> action mapping
-var _action_bits: Array[StringName] = []
-
-var _frame_count := 0
-
-
-class ReplayFrame:
-	const type_name := &"ReplayFrame"
+var _replay_tape := DataTape.new()
+var _current_frame := { }
+var _is_replaying := false
 
 
-	func type_def() -> Dictionary:
-		return {
-			&"just_pressed": Type.dict(TYPE_STRING_NAME, Type.native(TYPE_BOOL)),
-			&"pressed": Type.dict(TYPE_STRING_NAME, Type.native(TYPE_BOOL)),
-		}
+func is_replaying() -> bool:
+	return _is_replaying
 
 
-	var just_pressed: Dictionary
-	var pressed: Dictionary
+func start() -> void:
+	_replay_tape.rewind()
+	_is_replaying = true
+
+
+func stop() -> void:
+	_is_replaying = false
+
+
+func size() -> int:
+	return _replay_tape.size()
 
 
 func _physics_process(_delta: float) -> void:
-	_frame_count += 1
+	if _is_replaying and _replay_tape.done():
+		stop()
 
-
-func _set_packed_byte(dict: Dictionary, action: StringName, value: bool) -> bool:
-	if not value:
-		return false
-
-	@warning_ignore("integer_division")
-	var i := _frame_count / 8
-	var b := posmod(_frame_count, 8)
-
-	var buf: PackedByteArray
-	if action in dict:
-		buf = dict[action]
+	# TODO: Better compress empty frames?
+	if _is_replaying:
+		match _replay_tape.take():
+			null:
+				_current_frame.clear()
+			var d:
+				_current_frame = d
 	else:
-		buf = PackedByteArray()
-		dict[action] = buf
+		if _current_frame.is_empty():
+			print(null)
+			_replay_tape.append(null)
+		else:
+			print(_current_frame)
+			_replay_tape.append(_current_frame)
+		_current_frame.clear()
 
-	util.a_ok(buf.resize(i + 1))
 
-	var new_byte := buf.get(i) & (1 << b)
-	buf.set(i, new_byte)
+## (kind: StringName, action: StringName, value: T, zero: T) -> T
+func _poll(kind: StringName, action: StringName, value: Variant, zero: Variant) -> Variant:
+	assert(typeof(value) == typeof(zero))
+	if _is_replaying:
+		value = util.dict_get_or_add_dict(_current_frame, kind).get(action, zero)
+	elif value:
+		util.a_true(util.dict_get_or_add_dict(_current_frame, kind).set(action, value))
+	return value
 
-	return true
 
-	#func is_action_just_pressed(action: StringName) -> bool:
-	#return _set_packed_byte(
-	#_just_pressed, action, Input.is_action_just_pressed(action)
-	#)
-#
-#func is_action_pressed(action: StringName) -> bool:\
-#return _set_packed_byte(
-#_pressed, action, Input.is_action_just_pressed(action)
-#)
+func is_action_just_pressed(action: StringName) -> bool:
+	return _poll(&"just_pressed", action, Input.is_action_just_pressed(action), false)
+
+
+func is_action_pressed(action: StringName) -> bool:
+	return _poll(&"pressed", action, Input.is_action_pressed(action), false)
+
+
+func get_axis(negative_action: StringName, positive_action: StringName) -> float:
+	# TODO: more efficient way to find action key
+	var action := str(negative_action, ",", positive_action)
+
+	return _poll(&"axis", action, Input.get_axis(negative_action, positive_action), 0.0)
+
+
+func get_vector(
+		negative_x: StringName,
+		positive_x: StringName,
+		negative_y: StringName,
+		positive_y: StringName,
+		deadzone: float = -1.0,
+) -> Vector2:
+	# TODO: more efficient way to find action key
+	var action := str(negative_x, ",", positive_x, ",", negative_y, ",", positive_y)
+
+	return _poll(
+		&"vector",
+		action,
+		Input.get_vector(negative_x, positive_x, negative_y, positive_y, deadzone),
+		Vector2.ZERO,
+	)
