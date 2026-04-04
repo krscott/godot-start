@@ -38,11 +38,19 @@ offset_bottom = 94.0
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
+text = "status"
 
 [node name="ReplaySize" type="Label" parent="VBoxContainer" unique_id=16295502]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
+text = "bytes"
+
+[node name="RngLabel" type="Label" parent="VBoxContainer" unique_id=174117088]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Waiting for click..."
 
 [node name="Player" type="CharacterBody2D" parent="." unique_id=341099890]
 position = Vector2(590, 314)

@@ -1,14 +1,20 @@
 extends Node
 
+# Arbitrary value
+var _rng_seed := hash("replay input")
+
 var _replay_tape := DataTape.new()
 var _current_frame := { }
 var _seen_event_ids: Array[int] = []
+var _rng := RandomNumberGenerator.new()
+var _used_rng_this_frame := false
 var _is_replaying := false
 
 
 func _clear_frame() -> void:
 	_current_frame.clear()
 	_seen_event_ids.clear()
+	_used_rng_this_frame = false
 
 
 func is_replaying() -> bool:
@@ -26,6 +32,10 @@ func stop() -> void:
 
 func size() -> int:
 	return _replay_tape.size()
+
+
+func _ready() -> void:
+	_rng.seed = _rng_seed
 
 
 func _physics_process(_delta: float) -> void:
@@ -62,6 +72,10 @@ func _poll(kind: StringName, action: StringName, value: Variant, zero: Variant) 
 	elif value:
 		util.a_true(util.dict_get_or_add_dict(_current_frame, kind).set(action, value))
 	return value
+
+
+func is_action_just_released(action: StringName) -> bool:
+	return _poll(&"just_released", action, Input.is_action_just_released(action), false)
 
 
 func is_action_just_pressed(action: StringName) -> bool:
@@ -121,3 +135,19 @@ func event(ev: InputEvent, props: Array[StringName]) -> void:
 			for prop in props:
 				ev_data[prop] = ev.get(prop)
 			util.dict_get_or_add_array(_current_frame, &"events").push_back(ev_data)
+
+
+func rng() -> RandomNumberGenerator:
+	assert(_rng.seed == _rng_seed, "Client code is not allowed to change RNG seed")
+
+	if _is_replaying:
+		if _current_frame.has(&"rng_state"):
+			_rng.state = _current_frame[&"rng_state"]
+		else:
+			push_warning("Unexpected RNG call in replay")
+	else:
+		if not _used_rng_this_frame:
+			_used_rng_this_frame = true
+			_current_frame[&"rng_state"] = _rng.state
+
+	return _rng
