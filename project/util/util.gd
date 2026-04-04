@@ -168,7 +168,9 @@ static func transform_3d(
 	return Transform3D(base, position)
 
 
-static func rand_index(arr: Array) -> int:
+static func rand_index(arr: Array, rng: RandomNumberGenerator = null) -> int:
+	if rng:
+		return rng.randi_range(0, arr.size() - 1)
 	return randi_range(0, arr.size() - 1)
 
 
