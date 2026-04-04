@@ -176,9 +176,22 @@ static func rand_index(arr: Array) -> int:
 ## Preferred over `Dictionary.get_or_add` to save a temp object
 static func dict_get_or_add_dict(dict: Dictionary, key: Variant) -> Dictionary:
 	if dict.has(key):
+		assert(dict[key] is Dictionary)
 		return dict[key]
 
 	var out := { }
+	dict[key] = out
+	return out
+
+
+## Get an array from a dictionary, or add a new one if it doesn't exist.
+## Preferred over `Dictionary.get_or_add` to save a temp object
+static func dict_get_or_add_array(dict: Dictionary, key: Variant) -> Array:
+	if dict.has(key):
+		assert(dict[key] is Array)
+		return dict[key]
+
+	var out := []
 	dict[key] = out
 	return out
 

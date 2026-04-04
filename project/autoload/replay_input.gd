@@ -2,7 +2,13 @@ extends Node
 
 var _replay_tape := DataTape.new()
 var _current_frame := { }
+var _seen_event_ids: Array[int] = []
 var _is_replaying := false
+
+
+func _clear_frame() -> void:
+	_current_frame.clear()
+	_seen_event_ids.clear()
 
 
 func is_replaying() -> bool:
@@ -30,9 +36,13 @@ func _physics_process(_delta: float) -> void:
 	if _is_replaying:
 		match _replay_tape.take():
 			null:
-				_current_frame.clear()
+				_clear_frame()
 			var d:
 				_current_frame = d
+
+		if _current_frame.has(&"events"):
+			for ev_data: Dictionary in _current_frame[&"events"]:
+				_fire_event(ev_data)
 	else:
 		if _current_frame.is_empty():
 			print(null)
@@ -40,9 +50,10 @@ func _physics_process(_delta: float) -> void:
 		else:
 			print(_current_frame)
 			_replay_tape.append(_current_frame)
-		_current_frame.clear()
+		_clear_frame()
 
 
+# TODO: Use an enum for kind
 ## (kind: StringName, action: StringName, value: T, zero: T) -> T
 func _poll(kind: StringName, action: StringName, value: Variant, zero: Variant) -> Variant:
 	assert(typeof(value) == typeof(zero))
@@ -84,3 +95,29 @@ func get_vector(
 		Input.get_vector(negative_x, positive_x, negative_y, positive_y, deadzone),
 		Vector2.ZERO,
 	)
+
+
+func _fire_event(ev_data: Dictionary) -> void:
+	var class_name_: StringName = ev_data[&".class"]
+	var ev: InputEvent = ClassDB.instantiate(class_name_)
+	for k: StringName in ev_data:
+		if not k.begins_with("."):
+			ev.set(k, ev_data[k])
+	Input.parse_input_event(ev)
+
+
+func event(ev: InputEvent, props: Array[StringName]) -> void:
+	if _is_replaying:
+		# Do nothing
+		pass
+	else:
+		var id := ev.get_instance_id()
+		if not _seen_event_ids.has(id):
+			_seen_event_ids.push_back(id)
+
+			var ev_data := {
+				&".class": ev.get_class(),
+			}
+			for prop in props:
+				ev_data[prop] = ev.get(prop)
+			util.dict_get_or_add_array(_current_frame, &"events").push_back(ev_data)
