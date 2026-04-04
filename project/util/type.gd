@@ -3,9 +3,12 @@ class_name Type
 const _TYPE_NAME_VARNAME := &"type_name"
 const _TYPE_DEF_FUNCNAME := &"type_def"
 
-static var _field_list_cache := {
-	&"Node3D": [Field.native(&"transform", TYPE_TRANSFORM3D)],
-}
+static var _field_list_cache := { }
+
+const _native_field_whitelist: Array[StringName] = [
+	&"transform",
+	# Add more as needed
+]
 
 var native_type: Variant.Type
 var object_class: GDScript
@@ -105,20 +108,31 @@ static func _create_obj_fields(obj: Object) -> Array[Field]:
 	else:
 		var props := obj.get_property_list()
 		var i := 0
+
 		while i < props.size():
-			if props[i].name == "script":
+			var name: String = props[i].name
+
+			if name == "script":
 				i += 1
 				break
+
+			if name in _native_field_whitelist:
+				var native_type_: Variant.Type = props[i].type
+				print("field: ", name)
+				fields.push_back(Field.native(name, native_type_))
+
 			i += 1
 
 		i += 1 # Skip name of script
 
 		while i < props.size():
 			var name: String = props[i].name
+
 			if not name.contains("/") and obj.get(name) is not Node:
 				var native_type_: Variant.Type = props[i].type
 				print("field: ", name)
 				fields.push_back(Field.native(name, native_type_))
+
 			i += 1
 
 	for field in fields:
@@ -177,41 +191,29 @@ static func _get_type_name(obj: Object) -> StringName:
 	return name
 
 
+static func _get_or_update_cached_fields(obj: Object, type_name: StringName) -> Array[Field]:
+	var fields: Array[Field] = []
+	if _field_list_cache.has(type_name):
+		var arr: Array = _field_list_cache[type_name]
+		fields.assign(arr)
+	else:
+		print("Caching type '", type_name, "' based on obj: ", obj)
+		fields = _create_obj_fields(obj)
+		_field_list_cache[type_name] = fields
+	return fields
+
+
 static func get_fields(obj: Object) -> Array[Field]:
 	assert(obj)
-	var fields: Array[Field] = []
 
 	if obj.get_script():
 		match _get_type_name(obj):
 			&"":
 				push_warning("Unoptimized class: ", obj, " : ", obj.get_script().resource_path)
-				fields = _create_obj_fields(obj)
+				return _create_obj_fields(obj)
 			var x:
 				var type_name: StringName = x
-				if _field_list_cache.has(type_name):
-					var arr: Array = _field_list_cache[type_name]
-					fields.assign(arr)
-				else:
-					print("Caching type '", type_name, "' based on obj: ", obj)
-					fields = _create_obj_fields(obj)
-					_field_list_cache[type_name] = fields
+				return _get_or_update_cached_fields(obj, type_name)
 
-	else:
-		var obj_class := StringName(obj.get_class())
-		while obj_class and not _field_list_cache.has(obj_class):
-			obj_class = ClassDB.get_parent_class(obj_class)
-		if _field_list_cache.has(obj_class):
-			var arr: Array = _field_list_cache[obj_class]
-			fields.assign(arr)
-		else:
-			assert(
-				false,
-				str(
-					"Unhandled class, add to gdserde._field_list_cache: '",
-					obj_class,
-					"'",
-				),
-			)
-			fields = _create_obj_fields(obj)
-
-	return fields
+	var obj_class := StringName(obj.get_class())
+	return _get_or_update_cached_fields(obj, obj_class)
