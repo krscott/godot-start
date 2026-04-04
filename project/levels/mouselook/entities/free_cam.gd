@@ -1,7 +1,7 @@
 class_name FreeCam
 extends Camera3D
 
-const gdserde_class := &"FreeCam"
+const type_name := &"FreeCam"
 const gdserde_props := [&"transform"]
 
 @export var take_control_on_ready := false

@@ -1,5 +1,5 @@
 class_name DialogueEvent
-const gdserde_class = &"DialogueEvent"
+const type_name = &"DialogueEvent"
 
 
 static func type_def() -> Dictionary:
@@ -20,7 +20,7 @@ var choices: Array[DialogueChoice]
 
 
 class DialogueCallback:
-	const gdserde_class = &"DialogueCallback"
+	const type_name = &"DialogueCallback"
 
 
 	static func type_def() -> Dictionary:
@@ -35,7 +35,7 @@ class DialogueCallback:
 
 
 class DialogueChoice:
-	const gdserde_class = &"DialogueChoice"
+	const type_name = &"DialogueChoice"
 
 
 	static func type_def() -> Dictionary:

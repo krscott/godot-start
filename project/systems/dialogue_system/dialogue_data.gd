@@ -1,5 +1,5 @@
 class_name DialogueData
-const gdserde_class = &"DialogueData"
+const type_name = &"DialogueData"
 
 
 static func type_def() -> Dictionary:

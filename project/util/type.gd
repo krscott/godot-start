@@ -90,38 +90,6 @@ class Field:
 		)
 
 
-const _REFCOUNTED_BLACKLIST: Array[String] = [
-	"RefCounted",
-	"script",
-	"Script Variables",
-	"__meta__",
-	"Built-in script",
-]
-const _NODE_BLACKLIST: Array[String] = [
-	"Node",
-	"name",
-	"unique_name_in_owner",
-	"scene_file_path",
-	"owner",
-	"multiplayer",
-	"Process",
-	"process_mode",
-	"process_priority",
-	"process_physics_priority",
-	"Thread Group",
-	"process_thread_group",
-	"process_thread_group_order",
-	"process_thread_messages",
-	"Physics Interpolation",
-	"physics_interpolation_mode",
-	"Auto Translate",
-	"auto_translate_mode",
-	"Editor Description",
-	"editor_description",
-	"script",
-]
-
-
 static func _create_obj_fields(obj: Object) -> Array[Field]:
 	var fields: Array[Field] = []
 
@@ -135,29 +103,23 @@ static func _create_obj_fields(obj: Object) -> Array[Field]:
 				type.native_type = typeof(obj.get(name)) as Variant.Type
 			fields.push_back(Field.new(name, type))
 	else:
-		var blacklist: Array[String]
-		if obj is RefCounted:
-			blacklist = _REFCOUNTED_BLACKLIST
-		elif obj is Node:
-			blacklist = _NODE_BLACKLIST
-		else:
-			blacklist = []
-			for item in obj.get_property_list():
-				blacklist.push_back(item.name)
-			push_error(blacklist)
-			assert(false, str("Add ", obj, " blacklist"))
+		var props := obj.get_property_list()
+		var i := 0
+		while i < props.size():
+			if props[i].name == "script":
+				i += 1
+				break
+			i += 1
 
-		for item in obj.get_property_list():
-			var name := StringName(str(item.name))
-			if name in blacklist:
-				continue
-			if name.contains("."):
-				continue
-			if obj.get(name) is Node:
-				continue
+		i += 1 # Skip name of script
 
-			var native_type_: Variant.Type = item.type
-			fields.push_back(Field.native(name, native_type_))
+		while i < props.size():
+			var name: String = props[i].name
+			if not name.contains("/") and obj.get(name) is not Node:
+				var native_type_: Variant.Type = props[i].type
+				print("field: ", name)
+				fields.push_back(Field.native(name, native_type_))
+			i += 1
 
 	for field in fields:
 		var name := field.name
@@ -205,14 +167,24 @@ static func _create_obj_fields(obj: Object) -> Array[Field]:
 	return fields
 
 
+static func _get_type_name(obj: Object) -> StringName:
+	var name: Variant = obj.get(_TYPE_NAME_VARNAME)
+	if not name:
+		name = obj.get_script().resource_path
+	if not name:
+		# e.g. internally defined `class`es
+		name = &""
+	return name
+
+
 static func get_fields(obj: Object) -> Array[Field]:
 	assert(obj)
 	var fields: Array[Field] = []
 
 	if obj.get_script():
-		match obj.get(_TYPE_NAME_VARNAME):
-			null:
-				push_warning("Unoptimized class: ", obj)
+		match _get_type_name(obj):
+			&"":
+				push_warning("Unoptimized class: ", obj, " : ", obj.get_script().resource_path)
 				fields = _create_obj_fields(obj)
 			var x:
 				var type_name: StringName = x
@@ -220,6 +192,7 @@ static func get_fields(obj: Object) -> Array[Field]:
 					var arr: Array = _field_list_cache[type_name]
 					fields.assign(arr)
 				else:
+					print("Caching type '", type_name, "' based on obj: ", obj)
 					fields = _create_obj_fields(obj)
 					_field_list_cache[type_name] = fields
 
@@ -231,7 +204,14 @@ static func get_fields(obj: Object) -> Array[Field]:
 			var arr: Array = _field_list_cache[obj_class]
 			fields.assign(arr)
 		else:
-			assert(false, str("Unhandled class, add to gdserde._field_list_cache: ", obj_class))
+			assert(
+				false,
+				str(
+					"Unhandled class, add to gdserde._field_list_cache: '",
+					obj_class,
+					"'",
+				),
+			)
 			fields = _create_obj_fields(obj)
 
 	return fields

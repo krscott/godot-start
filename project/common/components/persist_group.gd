@@ -4,7 +4,7 @@
 class_name PersistGroup
 extends Node
 
-const gdserde_class := &"PersistGroup"
+const type_name := &"PersistGroup"
 
 @export var unique_state_key: String
 @export var group_name := &"persist"
