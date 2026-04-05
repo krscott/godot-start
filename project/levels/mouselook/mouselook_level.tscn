@@ -29,6 +29,7 @@ albedo_color = Color(0, 0, 0, 1)
 
 [node name="LevelConfig" type="Node" parent="." unique_id=437031246]
 script = ExtResource("1_am13w")
+record_replay = true
 mouse_capture = true
 skip_main_menu = true
 metadata/_custom_type_script = "uid://bu2q2x32c2nug"
