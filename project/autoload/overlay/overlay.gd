@@ -2,8 +2,6 @@ extends Node
 
 @onready var _save_state: SaveState = %SaveState
 @onready var pause_menu_system: PauseMenuSystem = %PauseMenuSystem
-#@onready var _replay_system: ReplaySystem = %ReplaySystem
-#@onready var player_input: PlayerInput = %PlayerInput
 @onready var stretch_filter: CanvasLayer = %StretchFilter
 @onready var dialogue_layer: DialogueLayer = %DialogueLayer
 
@@ -19,14 +17,10 @@ func sync_object_state(key: StringName, obj: Object) -> void:
 func _ready() -> void:
 	assert(_save_state)
 	assert(pause_menu_system)
-	#assert(_replay_system)
-	#assert(player_input)
 	assert(stretch_filter)
 	assert(dialogue_layer)
 
 	util.printdbg("DEBUG BUILD")
-
-	#sync_object_state(&"player_input", player_input)
 
 	var args := OS.get_cmdline_user_args()
 	if args:
