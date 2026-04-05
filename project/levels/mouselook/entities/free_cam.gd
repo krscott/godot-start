@@ -17,6 +17,11 @@ static func type_def() -> Dictionary:
 
 
 func _physics_process(delta: float) -> void:
+	# TODO: Remove
+	if Input.is_action_just_pressed("replay_reload"):
+		reinput.start()
+		util.a_ok(get_tree().reload_current_scene())
+
 	if enabled:
 		var updown := reinput.get_axis("crouch", "jump")
 
@@ -31,14 +36,17 @@ func _physics_process(delta: float) -> void:
 			"move_backward",
 		)
 
+		rotation_degrees = reinput.get_custom(&"free_cam_rotation", rotation_degrees, Vector3.ZERO)
+
 		var direction := (
-			transform.basis * Vector3(move.x, 0, move.y) + Vector3(0, updown, 0) ).normalized()
+			transform.basis * Vector3(move.x, 0, move.y) + Vector3(0, updown, 0)
+		).normalized()
 
 		position += direction * distance
 
 
 func _input(event: InputEvent) -> void:
-	if enabled and event is InputEventMouseMotion and reinput.event(event, [&"relative"]):
+	if enabled and not reinput.is_replaying() and event is InputEventMouseMotion:
 		var ev: InputEventMouseMotion = event
 		var look := Vector2(rotation_degrees.x, rotation_degrees.y)
 
