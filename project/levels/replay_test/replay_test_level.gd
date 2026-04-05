@@ -4,6 +4,8 @@ extends Node2D
 @onready var replay_size_label: Label = %ReplaySize
 @onready var rng_label: Label = %RngLabel
 
+var _mouse_pressed := false
+
 
 func _ready() -> void:
 	assert(replay_status_label)
@@ -22,10 +24,13 @@ func _physics_process(_delta: float) -> void:
 		reinput.start()
 		util.a_ok(get_tree().reload_current_scene())
 
+	if reinput.get_custom(&"pick_random_number", _mouse_pressed, false):
+		_mouse_pressed = false
+		rng_label.text = str(reinput.rng().randi())
+
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		var ev: InputEventMouseButton = event
 		if ev.button_index == MouseButton.MOUSE_BUTTON_LEFT and ev.pressed:
-			if reinput.event(ev, [&"button_index", &"pressed"]):
-				rng_label.text = str(reinput.rng().randi())
+			_mouse_pressed = true

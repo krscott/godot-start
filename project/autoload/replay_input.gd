@@ -5,7 +5,6 @@ var _rng_seed := hash("replay input")
 
 var _replay_tape := DataTape.new()
 var _current_frame := { }
-var _last_seen_event_id := -1
 var _rng := RandomNumberGenerator.new()
 var _used_rng_this_frame := false
 var _registered_signal_nodes := { }
@@ -15,7 +14,6 @@ var _is_replaying := false
 
 func _clear_frame() -> void:
 	_current_frame.clear()
-	_last_seen_event_id = -1
 	_used_rng_this_frame = false
 
 
@@ -54,9 +52,6 @@ func _physics_process(_delta: float) -> void:
 			var d:
 				_current_frame = d
 
-		if _current_frame.has(&"events"):
-			for ev_data: Dictionary in _current_frame[&"events"]:
-				_fire_event(ev_data)
 		if _current_frame.has(&"signals"):
 			for sig_args: Array in _current_frame[&"signals"]:
 				_emit_signal.callv(sig_args)
@@ -124,52 +119,6 @@ func get_vector(
 
 func get_custom(action: StringName, value: Variant, zero: Variant) -> Variant:
 	return _poll(&"custom", action, value, zero)
-
-#==========
-#  Events
-#==========
-
-
-func _fire_event(ev_data: Dictionary) -> void:
-	var class_name_: StringName = ev_data[&".class"]
-	var ev: InputEvent = ClassDB.instantiate(class_name_)
-	for k: StringName in ev_data:
-		if not k.begins_with("."):
-			ev.set(k, ev_data[k])
-
-	ev.set_meta(&"replay_counter", ev_data[&".count"])
-	Input.parse_input_event(ev)
-
-
-func event(ev: InputEvent, props: Array[StringName]) -> bool:
-	var allow_event := true
-
-	if _is_replaying:
-		var replay_counter: int = ev.get_meta(&"replay_counter", 0)
-		print(replay_counter)
-		print(ev)
-		if replay_counter > 0:
-			ev.set_meta(&"replay_counter", replay_counter - 1)
-		else:
-			allow_event = false
-
-	else:
-		var id := ev.get_instance_id()
-		if _last_seen_event_id != id:
-			_last_seen_event_id = id
-
-			var ev_data := {
-				&".class": ev.get_class(),
-				&".count": 1,
-			}
-			for prop in props:
-				ev_data[prop] = ev.get(prop)
-			util.dict_get_or_add_array(_current_frame, &"events").push_back(ev_data)
-		else:
-			var events: Array = _current_frame[&"events"]
-			events[-1][&".count"] += 1
-
-	return allow_event
 
 #==========
 #   RNG
