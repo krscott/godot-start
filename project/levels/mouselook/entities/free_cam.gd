@@ -23,13 +23,14 @@ func _physics_process(delta: float) -> void:
 		util.a_ok(get_tree().reload_current_scene())
 
 	if enabled:
-		var updown := reinput.get_axis("crouch", "jump")
+		# Explicitly typed due to https://github.com/godotengine/godot/issues/114422
+		var updown: float = reinput.get_axis("crouch", "jump")
 
 		var distance := base_speed * delta
 		if reinput.is_action_pressed("sprint"):
 			distance = sprint_speed * delta
 
-		var move := reinput.get_vector(
+		var move: Vector2 = reinput.get_vector(
 			"move_left",
 			"move_right",
 			"move_forward",
