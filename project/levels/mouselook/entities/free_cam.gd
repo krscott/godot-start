@@ -4,51 +4,47 @@ extends Camera3D
 const type_name := &"FreeCam"
 
 
-func type_def() -> Dictionary:
+static func type_def() -> Dictionary:
 	return { &"transform": null }
 
 
-@export var take_control_on_ready := false
-
-#@export var maybe_input: PlayerInput
-
+@export var enabled := true
 @export var base_speed := 5.0
 @export var sprint_speed := 20.0
-
-var look_origin := Vector2.ZERO
-
-
-func give_control() -> void:
-	look_origin = Vector2(rotation_degrees.x, rotation_degrees.y) - player_input.look
-	#maybe_input = player_input
-
-
-func _ready() -> void:
-	if take_control_on_ready:
-		give_control(overlay.player_input)
+@export var sensitivity := 0.2
+@export var min_angle := -90.0
+@export var max_angle := 90
 
 
 func _physics_process(delta: float) -> void:
-	if maybe_input:
-		var updown := 0.0
-		if maybe_input.jump:
-			updown += 1.0
-		if maybe_input.crouch:
-			updown -= 1.0
+	if enabled:
+		var updown := reinput.get_axis("crouch", "jump")
 
-		var speed := base_speed * delta
-		if maybe_input.sprint:
-			speed = sprint_speed * delta
+		var distance := base_speed * delta
+		if reinput.is_action_pressed("sprint"):
+			distance = sprint_speed * delta
+
+		var move := reinput.get_vector(
+			"move_left",
+			"move_right",
+			"move_forward",
+			"move_backward",
+		)
 
 		var direction := (
-			transform.basis * Vector3(maybe_input.move.x, 0, maybe_input.move.y)
-			+ Vector3(0, updown, 0)
-		).normalized()
+			transform.basis * Vector3(move.x, 0, move.y) + Vector3(0, updown, 0) ).normalized()
 
-		position += direction * speed
+		position += direction * distance
 
 
-func _process(_delta: float) -> void:
-	if maybe_input:
-		rotation_degrees.x = maybe_input.look.x + look_origin.x
-		rotation_degrees.y = maybe_input.look.y + look_origin.y
+func _input(event: InputEvent) -> void:
+	if enabled and event is InputEventMouseMotion and reinput.event(event, [&"relative"]):
+		var ev: InputEventMouseMotion = event
+		var look := Vector2(rotation_degrees.x, rotation_degrees.y)
+
+		look.y -= (ev.relative.x * sensitivity)
+		look.x -= (ev.relative.y * sensitivity)
+		look.x = clamp(look.x, min_angle, max_angle)
+
+		rotation_degrees.x = look.x
+		rotation_degrees.y = look.y
