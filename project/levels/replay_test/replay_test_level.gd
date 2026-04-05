@@ -26,7 +26,7 @@ func _physics_process(_delta: float) -> void:
 
 	if reinput.get_custom(&"pick_random_number", _mouse_pressed, false):
 		_mouse_pressed = false
-		var _throwaway := reinput.rng().randi() # skip one
+		var _throwaway: int = reinput.rng().randi() # skip one
 		rng_label.text = str(reinput.rng().randi())
 
 
