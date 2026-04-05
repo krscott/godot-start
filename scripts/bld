@@ -157,7 +157,11 @@ EOS
 }
 
 run_godot() {
-    output=$(run godot --headless "$@" 2>&1 | tee /dev/stderr)
+    local output_file
+    output_file=$(mktemp)
+    trap 'rm -f "$output_file"' RETURN
+    run godot --headless "$@" > >(tee "$output_file" >&2) 2>&1
+    output=$(<"$output_file")
     if printf '%s\n' "$output" | grep -q '^SCRIPT ERROR:'; then
         error "Failed: Script error"
         print_match_blocks '^SCRIPT ERROR:'
