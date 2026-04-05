@@ -29,7 +29,9 @@ albedo_color = Color(0, 0, 0, 1)
 
 [node name="LevelConfig" type="Node" parent="." unique_id=437031246]
 script = ExtResource("1_am13w")
+record_replay = true
 mouse_capture = true
+skip_main_menu = true
 metadata/_custom_type_script = "uid://bu2q2x32c2nug"
 
 [node name="PersistGroup" type="Node" parent="." unique_id=821707653]
@@ -47,7 +49,6 @@ transform = Transform3D(0.9182944, 0.3015499, -0.25652108, -3.72529e-08, 0.64794
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 3, 1, 0)
 current = true
 script = ExtResource("2_am13w")
-take_control_on_ready = true
 metadata/_custom_type_script = "uid://dfati240tvaw1"
 
 [node name="Debug" type="Node3D" parent="." unique_id=132809176]

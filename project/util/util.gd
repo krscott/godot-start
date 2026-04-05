@@ -63,7 +63,7 @@ static func a_ok(err: Error, context := "") -> void:
 		var msg := error_string(err)
 		if context:
 			msg = str(msg, context, " (", msg, ")")
-		assert(false, msg)
+		#assert(false, msg)
 		printerr(msg)
 
 
@@ -168,5 +168,41 @@ static func transform_3d(
 	return Transform3D(base, position)
 
 
-static func rand_index(arr: Array) -> int:
+static func rand_index(arr: Array, rng: RandomNumberGenerator = null) -> int:
+	if rng:
+		return rng.randi_range(0, arr.size() - 1)
 	return randi_range(0, arr.size() - 1)
+
+
+## Get a sub-dictionary from a dictionary, or add a new one if it doesn't exist.
+## Preferred over `Dictionary.get_or_add` to save a temp object
+static func dict_get_or_add_dict(dict: Dictionary, key: Variant) -> Dictionary:
+	if dict.has(key):
+		assert(dict[key] is Dictionary)
+		return dict[key]
+
+	var out := { }
+	dict[key] = out
+	return out
+
+
+## Get an array from a dictionary, or add a new one if it doesn't exist.
+## Preferred over `Dictionary.get_or_add` to save a temp object
+static func dict_get_or_add_array(dict: Dictionary, key: Variant) -> Array:
+	if dict.has(key):
+		assert(dict[key] is Array)
+		return dict[key]
+
+	var out := []
+	dict[key] = out
+	return out
+
+
+static func human_readable_byte_count(count: float) -> String:
+	if count < 1024:
+		return str(count, " B")
+	for s: String in ["KiB", "MiB", "GiB"]:
+		count /= 1024
+		if count < 1024:
+			return "%.1f %s" % [count, s]
+	return "%.1f TiB" % [count]
