@@ -69,6 +69,10 @@ func _physics_process(_delta: float) -> void:
 			_replay_tape.append(_current_frame)
 		_clear_frame()
 
+#==========
+# Polling
+#==========
+
 
 # TODO: Use an enum for kind
 ## (kind: StringName, action: StringName, value: T, zero: T) -> T
@@ -121,6 +125,10 @@ func get_vector(
 func get_custom(action: StringName, value: Variant, zero: Variant) -> Variant:
 	return _poll(&"custom", action, value, zero)
 
+#==========
+#  Events
+#==========
+
 
 func _fire_event(ev_data: Dictionary) -> void:
 	var class_name_: StringName = ev_data[&".class"]
@@ -138,6 +146,7 @@ func event(ev: InputEvent, props: Array[StringName]) -> bool:
 
 	if _is_replaying:
 		allow_event = ev.get_meta(&"replay", false)
+		#print("rx: ", ev.get_meta(&"replay", false))
 
 	else:
 		var id := ev.get_instance_id()
@@ -146,12 +155,17 @@ func event(ev: InputEvent, props: Array[StringName]) -> bool:
 
 			var ev_data := {
 				&".class": ev.get_class(),
+				&".count": 1,
 			}
 			for prop in props:
 				ev_data[prop] = ev.get(prop)
 			util.dict_get_or_add_array(_current_frame, &"events").push_back(ev_data)
 
 	return allow_event
+
+#==========
+#   RNG
+#==========
 
 
 func rng() -> RandomNumberGenerator:
@@ -169,6 +183,10 @@ func rng() -> RandomNumberGenerator:
 
 	return _rng
 
+#==========
+# Signals
+#==========
+
 
 func _emit_signal(node_name: StringName, ...signalname_args: Array) -> void:
 	var node: Node = _registered_signal_nodes[node_name]
@@ -181,7 +199,7 @@ func _emit_signal(node_name: StringName, ...signalname_args: Array) -> void:
 
 
 func _on_signal(callback: Callable, id: int, ...nodename_signalname_args: Array) -> void:
-	print("============== ", nodename_signalname_args)
+	#print("============== ", nodename_signalname_args)
 	var allow_callback := true
 
 	if _is_replaying:
