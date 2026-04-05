@@ -129,9 +129,7 @@ func _fire_event(ev_data: Dictionary) -> void:
 		if not k.begins_with("."):
 			ev.set(k, ev_data[k])
 
-	# IDs aren't preserved through Input.parse_input_event(), using hash instead
-	_seen_event_ids.push_back(hash(str(ev)))
-	print(hash(str(ev)), " ", ev)
+	ev.set_meta(&"replay", true)
 	Input.parse_input_event(ev)
 
 
@@ -139,8 +137,7 @@ func event(ev: InputEvent, props: Array[StringName]) -> bool:
 	var allow_event := true
 
 	if _is_replaying:
-		allow_event = _seen_event_ids.has(hash(str(ev)))
-		print(hash(str(ev)), " ", ev, " ", allow_event)
+		allow_event = ev.get_meta(&"replay", false)
 
 	else:
 		var id := ev.get_instance_id()
