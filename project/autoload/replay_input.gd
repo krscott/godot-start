@@ -144,10 +144,12 @@ func rng() -> RandomNumberGenerator:
 	assert(_rng.seed == _rng_seed, "Client code is not allowed to change RNG seed")
 
 	if is_replaying():
-		if _current_frame.has(&"rng_state"):
-			_rng.state = _current_frame[&"rng_state"]
-		else:
-			push_warning("Unexpected RNG call in replay")
+		if not _used_rng_this_frame:
+			_used_rng_this_frame = true
+			if _current_frame.has(&"rng_state"):
+				_rng.state = _current_frame[&"rng_state"]
+			else:
+				push_warning("Unexpected RNG call in replay")
 	else:
 		if not _used_rng_this_frame:
 			_used_rng_this_frame = true
