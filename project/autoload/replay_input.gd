@@ -169,7 +169,7 @@ func _on_signal(callback: Callable, id: int, ...nodename_signalname_args: Array)
 		callback.callv(nodename_signalname_args.slice(2))
 
 
-func connect_signal(node: Node, signal_name: StringName, callback: Callable) -> void:
+func intercept_signal(node: Node, signal_name: StringName, callback: Callable) -> void:
 	if _registered_signal_nodes.has(node.name):
 		push_warning("Re-registering node: ", node)
 	_registered_signal_nodes[node.name] = node

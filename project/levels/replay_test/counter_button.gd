@@ -4,7 +4,7 @@ var _counter := 0
 
 
 func _ready() -> void:
-	reinput.connect_signal(self, &"pressed", _on_click)
+	reinput.intercept_signal(self, &"pressed", _on_click)
 
 
 func _on_click() -> void:
