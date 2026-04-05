@@ -118,6 +118,10 @@ func get_vector(
 	)
 
 
+func get_custom(action: StringName, value: Variant, zero: Variant) -> Variant:
+	return _poll(&"custom", action, value, zero)
+
+
 func _fire_event(ev_data: Dictionary) -> void:
 	var class_name_: StringName = ev_data[&".class"]
 	var ev: InputEvent = ClassDB.instantiate(class_name_)
