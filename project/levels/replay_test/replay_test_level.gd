@@ -27,5 +27,5 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		var ev: InputEventMouseButton = event
 		if ev.button_index == MouseButton.MOUSE_BUTTON_LEFT and ev.pressed:
-			reinput.event(ev, [&"button_index", &"pressed"])
-			rng_label.text = str(reinput.rng().randi())
+			if reinput.event(ev, [&"button_index", &"pressed"]):
+				rng_label.text = str(reinput.rng().randi())

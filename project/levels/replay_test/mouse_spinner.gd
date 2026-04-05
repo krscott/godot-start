@@ -6,9 +6,7 @@ const SENSITIVITY := 0.02
 
 
 func _input(event: InputEvent) -> void:
-	if event is InputEventMouseMotion:
-		reinput.event(event, [&"relative"])
-
+	if event is InputEventMouseMotion and reinput.event(event, [&"relative"]):
 		var ev: InputEventMouseMotion = event
 
 		var dr: float

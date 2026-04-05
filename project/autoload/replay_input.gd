@@ -8,7 +8,8 @@ var _current_frame := { }
 var _seen_event_ids: Array[int] = []
 var _rng := RandomNumberGenerator.new()
 var _used_rng_this_frame := false
-var _registered_nodes := { }
+var _registered_signal_nodes := { }
+var _replayed_signal_id := -1
 var _is_replaying := false
 
 
@@ -25,10 +26,12 @@ func is_replaying() -> bool:
 func start() -> void:
 	_replay_tape.rewind()
 	_is_replaying = true
+	get_tree().root.set_process_input(false)
 
 
 func stop() -> void:
 	_is_replaying = false
+	get_tree().root.set_process_input(true)
 
 
 func size() -> int:
@@ -59,10 +62,10 @@ func _physics_process(_delta: float) -> void:
 				_emit_signal.callv(sig_args)
 	else:
 		if _current_frame.is_empty():
-			print(null)
+			#print(null)
 			_replay_tape.append(null)
 		else:
-			print(_current_frame)
+			#print(_current_frame)
 			_replay_tape.append(_current_frame)
 		_clear_frame()
 
@@ -121,24 +124,28 @@ func _fire_event(ev_data: Dictionary) -> void:
 	for k: StringName in ev_data:
 		if not k.begins_with("."):
 			ev.set(k, ev_data[k])
+
 	Input.parse_input_event(ev)
 
 
-func event(ev: InputEvent, props: Array[StringName]) -> void:
-	if _is_replaying:
-		# Do nothing
-		pass
-	else:
-		var id := ev.get_instance_id()
-		if not _seen_event_ids.has(id):
-			_seen_event_ids.push_back(id)
+func event(ev: InputEvent, props: Array[StringName]) -> bool:
+	var id := ev.get_instance_id()
 
-			var ev_data := {
-				&".class": ev.get_class(),
-			}
-			for prop in props:
-				ev_data[prop] = ev.get(prop)
-			util.dict_get_or_add_array(_current_frame, &"events").push_back(ev_data)
+	if _is_replaying:
+		# do nothing
+		pass
+
+	elif not _seen_event_ids.has(id):
+		_seen_event_ids.push_back(id)
+
+		var ev_data := {
+			&".class": ev.get_class(),
+		}
+		for prop in props:
+			ev_data[prop] = ev.get(prop)
+		util.dict_get_or_add_array(_current_frame, &"events").push_back(ev_data)
+
+	return true
 
 
 func rng() -> RandomNumberGenerator:
@@ -157,21 +164,38 @@ func rng() -> RandomNumberGenerator:
 	return _rng
 
 
-func _emit_signal(node_name: StringName, ...emit_signal_args: Array) -> void:
-	var node: Node = _registered_nodes[node_name]
-	var err: Error = node.emit_signal.callv(emit_signal_args)
+func _emit_signal(node_name: StringName, ...signalname_args: Array) -> void:
+	var node: Node = _registered_signal_nodes[node_name]
+
+	# TODO: Is there a cleaner way to block other signals?
+	_replayed_signal_id = node.get_instance_id()
+	var err: Error = node.emit_signal.callv(signalname_args)
+	_replayed_signal_id = -1
 	util.a_ok(err)
 
 
-func _on_signal(...emit_signal_args: Array) -> void:
-	print("============== ", emit_signal_args)
-	if not _is_replaying:
-		util.dict_get_or_add_array(_current_frame, &"signals").push_back(emit_signal_args)
+func _on_signal(callback: Callable, id: int, ...nodename_signalname_args: Array) -> void:
+	print("============== ", nodename_signalname_args)
+	var allow_callback := true
+
+	if _is_replaying:
+		allow_callback = _replayed_signal_id == id
+	else:
+		util.dict_get_or_add_array(_current_frame, &"signals").push_back(nodename_signalname_args)
+
+	if allow_callback:
+		# Remove signal_name from args list and call callback function
+		callback.callv(nodename_signalname_args.slice(2))
 
 
-func connect_signal(node: Node, signal_name: StringName) -> void:
-	if _registered_nodes.has(node.name):
+func connect_signal(node: Node, signal_name: StringName, callback: Callable) -> void:
+	if _registered_signal_nodes.has(node.name):
 		push_warning("Re-registering node: ", node)
-	_registered_nodes[node.name] = node
+	_registered_signal_nodes[node.name] = node
 
-	util.a_ok(node.connect(signal_name, _on_signal.bind(node.name, signal_name)))
+	util.a_ok(
+		node.connect(
+			signal_name,
+			_on_signal.bind(callback, node.get_instance_id(), node.name, signal_name),
+		),
+	)
