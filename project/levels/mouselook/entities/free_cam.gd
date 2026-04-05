@@ -19,7 +19,7 @@ static func type_def() -> Dictionary:
 func _physics_process(delta: float) -> void:
 	# TODO: Remove
 	if Input.is_action_just_pressed("replay_reload"):
-		reinput.start()
+		reinput.rewind_and_play()
 		util.a_ok(get_tree().reload_current_scene())
 
 	if enabled:

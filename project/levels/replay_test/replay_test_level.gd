@@ -21,7 +21,7 @@ func _physics_process(_delta: float) -> void:
 	replay_size_label.text = util.human_readable_byte_count(reinput.size())
 
 	if Input.is_action_just_pressed("replay_reload"):
-		reinput.start()
+		reinput.rewind_and_play()
 		util.a_ok(get_tree().reload_current_scene())
 
 	if reinput.get_custom(&"pick_random_number", _mouse_pressed, false):

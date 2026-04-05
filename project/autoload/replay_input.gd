@@ -1,5 +1,11 @@
 extends Node
 
+enum Mode {
+	PASSTHRU,
+	RECORD,
+	PLAYBACK,
+}
+
 # Arbitrary value
 var _rng_seed := hash("replay input")
 
@@ -9,7 +15,8 @@ var _rng := RandomNumberGenerator.new()
 var _used_rng_this_frame := false
 var _registered_signal_nodes := { }
 var _replayed_signal_id := -1
-var _is_replaying := false
+
+var _mode := Mode.PASSTHRU
 
 
 func _clear_frame() -> void:
@@ -18,18 +25,20 @@ func _clear_frame() -> void:
 
 
 func is_replaying() -> bool:
-	return _is_replaying
+	return _mode == Mode.PLAYBACK
 
 
-func start() -> void:
+func record() -> void:
+	_mode = Mode.RECORD
+
+
+func rewind_and_play() -> void:
 	_replay_tape.rewind()
-	_is_replaying = true
-	get_tree().root.set_process_input(false)
+	_mode = Mode.PLAYBACK
 
 
 func stop() -> void:
-	_is_replaying = false
-	get_tree().root.set_process_input(true)
+	_mode = Mode.PASSTHRU
 
 
 func size() -> int:
@@ -41,28 +50,34 @@ func _ready() -> void:
 
 
 func _physics_process(_delta: float) -> void:
-	if _is_replaying and _replay_tape.done():
-		stop()
+	if is_replaying() and _replay_tape.done():
+		# TODO: emit signal instead, so client can decide stop vs record?
+		record()
 
 	# TODO: Better compress empty frames?
-	if _is_replaying:
-		match _replay_tape.take():
-			null:
-				_clear_frame()
-			var d:
-				_current_frame = d
 
-		if _current_frame.has(&"signals"):
-			for sig_args: Array in _current_frame[&"signals"]:
-				_emit_signal.callv(sig_args)
-	else:
-		if _current_frame.is_empty():
-			#print(null)
-			_replay_tape.append(null)
-		else:
-			#print(_current_frame)
-			_replay_tape.append(_current_frame)
-		_clear_frame()
+	match _mode:
+		Mode.PASSTHRU:
+			_clear_frame()
+		Mode.RECORD:
+			if _current_frame.is_empty():
+				#print(null)
+				_replay_tape.append(null)
+			else:
+				#print(_current_frame)
+				_replay_tape.append(_current_frame)
+
+			_clear_frame()
+		Mode.PLAYBACK:
+			match _replay_tape.take():
+				null:
+					_clear_frame()
+				var d:
+					_current_frame = d
+
+			if _current_frame.has(&"signals"):
+				for sig_args: Array in _current_frame[&"signals"]:
+					_emit_signal.callv(sig_args)
 
 #==========
 # Polling
@@ -73,7 +88,7 @@ func _physics_process(_delta: float) -> void:
 ## (kind: StringName, action: StringName, value: T, zero: T) -> T
 func _poll(kind: StringName, action: StringName, value: Variant, zero: Variant) -> Variant:
 	assert(typeof(value) == typeof(zero))
-	if _is_replaying:
+	if is_replaying():
 		value = util.dict_get_or_add_dict(_current_frame, kind).get(action, zero)
 	elif value:
 		util.a_true(util.dict_get_or_add_dict(_current_frame, kind).set(action, value))
@@ -128,7 +143,7 @@ func get_custom(action: StringName, value: Variant, zero: Variant) -> Variant:
 func rng() -> RandomNumberGenerator:
 	assert(_rng.seed == _rng_seed, "Client code is not allowed to change RNG seed")
 
-	if _is_replaying:
+	if is_replaying():
 		if _current_frame.has(&"rng_state"):
 			_rng.state = _current_frame[&"rng_state"]
 		else:
@@ -159,7 +174,7 @@ func _on_signal(callback: Callable, id: int, ...nodename_signalname_args: Array)
 	#print("============== ", nodename_signalname_args)
 	var allow_callback := true
 
-	if _is_replaying:
+	if is_replaying():
 		allow_callback = _replayed_signal_id == id
 	else:
 		util.dict_get_or_add_array(_current_frame, &"signals").push_back(nodename_signalname_args)
