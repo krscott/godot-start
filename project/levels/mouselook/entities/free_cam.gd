@@ -39,7 +39,7 @@ func _physics_process(delta: float) -> void:
 		rotation_degrees = reinput.get_custom(&"free_cam_rotation", rotation_degrees, Vector3.ZERO)
 
 		var direction := (
-			transform.basis * Vector3(move.x, 0, move.y) + Vector3(0, updown, 0)
+			transform.basis * Vector3(move.x, 0.0, move.y) + Vector3(0.0, updown, 0.0)
 		).normalized()
 
 		position += direction * distance
