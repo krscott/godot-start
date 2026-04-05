@@ -125,27 +125,32 @@ func _fire_event(ev_data: Dictionary) -> void:
 		if not k.begins_with("."):
 			ev.set(k, ev_data[k])
 
+	# IDs aren't preserved through Input.parse_input_event(), using hash instead
+	_seen_event_ids.push_back(hash(str(ev)))
+	print(hash(str(ev)), " ", ev)
 	Input.parse_input_event(ev)
 
 
 func event(ev: InputEvent, props: Array[StringName]) -> bool:
-	var id := ev.get_instance_id()
+	var allow_event := true
 
 	if _is_replaying:
-		# do nothing
-		pass
+		allow_event = _seen_event_ids.has(hash(str(ev)))
+		print(hash(str(ev)), " ", ev, " ", allow_event)
 
-	elif not _seen_event_ids.has(id):
-		_seen_event_ids.push_back(id)
+	else:
+		var id := ev.get_instance_id()
+		if not _seen_event_ids.has(id):
+			_seen_event_ids.push_back(id)
 
-		var ev_data := {
-			&".class": ev.get_class(),
-		}
-		for prop in props:
-			ev_data[prop] = ev.get(prop)
-		util.dict_get_or_add_array(_current_frame, &"events").push_back(ev_data)
+			var ev_data := {
+				&".class": ev.get_class(),
+			}
+			for prop in props:
+				ev_data[prop] = ev.get(prop)
+			util.dict_get_or_add_array(_current_frame, &"events").push_back(ev_data)
 
-	return true
+	return allow_event
 
 
 func rng() -> RandomNumberGenerator:
