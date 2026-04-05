@@ -5,7 +5,7 @@ var _rng_seed := hash("replay input")
 
 var _replay_tape := DataTape.new()
 var _current_frame := { }
-var _seen_event_ids: Array[int] = []
+var _last_seen_event_id := -1
 var _rng := RandomNumberGenerator.new()
 var _used_rng_this_frame := false
 var _registered_signal_nodes := { }
@@ -15,7 +15,7 @@ var _is_replaying := false
 
 func _clear_frame() -> void:
 	_current_frame.clear()
-	_seen_event_ids.clear()
+	_last_seen_event_id = -1
 	_used_rng_this_frame = false
 
 
@@ -137,7 +137,7 @@ func _fire_event(ev_data: Dictionary) -> void:
 		if not k.begins_with("."):
 			ev.set(k, ev_data[k])
 
-	ev.set_meta(&"replay", true)
+	ev.set_meta(&"replay_counter", ev_data[&".count"])
 	Input.parse_input_event(ev)
 
 
@@ -145,13 +145,18 @@ func event(ev: InputEvent, props: Array[StringName]) -> bool:
 	var allow_event := true
 
 	if _is_replaying:
-		allow_event = ev.get_meta(&"replay", false)
-		#print("rx: ", ev.get_meta(&"replay", false))
+		var replay_counter: int = ev.get_meta(&"replay_counter", 0)
+		print(replay_counter)
+		print(ev)
+		if replay_counter > 0:
+			ev.set_meta(&"replay_counter", replay_counter - 1)
+		else:
+			allow_event = false
 
 	else:
 		var id := ev.get_instance_id()
-		if not _seen_event_ids.has(id):
-			_seen_event_ids.push_back(id)
+		if _last_seen_event_id != id:
+			_last_seen_event_id = id
 
 			var ev_data := {
 				&".class": ev.get_class(),
@@ -160,6 +165,9 @@ func event(ev: InputEvent, props: Array[StringName]) -> bool:
 			for prop in props:
 				ev_data[prop] = ev.get(prop)
 			util.dict_get_or_add_array(_current_frame, &"events").push_back(ev_data)
+		else:
+			var events: Array = _current_frame[&"events"]
+			events[-1][&".count"] += 1
 
 	return allow_event
 
