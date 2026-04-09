@@ -44,6 +44,7 @@ unique_name_in_owner = true
 script = ExtResource("7_bt214")
 
 [node name="DitherFilter" type="CanvasLayer" parent="." unique_id=1427585307]
+unique_name_in_owner = true
 visible = false
 
 [node name="DitherFilter" type="ColorRect" parent="DitherFilter" unique_id=1046001627]
@@ -75,6 +76,7 @@ unique_name_in_owner = true
 unique_name_in_owner = true
 
 [node name="PaletteFilter" type="CanvasLayer" parent="." unique_id=1251717995]
+unique_name_in_owner = true
 visible = false
 
 [node name="PaletteFilter" type="ColorRect" parent="PaletteFilter" unique_id=618054725]
