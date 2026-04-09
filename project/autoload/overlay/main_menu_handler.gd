@@ -1,4 +1,3 @@
-class_name MainMenuHandler
 extends Node
 
 @export var menu: Menu

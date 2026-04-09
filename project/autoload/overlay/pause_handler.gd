@@ -1,4 +1,3 @@
-class_name PauseHandler
 extends Node
 
 var _is_paused := false
