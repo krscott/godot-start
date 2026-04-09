@@ -14,8 +14,8 @@ func _ready() -> void:
 	if record_replay and not reinput.is_replaying():
 		reinput.record()
 
-	overlay.pause_menu_system.capture_mouse = mouse_capture
-	overlay.pause_menu_system.show_on_start = not skip_main_menu
+	#overlay.pause_menu_system.capture_mouse = mouse_capture
+	#overlay.pause_menu_system.show_on_start = not skip_main_menu
 	overlay.stretch_filter.visible = stretch_filter
 
 	queue_free()
