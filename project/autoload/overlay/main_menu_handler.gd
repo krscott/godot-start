@@ -15,6 +15,11 @@ func _ready() -> void:
 		_show_menu()
 
 
+func _quit() -> void:
+	signalbus.quitting.emit()
+	get_tree().call_deferred(&"quit")
+
+
 func _build_menu() -> void:
 	menu.build(
 		[
@@ -36,7 +41,7 @@ func _build_menu() -> void:
 			.toggled(gamestate.palette_filter.state),
 			Menu.checkbox("Dither Filter", gamestate.dither_filter.set_state) #
 			.toggled(gamestate.dither_filter.state),
-			Menu.button("Quit", signalbus.quit_requested.emit) #
+			Menu.button("Quit", _quit) #
 			.desktop_only(),
 		],
 	)

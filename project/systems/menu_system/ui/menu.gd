@@ -126,7 +126,6 @@ func _on_visibility_changed() -> void:
 
 		var is_any_focused := false
 
-		print(_spec)
 		for x in _spec:
 			if is_instance_valid(x._node) and x._visible_when:
 				x._node.visible = x._visible_when.call()

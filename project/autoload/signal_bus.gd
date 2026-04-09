@@ -4,6 +4,6 @@ extends Node
 
 signal pause_requested
 signal unpause_requested
-signal quit_requested
+signal quitting
 
 @warning_ignore_restore("unused_signal")
