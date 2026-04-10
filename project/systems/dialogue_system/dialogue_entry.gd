@@ -85,7 +85,6 @@ func _interpolate(text: String) -> String:
 
 
 func _fire_before(event: DialogueEvent) -> void:
-	_call_callback(event.callback)
 	_call_callback(event.before)
 
 
@@ -153,8 +152,8 @@ func _on_advance(index: int) -> void:
 	_fire_after(event)
 
 	if _current_choices:
-		var choice := _current_choices[index]
-		_call_callback(choice.callback)
+		var choice: DialogueEvent.DialogueChoice = _current_choices[index]
+		_call_callback(choice.before)
 		_current_event_key = choice.next
 	else:
 		_current_event_key = _dialogue_data.get_next(state, _current_event_key)

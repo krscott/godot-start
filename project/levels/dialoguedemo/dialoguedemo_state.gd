@@ -41,6 +41,14 @@ func shot_alice() -> void:
 	alice_is_dead = true
 
 
+func on_intro_start() -> void:
+	print("[callback] intro event BEFORE")
+
+
+func on_intro_end() -> void:
+	print("[callback] intro event AFTER")
+
+
 func _ready() -> void:
 	assert(start_dialogue_button)
 	assert(dialogue_entry)
