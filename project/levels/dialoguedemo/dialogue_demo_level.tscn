@@ -11,7 +11,7 @@ script = ExtResource("1_ckrno")
 skip_main_menu = true
 metadata/_custom_type_script = "uid://bu2q2x32c2nug"
 
-[node name="State" type="Node" parent="." unique_id=1121244055]
+[node name="State" type="Node" parent="." unique_id=1121244055]:wq
 script = ExtResource("2_wgiis")
 
 [node name="DialogueEntry" type="Node" parent="State" unique_id=996939929]
