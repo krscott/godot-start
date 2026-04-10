@@ -17,4 +17,4 @@ func fade_to_scene(scene_path: String) -> void:
 	util.a_ok(get_tree().change_scene_to_file(scene_path))
 	await get_tree().process_frame
 	var tween2 := create_tween()
-	tween2.tween_property(_rect, "modulate:a", 0.0, FADE_DURATION)
+	_tp = tween2.tween_property(_rect, "modulate:a", 0.0, FADE_DURATION)
