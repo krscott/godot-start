@@ -2,8 +2,6 @@ extends Node
 
 @onready var _save_state: SaveState = %SaveState
 @onready var pause_menu_system: PauseMenuSystem = %PauseMenuSystem
-@onready var _replay_system: ReplaySystem = %ReplaySystem
-@onready var player_input: PlayerInput = %PlayerInput
 @onready var stretch_filter: CanvasLayer = %StretchFilter
 @onready var dialogue_layer: DialogueLayer = %DialogueLayer
 @onready var screen_fade: ScreenFade = %ScreenFade
@@ -20,20 +18,16 @@ func sync_object_state(key: StringName, obj: Object) -> void:
 func _ready() -> void:
 	assert(_save_state)
 	assert(pause_menu_system)
-	assert(_replay_system)
-	assert(player_input)
 	assert(stretch_filter)
 	assert(dialogue_layer)
 	assert(screen_fade)
 
 	util.printdbg("DEBUG BUILD")
 
-	sync_object_state(&"player_input", player_input)
-
 	var args := OS.get_cmdline_user_args()
 	if args:
 		util.printdbg("CLI args: ", args)
-		_replay_system.run_from_file(args[0])
+		#_replay_system.run_from_file(args[0])
 
 
 func _process(_delta: float) -> void:
@@ -44,7 +38,8 @@ func _process(_delta: float) -> void:
 			_save_state.quickload()
 		elif Input.is_action_just_pressed("quit"):
 			if OS.has_feature("pc"):
-				_replay_system._save_replay_and_quit()
+				pass
+				#_replay_system._save_replay_and_quit()
 			else:
 				pause_menu_system.pause()
 		elif Input.is_action_just_pressed("ui_cancel"):

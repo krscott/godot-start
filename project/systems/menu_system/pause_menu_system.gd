@@ -6,7 +6,6 @@ extends Node
 @export var show_on_start := true
 
 @export var menu: Menu
-@export var replay_system: ReplaySystem
 @export var save_state: SaveState
 @export var system_dialog: SystemDialog
 @export var dither_filter: CanvasLayer
@@ -42,7 +41,6 @@ func is_menu_open() -> bool:
 
 func _ready() -> void:
 	assert(menu)
-	assert(replay_system)
 	assert(save_state)
 	assert(system_dialog)
 	assert(dither_filter)
@@ -102,14 +100,14 @@ func _build_menu() -> void:
 			.desktop_only(),
 			Menu.button("Load Game", _load_game_dialog) #
 			.desktop_only(),
-			Menu.button("Load Replay", replay_system._replay_open_dialog) #
-			.desktop_only(),
+			#Menu.button("Load Replay", replay_system._replay_open_dialog) #
+			#.desktop_only(),
 			Menu.checkbox("Palette Filter", palette_filter.set_visible) #
 			.toggled(palette_filter.visible),
 			Menu.checkbox("Dither Filter", dither_filter.set_visible) #
 			.toggled(dither_filter.visible),
-			Menu.button("Quit", replay_system._save_replay_and_quit) #
-			.desktop_only(),
+			#Menu.button("Quit", replay_system._save_replay_and_quit) #
+			#.desktop_only(),
 		],
 	)
 

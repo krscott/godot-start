@@ -4,51 +4,56 @@ extends Camera3D
 const type_name := &"FreeCam"
 
 
-func type_def() -> Dictionary:
+static func type_def() -> Dictionary:
 	return { &"transform": null }
 
 
-@export var take_control_on_ready := false
-
-@export var maybe_input: PlayerInput
-
+@export var enabled := true
 @export var base_speed := 5.0
 @export var sprint_speed := 20.0
-
-var look_origin := Vector2.ZERO
-
-
-func give_control(player_input: PlayerInput) -> void:
-	look_origin = Vector2(rotation_degrees.x, rotation_degrees.y) - player_input.look
-	maybe_input = player_input
-
-
-func _ready() -> void:
-	if take_control_on_ready:
-		give_control(overlay.player_input)
+@export var sensitivity := 0.2
+@export var min_angle := -90.0
+@export var max_angle := 90
 
 
 func _physics_process(delta: float) -> void:
-	if maybe_input:
-		var updown := 0.0
-		if maybe_input.jump:
-			updown += 1.0
-		if maybe_input.crouch:
-			updown -= 1.0
+	# TODO: Remove
+	if Input.is_action_just_pressed("replay_reload"):
+		reinput.rewind_and_play()
+		util.a_ok(get_tree().reload_current_scene())
 
-		var speed := base_speed * delta
-		if maybe_input.sprint:
-			speed = sprint_speed * delta
+	if enabled:
+		# Explicitly typed due to https://github.com/godotengine/godot/issues/114422
+		var updown: float = reinput.get_axis("crouch", "jump")
+
+		var distance := base_speed * delta
+		if reinput.is_action_pressed("sprint"):
+			distance = sprint_speed * delta
+
+		var move: Vector2 = reinput.get_vector(
+			"move_left",
+			"move_right",
+			"move_forward",
+			"move_backward",
+		)
+
+		rotation_degrees = reinput.get_custom(&"free_cam_rotation", rotation_degrees, Vector3.ZERO)
 
 		var direction := (
-			transform.basis * Vector3(maybe_input.move.x, 0, maybe_input.move.y)
-			+ Vector3(0, updown, 0)
+			transform.basis * Vector3(move.x, 0.0, move.y) + Vector3(0.0, updown, 0.0)
 		).normalized()
 
-		position += direction * speed
+		position += direction * distance
 
 
-func _process(_delta: float) -> void:
-	if maybe_input:
-		rotation_degrees.x = maybe_input.look.x + look_origin.x
-		rotation_degrees.y = maybe_input.look.y + look_origin.y
+func _input(event: InputEvent) -> void:
+	if enabled and not reinput.is_replaying() and event is InputEventMouseMotion:
+		var ev: InputEventMouseMotion = event
+		var look := Vector2(rotation_degrees.x, rotation_degrees.y)
+
+		look.y -= (ev.relative.x * sensitivity)
+		look.x -= (ev.relative.y * sensitivity)
+		look.x = clamp(look.x, min_angle, max_angle)
+
+		rotation_degrees.x = look.x
+		rotation_degrees.y = look.y
