@@ -129,8 +129,8 @@ fi
 
 debug "Running binary: $binary"
 
-# original stdout -> /dev/null, stderr -> new stdout
-output=$(timeout "$timeout" "$binary" --headless -- "$@" 2>&1 >/dev/null)
+# Capture both stdout and stderr so scene-cycle prints stay visible.
+output=$(timeout "$timeout" "$binary" --headless -- "$@" 2>&1)
 
 echo ""
 echo "$output"
