@@ -7,8 +7,8 @@ func _ready() -> void:
 	assert(menu)
 	_build_menu()
 
-	util.a_ok(overlay.menu_open_pub.turned_on.connect(_open))
-	util.a_ok(overlay.menu_open_pub.turned_off.connect(_close))
+	util.a_ok(gamestate.menu_open_pub.turned_on.connect(_open))
+	util.a_ok(gamestate.menu_open_pub.turned_off.connect(_close))
 
 
 func _quit() -> void:
@@ -32,12 +32,12 @@ func _load_game_dialog() -> void:
 func _build_menu() -> void:
 	menu.build(
 		[
-			Menu.button("Start Game", _close) #
-			.visible_when(gamestate.game_started.is_on) #
+			Menu.button("Start Game", _start_game) #
+			.visible_when(gamestate.game_started_pub.is_on) #
 			.focus(),
 			Menu.button("Continue", _close) #
 			.action("ui_cancel") #
-			.visible_when(gamestate.game_started.is_off) #
+			.visible_when(gamestate.game_started_pub.is_off) #
 			.focus(),
 			Menu.button("Save Game", _save_game_dialog) #
 			.visible_when(_menu_visible) #
@@ -46,10 +46,10 @@ func _build_menu() -> void:
 			.desktop_only(),
 			#Menu.button("Load Replay", replay_system._replay_open_dialog) #
 			#.desktop_only(),
-			Menu.checkbox("Palette Filter", overlay.palette_filter_pub.set_state) #
-			.toggled(overlay.palette_filter_pub.state),
-			Menu.checkbox("Dither Filter", overlay.dither_filter_pub.set_state) #
-			.toggled(overlay.dither_filter_pub.state),
+			Menu.checkbox("Palette Filter", gamestate.palette_filter_pub.set_state) #
+			.toggled(gamestate.palette_filter_pub.state),
+			Menu.checkbox("Dither Filter", gamestate.dither_filter_pub.set_state) #
+			.toggled(gamestate.dither_filter_pub.state),
 			Menu.button("Quit", _quit) #
 			.desktop_only(),
 		],
@@ -58,12 +58,16 @@ func _build_menu() -> void:
 
 func _open() -> void:
 	menu.show()
-	overlay.menu_open_pub.state = true
+	gamestate.menu_open_pub.turn_on()
 
 
 func _close() -> void:
 	menu.hide()
-	overlay.menu_open_pub.state = false
+	gamestate.menu_open_pub.turn_off()
+
+
+func _start_game() -> void:
+	gamestate.game_started_pub.turn_on()
 
 
 func _menu_visible() -> bool:

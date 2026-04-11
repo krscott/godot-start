@@ -12,13 +12,13 @@ func _physics_process(_delta: float) -> void:
 		not _was_paused_last_frame and
 		Input.is_action_just_pressed("pause")
 	):
-		overlay.paused_pub.state = true
+		gamestate.paused_pub.state = true
 
-	get_tree().paused = overlay.paused_pub.state
-	_was_paused_last_frame = overlay.paused_pub.state
+	get_tree().paused = gamestate.paused_pub.state
+	_was_paused_last_frame = gamestate.paused_pub.state
 
 
 func _notification(what: int) -> void:
 	match what:
 		MainLoop.NOTIFICATION_APPLICATION_FOCUS_OUT:
-			overlay.paused_pub.state = true
+			gamestate.paused_pub.state = true

@@ -15,12 +15,14 @@ func _ready() -> void:
 		reinput.record()
 
 	if stretch_filter:
-		overlay.stretch_fitler_pub.state = true
+		gamestate.stretch_fitler_pub.state = true
 
 	if show_main_menu:
-		overlay.menu_open_pub.state = true
+		gamestate.menu_open_pub.state = true
+	else:
+		gamestate.game_started_pub.state = true
 
 	if pause_on_start:
-		overlay.paused_pub.state = true
+		gamestate.paused_pub.state = true
 
 	queue_free()

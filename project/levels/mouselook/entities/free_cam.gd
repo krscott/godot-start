@@ -17,7 +17,7 @@ static func type_def() -> Dictionary:
 
 
 func _is_active() -> bool:
-	return enabled and not overlay.menu_open_pub.state
+	return enabled and not gamestate.menu_open_pub.state
 
 
 func _physics_process(delta: float) -> void:

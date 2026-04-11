@@ -6,15 +6,6 @@ extends Node
 @onready var dialogue_layer: DialogueLayer = %DialogueLayer
 @onready var system_dialog: SystemDialog = %SystemDialog
 
-# Pub/Sub state
-
-var stretch_fitler_pub := pubsub.Bool.new()
-var palette_filter_pub := pubsub.Bool.new()
-var dither_filter_pub := pubsub.Bool.new()
-
-var paused_pub := pubsub.Bool.new()
-var menu_open_pub := pubsub.Bool.new()
-
 # Public Methods
 
 
@@ -39,15 +30,15 @@ func _ready() -> void:
 		util.printdbg("CLI args: ", args)
 		#_replay_system.run_from_file(args[0])
 
-	util.a_ok(dither_filter_pub.changed.connect(_dither_filter.set_visible))
-	util.a_ok(palette_filter_pub.changed.connect(_palette_filter.set_visible))
+	util.a_ok(gamestate.dither_filter_pub.changed.connect(_dither_filter.set_visible))
+	util.a_ok(gamestate.palette_filter_pub.changed.connect(_palette_filter.set_visible))
 
-	util.a_ok(paused_pub.turned_on.connect(menu_open_pub.turn_on))
-	util.a_ok(menu_open_pub.turned_off.connect(paused_pub.turn_off))
+	util.a_ok(gamestate.paused_pub.turned_on.connect(gamestate.menu_open_pub.turn_on))
+	util.a_ok(gamestate.menu_open_pub.turned_off.connect(gamestate.paused_pub.turn_off))
 
 
 func _process(_delta: float) -> void:
-	if not menu_open_pub.state:
+	if not gamestate.menu_open_pub.state:
 		if Input.is_action_just_pressed("quick_save"):
 			save_state.quicksave()
 		elif Input.is_action_just_pressed("quick_load"):
