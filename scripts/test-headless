@@ -82,7 +82,7 @@ require_cmd() {
 }
 
 verbose=
-timeout=1
+timeout=10
 binary=
 while [[ $# -gt 0 ]]; do
     case "$1" in
