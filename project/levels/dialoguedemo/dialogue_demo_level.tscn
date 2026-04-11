@@ -8,7 +8,6 @@
 
 [node name="LevelConfig" type="Node" parent="." unique_id=69534514]
 script = ExtResource("1_ckrno")
-skip_main_menu = true
 metadata/_custom_type_script = "uid://bu2q2x32c2nug"
 
 [node name="State" type="Node" parent="." unique_id=1121244055]

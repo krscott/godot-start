@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://c8a747x2yeyhy" path="res://systems/dialogue_system/ui/dialogue_layer.tscn" id="11_x1ssi"]
 [ext_resource type="PackedScene" uid="uid://dkhqxc2w4rda4" path="res://systems/menu_system/ui/menu.tscn" id="12_xs7q8"]
 [ext_resource type="Shader" uid="uid://cucunjhgkuj2r" path="res://shaders/palette-post.gdshader" id="13_ec5a7"]
+[ext_resource type="Script" path="res://systems/screen_fade.gd" id="14_sfade"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_3oy0g"]
 shader = ExtResource("8_5btto")
@@ -87,3 +88,17 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+
+[node name="ScreenFade" type="CanvasLayer" parent="."]
+unique_name_in_owner = true
+layer = 128
+script = ExtResource("14_sfade")
+
+[node name="ColorRect" type="ColorRect" parent="ScreenFade"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
