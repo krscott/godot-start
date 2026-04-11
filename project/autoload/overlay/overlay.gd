@@ -1,5 +1,8 @@
 extends Node
 
+@export var _test_cycle_scenes: Array[PackedScene] = []
+
+
 @onready var save_state: SaveState = %SaveState
 @onready var _dither_filter: CanvasLayer = %DitherFilter
 @onready var _palette_filter: CanvasLayer = %PaletteFilter
@@ -21,12 +24,16 @@ func _ready() -> void:
 	assert(_palette_filter)
 	assert(dialogue_layer)
 	assert(system_dialog)
+	assert(_test_cycle_scenes, "add some scenes to _test_cycle_scenes")
 
 	util.printdbg("DEBUG BUILD")
 
 	var args := OS.get_cmdline_user_args()
 	if args:
 		util.printdbg("CLI args: ", args)
+		if "--test-cycle" in args:
+			call_deferred(&"_test_cycle")
+			
 		#_replay_system.run_from_file(args[0])
 
 	util.a_ok(gamestate.dither_filter_pub.changed.connect(_dither_filter.set_visible))
@@ -44,3 +51,12 @@ func _process(_delta: float) -> void:
 			save_state.quickload()
 
 # Private Methods
+
+func _test_cycle() -> void:
+	
+	for scene in _test_cycle_scenes:
+		print("Testing scene: ", scene)
+		util.a_ok(get_tree().change_scene_to_packed(scene))
+		await get_tree().create_timer(1.0).timeout
+
+	get_tree().quit()
