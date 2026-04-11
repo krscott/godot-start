@@ -29,8 +29,6 @@ func _physics_process(_delta: float) -> void:
 		var _throwaway: int = reinput.rng().randi() # skip one
 		rng_label.text = str(reinput.rng().randi())
 
-	assert(false)
-
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
