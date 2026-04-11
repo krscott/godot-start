@@ -19,6 +19,19 @@ func _quit() -> void:
 	get_tree().call_deferred(&"quit")
 
 
+func _save_game_dialog() -> void:
+	var filename: String = await overlay.system_dialog.file_save_dialog("*.sav", "Save File")
+	if filename:
+		util.a_ok(overlay.save_state.save_to_file(filename))
+
+
+func _load_game_dialog() -> void:
+	var filename: String = await overlay.system_dialog.file_open_dialog("*.sav", "Save File")
+	if filename:
+		var err: Error = overlay.save_state.load_from_file(filename)
+		assert(not err)
+
+
 func _build_menu() -> void:
 	menu.build(
 		[
@@ -29,11 +42,11 @@ func _build_menu() -> void:
 			.action("ui_cancel") #
 			.visible_when(gamestate.game_started.is_off) #
 			.focus(),
-			#Menu.button("Save Game", _save_game_dialog) #
-			#.visible_when(_is_not_at_main_menu) #
-			#.desktop_only(),
-			#Menu.button("Load Game", _load_game_dialog) #
-			#.desktop_only(),
+			Menu.button("Save Game", _save_game_dialog) #
+			.visible_when(_menu_visible) #
+			.desktop_only(),
+			Menu.button("Load Game", _load_game_dialog) #
+			.desktop_only(),
 			#Menu.button("Load Replay", replay_system._replay_open_dialog) #
 			#.desktop_only(),
 			Menu.checkbox("Palette Filter", gamestate.palette_filter.set_state) #
@@ -52,3 +65,7 @@ func _show_menu() -> void:
 
 func _hide_menu() -> void:
 	menu.hide()
+
+
+func _menu_visible() -> bool:
+	return menu.visible

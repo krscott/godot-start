@@ -69,7 +69,7 @@ func _ready() -> void:
 				key = node.name
 			else:
 				key = str(parent.get_path_to(node, true))
-			print(key)
+			util.printdbg("Persisting: ", key)
 			_keys.push_back(key)
 			_nodes.push_back(node)
 			assert(_keys.size() == _nodes.size())
