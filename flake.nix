@@ -91,6 +91,8 @@
         '';
 
         test-headless = pkgs.writeShellScriptBin "test-headless" ''
+          set -euo pipefail
+
           is_nixos() {
             [[ -e /etc/NIXOS ]] || [[ -e /run/current-system/nixos-version ]]
           }
