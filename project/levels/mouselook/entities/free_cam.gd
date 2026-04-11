@@ -16,13 +16,17 @@ static func type_def() -> Dictionary:
 @export var max_angle := 90
 
 
+func _is_active() -> bool:
+	return enabled and not overlay.menu_open_pub.state
+
+
 func _physics_process(delta: float) -> void:
 	# TODO: Remove
 	if Input.is_action_just_pressed("replay_reload"):
 		reinput.rewind_and_play()
 		util.a_ok(get_tree().reload_current_scene())
 
-	if enabled:
+	if _is_active():
 		# Explicitly typed due to https://github.com/godotengine/godot/issues/114422
 		var updown: float = reinput.get_axis("crouch", "jump")
 
@@ -47,7 +51,7 @@ func _physics_process(delta: float) -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if enabled and not reinput.is_replaying() and event is InputEventMouseMotion:
+	if _is_active() and not reinput.is_replaying() and event is InputEventMouseMotion:
 		var ev: InputEventMouseMotion = event
 		var look := Vector2(rotation_degrees.x, rotation_degrees.y)
 
