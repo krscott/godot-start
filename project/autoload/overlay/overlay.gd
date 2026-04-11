@@ -60,4 +60,5 @@ func _test_cycle() -> void:
 		util.a_ok(get_tree().change_scene_to_packed(scene))
 		await get_tree().create_timer(1.0).timeout
 
+	print("Test cycle complete")
 	get_tree().quit()

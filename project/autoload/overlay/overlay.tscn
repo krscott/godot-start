@@ -2,10 +2,10 @@
 
 [ext_resource type="Script" uid="uid://ygjvluupbdtm" path="res://autoload/overlay/overlay.gd" id="1_17t5e"]
 [ext_resource type="PackedScene" uid="uid://bev71dv4qsfw" path="res://levels/dialoguedemo/dialogue_demo_level.tscn" id="2_1eu7u"]
-[ext_resource type="Script" path="res://autoload/overlay/pause_handler.gd" id="2_f73nc"]
+[ext_resource type="Script" uid="uid://bxou0twirdfvb" path="res://autoload/overlay/pause_handler.gd" id="2_f73nc"]
 [ext_resource type="Script" uid="uid://cu714ln7qv2gu" path="res://systems/save_state.gd" id="2_su27h"]
 [ext_resource type="PackedScene" uid="uid://lmp14m6v5wf4" path="res://levels/obliquetile/oblique_tile_level.tscn" id="3_ag5nu"]
-[ext_resource type="Script" path="res://autoload/overlay/main_menu_handler.gd" id="3_i4lk7"]
+[ext_resource type="Script" uid="uid://cj0qies4hhgvo" path="res://autoload/overlay/main_menu_handler.gd" id="3_i4lk7"]
 [ext_resource type="PackedScene" uid="uid://c8lpblcihq5ff" path="res://levels/mouselook/mouselook_level.tscn" id="4_wqvda"]
 [ext_resource type="PackedScene" uid="uid://syvehu8gn224" path="res://levels/replay_test/replay_test_level.tscn" id="5_jsub8"]
 [ext_resource type="Script" uid="uid://btc74n06ykolu" path="res://systems/system_dialog.gd" id="7_bt214"]
@@ -15,7 +15,7 @@
 [ext_resource type="PackedScene" uid="uid://c8a747x2yeyhy" path="res://systems/dialogue_system/ui/dialogue_layer.tscn" id="11_x1ssi"]
 [ext_resource type="PackedScene" uid="uid://dkhqxc2w4rda4" path="res://systems/menu_system/ui/menu.tscn" id="12_xs7q8"]
 [ext_resource type="Shader" uid="uid://cucunjhgkuj2r" path="res://shaders/palette-post.gdshader" id="13_ec5a7"]
-[ext_resource type="Script" path="res://systems/screen_fade.gd" id="14_sfade"]
+[ext_resource type="Script" uid="uid://c20jhfrbg8p2j" path="res://systems/screen_fade.gd" id="14_sfade"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_3oy0g"]
 shader = ExtResource("8_5btto")
@@ -94,12 +94,12 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="ScreenFade" type="CanvasLayer" parent="."]
+[node name="ScreenFade" type="CanvasLayer" parent="." unique_id=1730065750]
 unique_name_in_owner = true
 layer = 128
 script = ExtResource("14_sfade")
 
-[node name="ColorRect" type="ColorRect" parent="ScreenFade"]
+[node name="ColorRect" type="ColorRect" parent="ScreenFade" unique_id=1372180278]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
