@@ -92,6 +92,8 @@ static func label(text: String) -> Spec:
 
 var _spec: Array[Spec] = []
 var _was_visible_last_frame := false
+var _is_ready := false
+var _is_spec_built := false
 
 
 func _ready() -> void:
@@ -105,6 +107,8 @@ func _ready() -> void:
 
 	util.a_ok(visibility_changed.connect(_on_visibility_changed))
 
+	_is_ready = true
+
 
 func _process(_delta: float) -> void:
 	if _was_visible_last_frame and visible:
@@ -117,6 +121,9 @@ func _process(_delta: float) -> void:
 
 func _on_visibility_changed() -> void:
 	if visible:
+		if not _is_spec_built:
+			_build_menu()
+
 		var is_any_focused := false
 
 		for x in _spec:
@@ -146,8 +153,12 @@ func _create_item(x: Spec) -> Node:
 
 func build(spec: Array[Spec]) -> void:
 	assert(_spec.size() == 0, "TODO: clear old spec")
+	_spec = spec
+	_is_spec_built = false
 
-	for x in spec:
+
+func _build_menu() -> void:
+	for x in _spec:
 		if x._hidden:
 			continue
 
@@ -168,4 +179,4 @@ func build(spec: Array[Spec]) -> void:
 			_:
 				assert(false, str("KIND NOT IMPLEMENTED: ", x._kind))
 
-	_spec = spec
+	_is_spec_built = true
