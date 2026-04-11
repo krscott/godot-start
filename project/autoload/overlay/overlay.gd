@@ -7,6 +7,7 @@ extends Node
 @onready var _dither_filter: CanvasLayer = %DitherFilter
 @onready var _palette_filter: CanvasLayer = %PaletteFilter
 @onready var dialogue_layer: DialogueLayer = %DialogueLayer
+@onready var screen_fade: ScreenFade = %ScreenFade
 @onready var system_dialog: SystemDialog = %SystemDialog
 
 # Public Methods
@@ -23,6 +24,7 @@ func _ready() -> void:
 	assert(_dither_filter)
 	assert(_palette_filter)
 	assert(dialogue_layer)
+	assert(screen_fade)
 	assert(system_dialog)
 	assert(_test_cycle_scenes, "add some scenes to _test_cycle_scenes")
 
