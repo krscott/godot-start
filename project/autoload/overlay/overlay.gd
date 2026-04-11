@@ -17,7 +17,6 @@ func sync_object_state(key: StringName, obj: Object) -> void:
 
 func _ready() -> void:
 	assert(save_state)
-	#assert(pause_menu_system)
 	assert(_dither_filter)
 	assert(_palette_filter)
 	assert(dialogue_layer)
