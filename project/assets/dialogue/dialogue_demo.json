@@ -8,11 +8,17 @@
 			]
 		},
 		"intro": {
+			"before": {
+				"name": "on_intro_start"
+			},
 			"speaker": "Alice",
 			"text": [
 				"Hi! My name is Alice!",
 				"Let's play rock paper scissors!"
 			],
+			"after": {
+				"name": "on_intro_end"
+			},
 			"next": [
 				"start_game"
 			]
@@ -38,31 +44,37 @@
 			"choices": [
 				{
 					"text": "Rock",
-					"callback": {
+					"before": {
 						"name": "choose",
-						"args": ["rock"]
+						"args": [
+							"rock"
+						]
 					},
 					"next": "play_game"
 				},
 				{
 					"text": "Paper",
-					"callback": {
+					"before": {
 						"name": "choose",
-						"args": ["paper"]
+						"args": [
+							"paper"
+						]
 					},
 					"next": "play_game"
 				},
 				{
 					"text": "Scissors",
-					"callback": {
+					"before": {
 						"name": "choose",
-						"args": ["scissors"]
+						"args": [
+							"scissors"
+						]
 					},
 					"next": "play_game"
 				},
 				{
 					"text": "Shoot",
-					"callback": {
+					"before": {
 						"name": "shot_alice"
 					},
 					"next": "shoot_alice"
