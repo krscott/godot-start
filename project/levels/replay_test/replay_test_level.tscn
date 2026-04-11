@@ -30,7 +30,6 @@ script = ExtResource("1_70cen")
 [node name="LevelConfig" type="Node" parent="." unique_id=783266909]
 script = ExtResource("2_oaplw")
 record_replay = true
-skip_main_menu = true
 metadata/_custom_type_script = "uid://bu2q2x32c2nug"
 
 [node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=583752489]

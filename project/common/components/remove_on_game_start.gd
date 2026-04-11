@@ -2,5 +2,5 @@ class_name RemoveOnGameStart
 extends Node
 
 func _ready() -> void:
-	await signalbus.game_started
+	await gamestate.game_started_pub.turned_on
 	get_parent().queue_free()
