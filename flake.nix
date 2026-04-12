@@ -91,12 +91,22 @@
         '';
 
         test-headless = pkgs.writeShellScriptBin "test-headless" ''
-          ./scripts/test-headless --binary "${
-            godot-start-debug.override { disableWrapper = true; }
-          }/bin/godot-start" -- "$@"
-          ./scripts/test-headless --binary "${
-            pkgs.godot-start.override { disableWrapper = true; }
-          }/bin/godot-start" -- "$@"
+          set -euo pipefail
+
+          is_nixos() {
+            [[ -e /etc/NIXOS ]] || [[ -e /run/current-system/nixos-version ]]
+          }
+
+          if is_nixos; then
+            debug_binary="${godot-start-debug}/bin/godot-start"
+            release_binary="${pkgs.godot-start}/bin/godot-start"
+          else
+            debug_binary="${godot-start-debug.override { disableWrapper = true; }}/bin/godot-start"
+            release_binary="${pkgs.godot-start.override { disableWrapper = true; }}/bin/godot-start"
+          fi
+
+          ./scripts/test-headless --binary "$debug_binary" -- "$@"
+          ./scripts/test-headless --binary "$release_binary" -- "$@"
         '';
       in
       {
