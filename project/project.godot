@@ -20,7 +20,8 @@ config/icon="res://icon.svg"
 
 constants="*uid://kyebjiac1qqb"
 signalbus="*uid://b2mmgrdlgnuf7"
-overlay="*res://autoload/overlay/overlay.tscn"
+overlay_="*res://autoload/overlay/overlay.tscn"
+overlay="*uid://tytxrswba3pu"
 gamestate="*uid://cp8fyt7psjvop"
 reinput="*uid://cckj6in5i8to3"
 

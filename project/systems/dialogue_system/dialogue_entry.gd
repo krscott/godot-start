@@ -45,7 +45,7 @@ func start() -> void:
 		stop()
 
 	_current_event_key = entry_name
-	util.a_ok(overlay.dialogue_layer.advanced.connect(_on_advance))
+	util.a_ok(overlay.n.dialogue_layer.advanced.connect(_on_advance))
 	signalbus.dialogue_started.emit()
 	_start_next_event()
 
@@ -126,7 +126,7 @@ func _start_next_event() -> void:
 			_current_choices.push_back(choice)
 			util.a_false(choice_texts.push_back(choice.text))
 
-	overlay.dialogue_layer.render(speaker, text, choice_texts)
+	overlay.n.dialogue_layer.render(speaker, text, choice_texts)
 
 
 func _render_sequence_entry() -> void:
@@ -136,7 +136,7 @@ func _render_sequence_entry() -> void:
 	for line in entry.text:
 		text.push_back(_interpolate(line))
 	var no_choices: PackedStringArray = []
-	overlay.dialogue_layer.render(entry.speaker, text, no_choices)
+	overlay.n.dialogue_layer.render(entry.speaker, text, no_choices)
 
 
 func _on_advance(index: int) -> void:
@@ -195,7 +195,7 @@ func _call_callback(callback: DialogueEvent.DialogueCallback) -> void:
 
 
 func stop() -> void:
-	overlay.dialogue_layer.advanced.disconnect(_on_advance)
-	overlay.dialogue_layer.hide()
+	overlay.n.dialogue_layer.advanced.disconnect(_on_advance)
+	overlay.n.dialogue_layer.hide()
 	signalbus.dialogue_ended.emit()
 	_current_event_key = ""

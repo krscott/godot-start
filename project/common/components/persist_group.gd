@@ -74,4 +74,4 @@ func _ready() -> void:
 			_nodes.push_back(node)
 			assert(_keys.size() == _nodes.size())
 
-	overlay.sync_object_state(unique_state_key, self)
+	overlay.n.sync_object_state(unique_state_key, self)

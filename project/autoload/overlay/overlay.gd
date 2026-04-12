@@ -1,3 +1,4 @@
+class_name AutoloadOverlay
 extends Node
 
 @export var _test_cycle_scenes: Array[PackedScene] = []

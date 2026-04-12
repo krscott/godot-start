@@ -17,15 +17,15 @@ func _quit() -> void:
 
 
 func _save_game_dialog() -> void:
-	var filename: String = await overlay.system_dialog.file_save_dialog("*.sav", "Save File")
+	var filename: String = await overlay.n.system_dialog.file_save_dialog("*.sav", "Save File")
 	if filename:
-		util.a_ok(overlay.save_state.save_to_file(filename))
+		util.a_ok(overlay.n.save_state.save_to_file(filename))
 
 
 func _load_game_dialog() -> void:
-	var filename: String = await overlay.system_dialog.file_open_dialog("*.sav", "Save File")
+	var filename: String = await overlay.n.system_dialog.file_open_dialog("*.sav", "Save File")
 	if filename:
-		var err: Error = overlay.save_state.load_from_file(filename)
+		var err: Error = overlay.n.save_state.load_from_file(filename)
 		assert(not err)
 
 
